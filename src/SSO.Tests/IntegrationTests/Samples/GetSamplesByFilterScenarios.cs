@@ -16,7 +16,7 @@ namespace SSO.Tests.IntegrationTests.Samples
 
 			using (var client = ServerHelper.Create().SetupData<DefaultDbContext, Sample>(contextData).CreateClient())
 			{
-				var response = await client.GetAsync($"/api/samples");
+				var response = await client.GetAsync($"/api/default/samples");
 
 				Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 			}

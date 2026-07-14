@@ -22,7 +22,7 @@ namespace SSO.Tests.IntegrationTests.Samples
 				var json = JsonConvert.SerializeObject(data);
 				HttpContent content = new StringContent(json);
 
-				var response = await client.PutAsync($"/api/samples/{data.Id}", content);
+				var response = await client.PutAsync($"/api/default/samples/{data.Id}", content);
 
 				Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 			}
@@ -39,7 +39,7 @@ namespace SSO.Tests.IntegrationTests.Samples
 				var json = JsonConvert.SerializeObject(data);
 				HttpContent content = new StringContent(json);
 
-				var response = await client.PutAsync($"/api/samples/{data.Id}", content);
+				var response = await client.PutAsync($"/api/default/samples/{data.Id}", content);
 
 				Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
 			}

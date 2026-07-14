@@ -22,7 +22,7 @@ namespace SSO.Tests.IntegrationTests.Samples
 				var json = JsonConvert.SerializeObject(data);
 				HttpContent content = new StringContent(json);
 
-				var response = await client.PostAsync($"/api/samples", content);
+				var response = await client.PostAsync($"/api/default/samples", content);
 
 				Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
 			}
@@ -47,7 +47,7 @@ namespace SSO.Tests.IntegrationTests.Samples
 				var json = JsonConvert.SerializeObject(data);
 				HttpContent content = new StringContent(json);
 
-				var response = await client.PostAsync($"/api/samples", content);
+				var response = await client.PostAsync($"/api/default/samples", content);
 
 				Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
 			}
