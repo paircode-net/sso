@@ -1,0 +1,79 @@
+﻿@using BAYSOFT.Core.Domain.Resources
+@using BAYSOFT.Web.Blazor.Models
+@using BAYSOFT.Abstractions.Core.Domain.Entities
+@using Microsoft.Extensions.Localization
+
+@inject IStringLocalizer<Messages> Localizer
+
+@typeparam TEntity where TEntity : DomainEntity<TKey>
+@typeparam TKey where TKey : IEquatable<TKey>
+
+<MudTable ServerData="@(GetData)" @ref="TableModel.MudTable" Elevation="@TableModel.Elevation" FixedHeader="@TableModel.FixedHeader" FixedFooter="@TableModel.FixedFooter" Height="@CalculateHeight()" MultiSelection="@TableModel.MultiSelection" @bind-SelectedItems="TableModel.SelectedItems" @bind-SelectOnRowClick="@TableModel.SelectOnRowClick" Dense="@TableModel.Dense" Hover="@TableModel.Hover" Bordered="@TableModel.Bordered" Striped="@TableModel.Striped">
+	<ToolBarContent>
+		<MudText Typo="Typo.h6">@TableModel.Title</MudText>
+		<MudSpacer />
+		<MudTextField T="string" ValueChanged="@(Search)" Placeholder="@(Localizer["Enter your query here..."])" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" AutoFocus="true" Variant="Variant.Outlined"></MudTextField>
+		<MudSpacer />
+		@foreach(var action in TableModel.Actions)
+		{
+			@if (TableModel.SelectedItems != null && action.Show(TableModel.SelectedItems.Count))
+			{
+				<MudIconButton Icon="@action.Icon" Color="@action.Color" Edge="Edge.Start" @onclick="@action.Action" Title="@action.DisplayName" />
+			}
+		}
+	</ToolBarContent>
+	<ColGroup>
+		<col style="width: 48px;" />
+	</ColGroup>
+	<HeaderContent>
+		@foreach (var header in TableModel.Headers)
+		{
+			<MudTh><MudTableSortLabel InitialDirection="@header.SortDirection" SortLabel="@header.Name" T="TEntity">@header.DisplayName</MudTableSortLabel></MudTh>
+		}
+	</HeaderContent>
+	<RowTemplate>
+		@foreach (var header in TableModel.Headers)
+		{
+			<MudTd DataLabel="@header.Name">@header.GetValue(context)</MudTd>
+		}
+	</RowTemplate>
+	<NoRecordsContent>
+		<MudText>@(Localizer["No matching records found"])</MudText>
+	</NoRecordsContent>
+	<LoadingContent>
+		<MudText>@(Localizer["Loading..."])</MudText>
+	</LoadingContent>
+	<PagerContent>
+		<MudTablePager PageSizeOptions="@TableModel.PageSizeOptions"
+					   RowsPerPageString="@Localizer[TableModel.RowsPerPageString]"
+					   InfoFormat="@Localizer[TableModel.InfoFormat]"
+					   AllItemsText="@Localizer[TableModel.AllItemsText]"
+					   HorizontalAlignment="@TableModel.HorizontalAlignment"
+					   HideRowsPerPage="@TableModel.HideRowsPerPage"
+					   HidePageNumber="@TableModel.HidePageNumber"
+					   HidePagination="@TableModel.HidePagination" />
+	</PagerContent>
+</MudTable>
+
+@code {
+	[Parameter]
+	public int? VisibleRows { get; set; }
+	[Parameter]
+	public Table<TEntity, TKey> TableModel { get; set; }
+	[Parameter]
+	public Func<TableState, CancellationToken, Task<TableData<TEntity>>> GetData { get; set; }
+	[Parameter]
+	public EventCallback<string> Search { get; set; }
+	[Parameter]
+	public EventCallback<MouseEventArgs> Add { get; set; }
+	[Parameter]
+	public EventCallback<MouseEventArgs> Edit { get; set; }
+	[Parameter]
+	public EventCallback<MouseEventArgs> Delete { get; set; }
+	[Parameter]
+	public EventCallback<Table<TEntity, TKey>> TableModelChanged{ get; set; }
+	private string CalculateHeight()
+	{
+		return $"{Math.Ceiling(((TableModel.FixedHeader || TableModel.FixedFooter) ? (TableModel.Dense ? 36.8 : 56.8) : 0) + ((VisibleRows.HasValue ? VisibleRows.Value : 10) * (TableModel.Dense ? 33.02 : 57.02)))}px";
+	}
+}

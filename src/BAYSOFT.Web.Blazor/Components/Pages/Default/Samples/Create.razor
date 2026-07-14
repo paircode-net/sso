@@ -1,0 +1,16 @@
+@using BAYSOFT.Web.Blazor.Components.Pages.Default.Samples.Components
+
+@page "/default/samples/create"
+
+@rendermode InteractiveServer
+
+<PageSample
+	RootEndPoint="@GetRootEndPoint()">
+</PageSample>
+
+@code {
+	public string GetRootEndPoint()
+	{
+        return $"/default/samples";
+	}
+}

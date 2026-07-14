@@ -1,0 +1,36 @@
+@using BAYSOFT.Core.Domain.Default.Samples.Entity
+@using BAYSOFT.Web.Blazor.Components.Pages.Default.Samples.Components
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<Sample> Localizer
+
+<MudDialog>
+    <DialogContent>
+        <FormSample 
+            Id="Id"
+            @ref="Form"
+            Wrapped="true"
+            OnSaveCallback="OnSaveCallback">
+        </FormSample>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">@(!string.IsNullOrWhiteSpace(ButtonCanecelText) ? ButtonCanecelText : Localizer["Cancel"])</MudButton>
+        <MudButton Color="@Color" Variant="Variant.Filled" OnClick="Submit">@(!string.IsNullOrWhiteSpace(ButtonConfirmText) ? ButtonConfirmText : Localizer["Confirm"])</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public Guid? Id { get; set; }
+
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public string ButtonCanecelText { get; set; }
+    [Parameter] public string ButtonConfirmText { get; set; }
+
+    [Parameter] public Color Color { get; set; }
+
+    private FormSample Form { get; set; }
+
+    async Task Submit() => await Form.Save();
+    void Cancel() => MudDialog.Cancel();
+    void OnSaveCallback(Sample result) => MudDialog.Close(DialogResult.Ok(result));
+}

@@ -1,0 +1,49 @@
+{
+  "SchemaVersion": "1.0",
+  "Name": "BAYSOFT",
+  "IdType": "Guid",
+  "UseSealedClasses": true,
+  "UseVirtualCollections": false,
+  "Tab": "    ",
+  "DefaultConventions": {
+    "UsePluralizedTables": true,
+    "UseDefaultValueOnStringIds": true,
+    "DefaultStringIdLength": "36",
+    "DefaultProject": "{projectName}",
+    "DefaultProjectPath": "{projectName}",
+    "DefaultContext": "{contextName}Db",
+    "DefaultContextPath": "{contextName}Db",
+    "DefaultEntity": "Entities.{entityName}",
+    "DefaultEntityPath": "Entities\\{entityName}",
+    "DefaultEntityPluralized": true
+  },
+  "Contexts": {
+    "Default": {
+      "Schema": "DefaultDb",
+      "Description": "DefaultDbContext that represents the schema \u0027DefaultDb\u0027",
+      "Entities": {
+        "Sample": {
+          "IdType": "Guid",
+          "Description": "Entity that represents the table \u0027Samples\u0027",
+          "Table": "Samples",
+          "AggregateRoot": true,
+          "Auditable": true,
+          "Properties": {
+            "Description": {
+              "Type": "string",
+              "Required": true,
+              "Length": 128,
+              "HasMaxLength": false,
+              "Precision": null,
+              "Scale": null,
+              "DbColumn": "Description",
+              "DisplayOnSelect": false
+            }
+          },
+          "Relations": {}
+        }
+      }
+    }
+  },
+  "ScaffoldExceptions": ["web.react"]
+}

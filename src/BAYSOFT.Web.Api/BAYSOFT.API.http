@@ -1,0 +1,6 @@
+@BAYSOFT.Presentations.API_HostAddress = http://localhost:5053
+
+GET {{BAYSOFT.Presentations.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

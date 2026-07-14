@@ -1,0 +1,43 @@
+﻿@using Microsoft.Extensions.Localization
+
+@typeparam TEntity
+@typeparam TKey
+
+@inject IStringLocalizer<TEntity> Localizer
+
+<MudPaper>
+	<MudPaper Class="pa-3 d-flex justify-start flex-grow-1 gap-3" Elevation="0">
+		<MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Default" @onclick="@((e) => GoBack())" />
+		<MudText Class="align-content-center" Typo="Typo.h6">@(Title)</MudText>
+	</MudPaper>
+	<MudPaper Class="pa-3" Elevation="0">
+		@if (FormContent != null)
+		{
+			@FormContent
+		}
+	</MudPaper>
+	@if (TabsContent != null)
+	{
+		<MudPaper Elevation="0">
+			<MudDivider />
+			<MudDivider />
+			<MudCardContent Class="pa-0">
+				@TabsContent
+			</MudCardContent>
+		</MudPaper>
+	}
+</MudPaper>
+
+@code {
+	[Parameter] public RenderFragment? FormContent { get; set; }
+	[Parameter] public RenderFragment? TabsContent { get; set; }
+	[Parameter] public TKey? Id { get; set; }
+	[Parameter] public EventCallback OnGoBack { get; set; }
+
+	public string Title => $"{(Id is not null ? Localizer["Edit"] : Localizer["Create"])} {Localizer[(typeof(TEntity).Name)].Value.ToLower()}";
+	
+	private async void GoBack()
+	{
+		await this.OnGoBack.InvokeAsync();
+	}
+}

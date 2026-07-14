@@ -1,0 +1,90 @@
+@using BAYSOFT.Core.Application.Default.Samples.Queries;
+@using BAYSOFT.Core.Domain.Default.Samples.Entity;
+@using BAYSOFT.Web.Blazor.Components.Pages.Default.Samples.Filters;
+@using BAYSOFT.Web.Blazor.Components.SmartComponents;
+@using BAYSOFT.Web.Blazor.Extensions;
+@using Microsoft.Extensions.Localization;
+@using ModelWrapper.Extensions.GetModels;
+@using System.Linq.Expressions;
+
+@inject IServiceScopeFactory scope
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject IStringLocalizer<Sample> Localizer
+
+@if (!Id.HasValue)
+{
+	<MudItem lg="lg" md="md" sm="sm" xl="xl" xs="xs" xxl="xxl">
+		<SmartSelect @ref="Select" TEntity="Sample" Label="@Label" Value="Value" ValueChanged="ValueChanged" Search="@Search" SetDisplay="@(e=> $"{e.Id}")" AllowAdd="false" OnAdd="Add" AllowEdit="false" OnEdit="Edit" />
+	</MudItem>
+}
+
+@code {
+	[Parameter] public int lg { get; set; }
+	[Parameter] public int md { get; set; }
+	[Parameter] public int sm { get; set; }
+	[Parameter] public int xl { get; set; }
+	[Parameter] public int xs { get; set; }
+	[Parameter] public int xxl { get; set; }
+
+	[Parameter] public Guid? Id { get; set; }
+	[Parameter] public string? Label { get; set; }
+	[Parameter] public Sample? Value { get; set; }
+	[Parameter] public EventCallback<Sample?> ValueChanged { get; set; }
+	[Parameter] public Expression<Func<Sample?>>? ValueExpression { get; set; }
+	private SmartSelect<Sample> Select { get; set; }
+
+	private async Task OnValueChanged(Sample? value) => await this.ValueChanged.InvokeAsync(value);
+
+	private async Task<IEnumerable<Sample>> Search(string search, CancellationToken token)
+	{
+		var query = new GetSamplesByFilterQuery();
+
+		var entities = new Sample[] { };
+
+		query.ApplySearch(search);
+		
+		query.ApplyFilters();
+		
+		var response = await scope.SendInNewScope(query);
+		if (response != null && response.HandleNotifications(Snackbar, false))
+		{
+			entities = response.GetModels().ToArray();
+		}
+
+		return entities;
+	}
+	private async Task Add()
+	{
+		await OpenDialog(null);
+	}
+	private async Task Edit()
+	{
+		await OpenDialog(Value != null ? Value.Id : Id);
+	}
+	private async Task OpenDialog(Guid? id)
+	{
+		var title = "Create {0}";
+		var parameters = new DialogParameters<DialogSample>();
+
+		if (id.HasValue)
+		{
+			parameters.Add(x => x.Id, id);
+			title = "Edit {0}";
+		}
+
+		parameters.Add(x => x.ButtonConfirmText, Localizer["Save"]);
+		parameters.Add(x => x.Color, Color.Error);
+
+		var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Medium, BackgroundClass = "dialog-backdrop-blur" };
+
+		var dialog = await DialogService.ShowAsync<DialogSample>(string.Format(Localizer["Create new {0}"], Localizer["Sample"].ToString().ToLower()), parameters, options);
+		
+		var result = await dialog.Result;
+		if (result != null! && !result.Canceled && result.Data != null && result.Data is Sample updatedEntity)
+		{
+			Value = updatedEntity;
+			await Select.SelectValue(Value);
+		}
+	} 
+}

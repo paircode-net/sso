@@ -1,0 +1,87 @@
+@using BAYSOFT.Core.Application.Default.Samples.Commands;
+@using BAYSOFT.Core.Application.Default.Samples.Queries;
+@using BAYSOFT.Core.Domain.Default.Samples.Entity;
+@using BAYSOFT.Web.Blazor.Components.Helpers;
+@using BAYSOFT.Web.Blazor.Components.Pages.Default.Samples.Filters;
+@using BAYSOFT.Web.Blazor.Components.Shared;
+@using BAYSOFT.Web.Blazor.Components.SmartComponents;
+@using BAYSOFT.Web.Blazor.Extensions;
+@using BAYSOFT.Web.Blazor.Models;
+@using MediatR;
+@using Microsoft.Extensions.Localization;
+@using ModelWrapper.Extensions.GetModels;
+@inject NavigationManager Navigation
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject IServiceScopeFactory scope
+@inject IStringLocalizer<Sample> Localizer
+
+@inherits TableBase<Sample, Guid>
+
+<SmartTable 
+	@bind-TableModel="TableModel"
+	GetData="@((state, cancellationToken) => ServerReload(state, cancellationToken))"
+	Search="@(text => OnSearch(text))"
+	VisibleRows="VisibleRows">
+</SmartTable>
+
+@code {
+	public TableSamples() : base()
+	{
+		Search = string.Empty;
+	}
+	protected override async Task OnInitializedAsync()
+	{
+		InitializeConfigurations(Localizer["Samples"], "/default/samples");
+	}
+	protected override void AddColumns()
+	{
+        TableModel.Headers.Add(new("Description", Localizer["Description"], SortDirection.Ascending));
+	}
+	private async Task<TableData<Sample>> ServerReload(TableState state, CancellationToken cancellationToken)
+	{
+		var query = new GetSamplesByFilterQuery();
+
+		query.ApplySearch(Search);
+
+		query.ApplyFilters();
+
+		query.ApplyOrdination(state.SortDirection.ToDescriptionString(), state.SortLabel);
+
+		query.ApplyPagination(state.PageSize, state.Page + 1);
+
+		var response = await scope.SendInNewScope(query, cancellationToken);
+
+		TableModel.SelectedItems = new();
+
+		response.HandleNotifications(Snackbar, false);
+
+		return new() { TotalItems = (int)response.ResultCount, Items = response.GetModels() };
+	}
+	protected override async Task Delete()
+	{
+		var parameters = new DialogParameters<Dialog>();
+		parameters.Add(x => x.ContentText, Localizer["Do you really want to delete these records? This process cannot be undone."]);
+		parameters.Add(x => x.ButtonConfirmText, Localizer["Delete"]);
+		parameters.Add(x => x.Color, Color.Error);
+
+		var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall, BackgroundClass = "dialog-backdrop-blur" };
+
+		var dialog = await DialogService.ShowAsync<Dialog>(Localizer["Delete"], parameters, options);
+		var result = await dialog.Result;
+		if (result != null && !result.Canceled)
+		{
+			foreach (var selectedItem in TableModel.SelectedItems.ToList())
+			{
+				var deleteCommand = new DeleteSampleCommand();
+				deleteCommand.Project(m => m.Id = selectedItem.Id);
+				var response = await scope.SendInNewScope(deleteCommand);
+				if (response.HandleNotifications(Snackbar))
+				{
+					StateHasChanged();
+					await TableModel.MudTable.ReloadServerData();
+				}
+			}
+		}
+	}
+}
