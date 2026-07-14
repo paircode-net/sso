@@ -1,6 +1,6 @@
 {
   "SchemaVersion": "1.0",
-  "Name": "BAYSOFT",
+  "Name": "SSO",
   "IdType": "Guid",
   "UseSealedClasses": true,
   "UseVirtualCollections": false,
@@ -45,5 +45,5 @@
       }
     }
   },
-  "ScaffoldExceptions": ["web.react"]
+  "ScaffoldExceptions": ["web.react", "web.blazor"]
 }

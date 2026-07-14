@@ -1,13 +1,13 @@
-# template-architecture-cqrs-full
+# SSO
 Architecture CQRS Full (.NET 10.0)
 
 #### Migrations
 
-Go to "BAYSOFT.Infrastructures.Data" project folder and open cmd
-> cd src/BAYSOFT.Infrastructures.Data
+Go to "SSO.Infrastructures.Data" project folder and open cmd
+> cd src/SSO.Infrastructures.Data
 
 Add migration ex: InitialMigrationDefaultDbContext (--verbose for more details)
-> dotnet ef --startup-project ../BAYSOFT.Web.Api migrations add [Name of the migration]DefaultDbContext -c DefaultDbContext -o Default/Migrations
+> dotnet ef --startup-project ../SSO.Web.Api migrations add [Name of the migration]DefaultDbContext -c DefaultDbContext -o Default/Migrations
 
 
 #### dotnet-ef install
