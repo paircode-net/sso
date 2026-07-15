@@ -58,9 +58,9 @@ Tests → Application, Domain, Data, Middleware, Web.Api
 | Context | Schema / DbContext | Status |
 |---------|--------------------|--------|
 | Default | `DefaultDb` / `DefaultDbContext` | Ativo (Sample) |
-| Identity | `IdentityDb` / `IdentityDbContext` | **Ativo (Fase 0)** — Identity + OpenIddict stores; aggregates de negócio ainda não |
+| Identity | `IdentityDb` / `IdentityDbContext` | **Ativo (Fase 1)** — Identity/OpenIddict + Organization/Product/Membership/User |
 
-Rotas de gestão Identity (alvo Fase 1+): `api/identity/{resource}`. Protocolo OIDC: `/connect/*` (endpoints configurados; controllers de token/authorize na Fase 2).
+Rotas de gestão: `api/identity/{resource}`. Protocolo OIDC: `/connect/*` (configurado; controllers de token/authorize na Fase 2).
 
 ## Composition root
 

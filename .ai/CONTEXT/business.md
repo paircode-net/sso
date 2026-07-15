@@ -2,7 +2,7 @@
 
 ## Escopo atual no código
 
-O repositório tem o scaffold **Sample** e a **Fase 0** de identidade (Identity + OpenIddict + `User` + `IdentityDbContext`). Aggregates de negócio SSO (Organization, Product, Membership, etc.) ainda não estão implementados.
+O repositório tem o scaffold **Sample** e o context **Identity** (Fases 0–1): Organization, Product, Membership, User (senha hasheada), soft-delete/auditoria e seed de desenvolvimento. Fluxos OIDC de emissão de token ainda são Fase 2.
 
 ### Regras de negócio inferíveis do código (Sample)
 

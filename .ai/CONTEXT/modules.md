@@ -2,7 +2,7 @@
 
 ## Context: Default
 
-Único bounded context implementado.
+Único bounded context de scaffold Sample.
 
 ### Aggregate: Sample
 
@@ -11,77 +11,42 @@
 | Entidade | `Sample` (`DomainEntity<Guid>`), propriedade `Description` (string, required, max 128) |
 | Tabela | `Samples` (schema `DefaultDb`) |
 | Aggregate root | Sim (Forge) |
-| Auditable (Forge) | Marcado `true` no `.forge/project.json`, **sem propriedades de auditoria no código/mapping** |
-
-#### Domain
-
-| Tipo | Arquivos |
-|------|----------|
-| Entity | `Default/Samples/Entity/Sample.cs` |
-| Services | `CreateSampleService`, `UpdateSampleService`, `DeleteSampleService` |
-| Specification | `SampleDescriptionAlreadyExistsSpecification` |
-| Entity validation | `SampleValidator` |
-| Domain validations | `Create|Update|DeleteSampleSpecificationsValidator` |
-| Resources | `EntitySample` resx (+ designer) |
-
-#### Application
-
-| Tipo | Operações |
-|------|-----------|
-| Commands | Post, Put, Patch, Delete |
-| Queries | `GetSampleById`, `GetSamplesByFilter` |
-| Notifications | Post, Put, Patch, Delete (handlers logam payload JSON) |
-
-#### Infrastructure Data
-
-| Tipo | Arquivo |
-|------|---------|
-| Context | `DefaultDbContext` |
-| Reader/Writer | `DefaultDbContextReader`, `DefaultDbContextWriter` |
-| Mapping | `SampleMap` |
-| Migrations | `InitialDDLMigrationDefaultDbContext`, `InitialDMLMigrationDefaultDbContext` (+ snapshot) |
 
 #### API
 
 | Controller | Rota | Verbos |
 |------------|------|--------|
-| `SamplesController` | `api/default/samples` | GET, GET `{id}`, POST, PUT `{id}`, PATCH `{id}`, DELETE `{id}` |
+| `SamplesController` | `api/default/samples` | GET, GET `{id}`, POST, PUT, PATCH, DELETE |
 
-Namespace do controller: `SSO.Web.Api.Default`  
-Path: `SSO.Web.Api/Resources/DefaultDb/SamplesController.cs`
+## Context: Identity (ADR-006 — Fase 0 + Fase 1)
 
-#### Tests
+| Aspecto | Detalhe |
+|---------|---------|
+| Schema / DbContext | `IdentityDb` / `IdentityDbContext` |
+| Auditoria | `IdentityAuditableEntity` (`CreatedAt`, `UpdatedAt`, `DeletedAt`, `IsDeleted`) |
+| Soft-delete | Delete services marcam `IsDeleted` (não removem fisicamente) |
+| Seed | `IdentitySeed` (org/product/user/membership de desenvolvimento) |
+| Wiring | `AddIdentityFoundation` + specs/validators em Middleware |
 
-- Unit: Application (commands/queries/notifications), Domain services, DbContext reader/writer
-- Integration: scenarios CRUD + filter em `IntegrationTests/Samples/`
+### Aggregates implementados
+
+| Aggregate | Tabela | Rotas | Notas |
+|-----------|--------|-------|-------|
+| Organization | `Organizations` | `api/identity/organizations` | Code único (ativo) |
+| Product | `Products` | `api/identity/products` | Code único (ativo) |
+| Membership | `Memberships` | `api/identity/memberships` | UserId + OrganizationId únicos (ativo) |
+| User | AspNetUsers (+ audit cols) | `api/identity/users` POST/GET `{id}` | `IdentityUser<Guid>` + `IDomainEntityBase`; senha via `UserManager` |
+
+### Pendente (fases seguintes)
+
+`Branch`, `Role`, `ClaimDefinition`, `Permission`, `AuthClient`, `Scope`, `Session`, `ExternalIdentityProvider`, `AuthAuditEvent`, ProductEnablement, assignments.
 
 ## Serviços de infraestrutura transversais
 
 | Serviço | Interface | Implementação | Status |
 |---------|-----------|---------------|--------|
-| Mail | `IMailService` | `MailService` | Stub vazio; registro DI **comentado** |
+| Mail | `IMailService` | `MailService` | Stub; DI comentado |
 
 ## Shared
 
 `SSO.Shared` existe na solução, **sem código-fonte `.cs`**.
-
-## TODOs observados no módulo Sample
-
-- `TODO: SUPPRESSED RESPONSE PROPERTIES` (commands/queries)
-- `TODO: COMMAND RULES` (`PostSampleCommand`)
-- `TODO: ByFilterQuery RULES` (`GetSamplesByFilterQuery`)
-
-## Context: Identity (ADR-006 — Fase 0 parcial)
-
-| Aspecto | Detalhe |
-|---------|---------|
-| Schema / DbContext | `IdentityDb` / `IdentityDbContext` |
-| Entidade User | `SSO.Core.Domain.Identity.Users.Entity.User` (`IdentityUser<Guid>`) |
-| Reader/Writer | `IIdentityDbContextReader` / `IIdentityDbContextWriter` |
-| Migration | `InitialDDLMigrationIdentityDbContext` (Identity + OpenIddict tables) |
-| Wiring | `AddIdentityFoundation` em Middleware |
-| Testes smoke | `IntegrationTests/Identity/AuthFoundationScenarios` |
-
-Aggregates de negócio ainda pendentes (Fase 1+): `Organization`, `Branch`, `Product`, `Membership`, `Role`, `Permission`, `AuthClient`, etc.
-
-Rotas alvo Fase 1+: `api/identity/{resource}`. Detalhe: `.ai/WORK/2026-07-14-00001-plataforma-sso.md`.

@@ -94,7 +94,10 @@ namespace SSO.Middleware.AddServices
                 #region IdentityDbContext migrate
                 var identityDbContext = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
                 if (identityDbContext.Database.IsRelational())
+                {
                     identityDbContext.Database.Migrate();
+                    IdentitySeed.EnsureAsync(scope.ServiceProvider).GetAwaiter().GetResult();
+                }
                 #endregion
 			}
 
