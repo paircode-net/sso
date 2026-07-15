@@ -44,7 +44,7 @@ Plano: `.ai/WORK/2026-07-14-00001-plataforma-sso.md`.
 | D-006 | Localização default pt-BR na API | `UseMiddleware` | Ativa |
 | D-007 | Migrations aplicadas no startup | `UseMigrations()` | Ativa (reavaliar p/ produção) |
 | D-008 | Testes com MSTest + InMemory + TestServer | `SSO.Tests` | Ativa |
-| D-009 | AuthN/AuthZ não habilitados no scaffold | hooks comentados | Temporária — substituída pelo alvo ADRs (ainda não no código) |
+| D-009 | AuthN/AuthZ habilitados (Fase 0) | `AddIdentityFoundation` + pipeline Auth | Ativa — supersede scaffold comentado |
 | D-010 | Mail service stub, DI desligado | `MailService` + AddDomainServices | Temporária |
 
 ## Decisões pendentes (produto / plataforma)

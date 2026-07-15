@@ -36,6 +36,7 @@ namespace SSO.Tests
 
 			app.UseRouting();
 
+			app.UseAuthentication();
 			app.UseAuthorization();
 
 			app.UseEndpoints(endpoints =>

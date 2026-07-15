@@ -58,9 +58,9 @@ Tests → Application, Domain, Data, Middleware, Web.Api
 | Context | Schema / DbContext | Status |
 |---------|--------------------|--------|
 | Default | `DefaultDb` / `DefaultDbContext` | Ativo (Sample) |
-| Identity | `IdentityDb` / `IdentityDbContext` | **Planejado** (ADR-006) — ainda não no código |
+| Identity | `IdentityDb` / `IdentityDbContext` | **Ativo (Fase 0)** — Identity + OpenIddict stores; aggregates de negócio ainda não |
 
-Rotas de gestão Identity (alvo): `api/identity/{resource}`. Protocolo OIDC: `/connect/*` (OpenIddict).
+Rotas de gestão Identity (alvo Fase 1+): `api/identity/{resource}`. Protocolo OIDC: `/connect/*` (endpoints configurados; controllers de token/authorize na Fase 2).
 
 ## Composition root
 
@@ -68,28 +68,29 @@ Arquivo central: `src/SSO.Middleware/Configurations.cs`
 
 - `AddMiddleware` / `UseMiddleware` — host real
 - `AddMiddlewareTest` / `UseMiddlewareTest` — host de testes
+- `AddIdentityFoundation` — Identity + OpenIddict (core/server/validation)
 - Registra MediatR a partir de assemblies Application, Domain, Infrastructures.Services
-- Aplica migrations relacionais via `UseMigrations()`
+- Aplica migrations relacionais via `UseMigrations()` (Default + Identity)
 
 ## Persistência
 
 - Não há Repository/UoW nomeados além de Reader/Writer BAYSOFT.
-- `IDefaultDbContextWriter.CommitAsync` delimita a unidade de trabalho do caso de uso.
+- `IDefaultDbContextWriter.CommitAsync` / `IIdentityDbContextWriter` delimitam UoW por context.
+- Identity: connection `IdentityConnection` (fallback `DefaultConnection`), schema `IdentityDb`.
 
 ## Autenticação na pipeline
 
-**Estado no código hoje:** em `UseMiddleware`, `UseAuthentication` / `UseAuthorization` estão **comentados**. Em `Program.cs`, `app.UseAuthorization()` é chamado sem schemes configurados.
+**Estado no código (Fase 0):**
 
-**Alvo decidido (ainda não implementado):**
-
-| Tema | Decisão |
-|------|---------|
-| Authorization Server | OpenIddict (ADR-001) |
-| AuthN / conta | ASP.NET Identity (ADR-002) |
-| Contexto tenant/branch | switch-context + claims no token (ADR-003) |
-| AuthZ | Contextual; sem herança Branch MVP (ADR-004) |
-| Permissions no token | Todas as efetivas do contexto no JWT (ADR-005) |
-| UI login/consent | Razor em `SSO.Web.Api` (F00001-D6) |
+| Tema | Status |
+|------|--------|
+| `UseAuthentication` / `UseAuthorization` | Habilitados em `UseMiddleware` (prod) e `TestStartup` (testes) |
+| ASP.NET Identity | `User` + `IdentityRole<Guid>` + EF stores |
+| OpenIddict | Core + Server (dev certs) + Validation local |
+| Flows habilitados (config) | Authorization Code+PKCE, Refresh, Client Credentials |
+| Controllers `/connect/*` | Ainda não — passthrough preparado para Fase 2 |
+| switch-context / permissions no JWT | Fase 2+ (ADRs 003–005) |
+| UI login/consent Razor | Fase 2 (D6) |
 
 Detalhe: feature plan `.ai/WORK/2026-07-14-00001-plataforma-sso.md`.
 

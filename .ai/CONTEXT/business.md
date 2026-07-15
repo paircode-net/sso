@@ -2,7 +2,7 @@
 
 ## Escopo atual no código
 
-O repositório implementa hoje um **scaffold CQRS** com o aggregate **Sample**. O domínio SSO está **planejado e decidido** (feature 00001 + ADRs), mas **ainda não codificado**.
+O repositório tem o scaffold **Sample** e a **Fase 0** de identidade (Identity + OpenIddict + `User` + `IdentityDbContext`). Aggregates de negócio SSO (Organization, Product, Membership, etc.) ainda não estão implementados.
 
 ### Regras de negócio inferíveis do código (Sample)
 

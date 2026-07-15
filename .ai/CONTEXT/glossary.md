@@ -6,7 +6,7 @@
 | **BAYSOFT.Abstractions** | Pacote NuGet com bases (`DomainEntity`, `ApplicationRequestHandler`, Reader/Writer, etc.) |
 | **Forge** | Metadados/codegen em `.forge/project.json` para entidades e convenções |
 | **Context / Default** | Bounded context do scaffold Sample; schema EF `DefaultDb` |
-| **Context / Identity** | Bounded context SSO planejado; schema EF `IdentityDb` (ADR-006) — **ainda não no código** |
+| **Context / Identity** | Bounded context SSO; schema EF `IdentityDb` (ADR-006) — Fase 0 ativa |
 | **Sample** | Aggregate de exemplo (não confundir com domínio SSO de produto); mantido até Fase 2 estável |
 | **Application Command** | Caso de uso de escrita orquestrado na Application |
 | **Application Query** | Caso de uso de leitura |

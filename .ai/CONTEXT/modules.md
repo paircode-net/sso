@@ -71,10 +71,17 @@ Path: `SSO.Web.Api/Resources/DefaultDb/SamplesController.cs`
 - `TODO: COMMAND RULES` (`PostSampleCommand`)
 - `TODO: ByFilterQuery RULES` (`GetSamplesByFilterQuery`)
 
-## Context: Identity (planejado — ADR-006)
+## Context: Identity (ADR-006 — Fase 0 parcial)
 
-**Ainda não implementado.** Aggregates previstos no plano feature 00001:
+| Aspecto | Detalhe |
+|---------|---------|
+| Schema / DbContext | `IdentityDb` / `IdentityDbContext` |
+| Entidade User | `SSO.Core.Domain.Identity.Users.Entity.User` (`IdentityUser<Guid>`) |
+| Reader/Writer | `IIdentityDbContextReader` / `IIdentityDbContextWriter` |
+| Migration | `InitialDDLMigrationIdentityDbContext` (Identity + OpenIddict tables) |
+| Wiring | `AddIdentityFoundation` em Middleware |
+| Testes smoke | `IntegrationTests/Identity/AuthFoundationScenarios` |
 
-`Organization`, `Branch`, `Product`, `User`, `Membership`, `Role`, `ClaimDefinition`, `Permission`, `RolePermission`, `UserRoleAssignment`, `UserClaimAssignment`, `ProductEnablement`, `AuthClient`, `Scope`, `Session`, `ExternalIdentityProvider`, `AuthAuditEvent` (+ stores OpenIddict/Identity).
+Aggregates de negócio ainda pendentes (Fase 1+): `Organization`, `Branch`, `Product`, `Membership`, `Role`, `Permission`, `AuthClient`, etc.
 
-Rotas alvo: `api/identity/{resource}`. Detalhe: `.ai/WORK/2026-07-14-00001-plataforma-sso.md`.
+Rotas alvo Fase 1+: `api/identity/{resource}`. Detalhe: `.ai/WORK/2026-07-14-00001-plataforma-sso.md`.

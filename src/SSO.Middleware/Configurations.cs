@@ -40,7 +40,8 @@ namespace SSO.Middleware
 
 			services.AddInheritStringLocalizerFactory();
 
-			// YOUR CODE GOES HERE
+			services.AddIdentityFoundation();
+
 			return services;
         }
 
@@ -57,9 +58,9 @@ namespace SSO.Middleware
 
             app.UseRequestLocalization(localizationOptions);
 
-            //app.UseAuthentication();
-            //app.UseAuthorization();
-            // YOUR CODE GOES HERE
+            app.UseAuthentication();
+            app.UseAuthorization();
+
             return app;
 		}
 		#region TESTS
@@ -87,7 +88,8 @@ namespace SSO.Middleware
 
 			services.AddInheritStringLocalizerFactory();
 
-			// YOUR CODE GOES HERE
+			services.AddIdentityFoundation();
+
 			return services;
 		}
 
@@ -102,9 +104,7 @@ namespace SSO.Middleware
 
 			app.UseRequestLocalization(localizationOptions);
 
-			//app.UseAuthentication();
-			//app.UseAuthorization();
-			// YOUR CODE GOES HERE
+			// Authentication/Authorization are applied in TestStartup after UseRouting.
 			return app;
 		}
 		#endregion

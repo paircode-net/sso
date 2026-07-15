@@ -1,14 +1,13 @@
-
 using SSO.Core.Domain.Default._Context.Interfaces.Infrastructures.Data;
+using SSO.Core.Domain.Identity._Context.Interfaces.Infrastructures.Data;
 using SSO.Infrastructures.Data.Default;
+using SSO.Infrastructures.Data.Identity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace SSO.Middleware.AddServices
 {
@@ -32,6 +31,28 @@ namespace SSO.Middleware.AddServices
                         sql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
                     }));
             #endregion
+
+            #region Reader/Writer, IdentityDbContext and Connection
+            var identityConnectionString = configuration.GetConnectionString("IdentityConnection")
+                ?? defaultConnectionString;
+
+            services.AddTransient<IIdentityDbContextWriter, IdentityDbContextWriter>();
+            services.AddTransient<IIdentityDbContextReader, IdentityDbContextReader>();
+
+            services.AddDbContext<IdentityDbContext>(options =>
+            {
+                options.UseSqlServer(
+                    identityConnectionString,
+                    sql =>
+                    {
+                        sql.MigrationsAssembly(typeof(IdentityDbContext).Assembly.GetName().Name);
+                        sql.MigrationsHistoryTable("__EFMigrationsHistory", IdentityDbContext.Schema);
+                        sql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+                    });
+
+                options.UseOpenIddict<Guid>();
+            });
+            #endregion
 			
             return services;
 		}
@@ -46,6 +67,17 @@ namespace SSO.Middleware.AddServices
                 ServiceLifetime.Singleton);
             #endregion
 
+            #region Reader/Writer, IdentityDbContext and InMemory
+            services.AddTransient<IIdentityDbContextWriter, IdentityDbContextWriter>();
+            services.AddTransient<IIdentityDbContextReader, IdentityDbContextReader>();
+
+            services.AddDbContext<IdentityDbContext>(options =>
+            {
+                options.UseInMemoryDatabase(nameof(IdentityDbContext), new InMemoryDatabaseRoot());
+                options.UseOpenIddict<Guid>();
+            }, ServiceLifetime.Singleton);
+            #endregion
+
 			return services;
 		}
 
@@ -57,6 +89,12 @@ namespace SSO.Middleware.AddServices
                 var defaultDbContext = scope.ServiceProvider.GetRequiredService<DefaultDbContext>();
                 if (defaultDbContext.Database.IsRelational())
                     defaultDbContext.Database.Migrate();
+                #endregion
+
+                #region IdentityDbContext migrate
+                var identityDbContext = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
+                if (identityDbContext.Database.IsRelational())
+                    identityDbContext.Database.Migrate();
                 #endregion
 			}
 

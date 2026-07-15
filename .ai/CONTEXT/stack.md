@@ -42,17 +42,15 @@
 
 ## AuthN / AuthZ
 
-| Item | Status no código | Alvo decidido |
-|------|------------------|---------------|
-| Authentication middleware | Comentado / não configurado | Habilitar completo (Fase 0+) |
-| Authorization scheme | Só `UseAuthorization` sem schemes | OpenIddict + policies |
-| ASP.NET Identity | Não presente | AuthN / conta (ADR-002) |
-| OpenIddict | Não presente | Authorization Server (ADR-001) |
-| JWT | Não presente | Claims de contexto + permissões efetivas (ADR-005) |
-| Signing keys | N/A | Dev: cert/key local; Prod: Key Vault + rotação (D9) |
-| UI login/consent | N/A | Razor em `SSO.Web.Api` (D6) |
-
-Pacotes alvo (Fase 0, ainda não adicionados): `Microsoft.AspNetCore.Identity.EntityFrameworkCore`, `OpenIddict.AspNetCore`, `OpenIddict.EntityFrameworkCore`.
+| Item | Status no código |
+|------|------------------|
+| Authentication middleware | Habilitado (`UseAuthentication` / `UseAuthorization`) |
+| ASP.NET Identity | Presente — `User` / stores em `IdentityDbContext` |
+| OpenIddict | 7.5.0 — AspNetCore + EntityFrameworkCore |
+| Signing keys (dev) | `AddDevelopmentEncryptionCertificate` / `AddDevelopmentSigningCertificate` |
+| Signing keys (prod) | Key Vault + rotação — pendente (D9) |
+| JWT com permissions / switch-context | Planejado Fase 2+ (ADR-005, ADR-003) |
+| UI login/consent | Planejado Fase 2 (D6) |
 
 ## Qualidade / CI
 

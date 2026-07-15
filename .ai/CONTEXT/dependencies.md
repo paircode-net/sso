@@ -26,18 +26,23 @@ Pacotes e referências observadas nos `.csproj` (versões no momento da descober
 ### SSO.Core.Domain
 
 - `BAYSOFT.Abstractions` 10.0.3
+- `Microsoft.Extensions.Identity.Stores` 10.0.3
 
 ### SSO.Infrastructures.Data
 
+- `Microsoft.AspNetCore.Identity.EntityFrameworkCore` 10.0.3
 - `Microsoft.EntityFrameworkCore.Design` 10.0.3
 - `Microsoft.EntityFrameworkCore.SqlServer` 10.0.3
-- `Microsoft.Extensions.DependencyInjection` 10.0.3
+- `Microsoft.Extensions.DependencyInjection` 10.0.7
+- `OpenIddict.EntityFrameworkCore` 7.5.0
 
 ### SSO.Middleware
 
+- `FrameworkReference` → `Microsoft.AspNetCore.App`
 - `Microsoft.AspNetCore.Localization.Routing` 2.3.9
 - `Microsoft.EntityFrameworkCore.InMemory` 10.0.3
-- DI Abstractions/Extensions 10.0.3
+- DI Abstractions/Extensions 10.0.7
+- `OpenIddict.AspNetCore` 7.5.0
 
 ### SSO.Shared
 
@@ -72,4 +77,4 @@ Pacotes e referências observadas nos `.csproj` (versões no momento da descober
 
 - Política de versionamento/atualização de pacotes
 - Introduction de package centralization
-- Dependências futuras de identidade (OpenIddict, Duende, IdentityServer, MSAL, etc.)
+- Key Vault / rotação de chaves OpenIddict em produção
