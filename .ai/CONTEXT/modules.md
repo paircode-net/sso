@@ -71,6 +71,10 @@ Path: `SSO.Web.Api/Resources/DefaultDb/SamplesController.cs`
 - `TODO: COMMAND RULES` (`PostSampleCommand`)
 - `TODO: ByFilterQuery RULES` (`GetSamplesByFilterQuery`)
 
-## Módulos de negócio SSO (identidade, sessão, clients OAuth, etc.)
+## Context: Identity (planejado — ADR-006)
 
-**A definir** — não há implementação além do aggregate Sample de scaffold.
+**Ainda não implementado.** Aggregates previstos no plano feature 00001:
+
+`Organization`, `Branch`, `Product`, `User`, `Membership`, `Role`, `ClaimDefinition`, `Permission`, `RolePermission`, `UserRoleAssignment`, `UserClaimAssignment`, `ProductEnablement`, `AuthClient`, `Scope`, `Session`, `ExternalIdentityProvider`, `AuthAuditEvent` (+ stores OpenIddict/Identity).
+
+Rotas alvo: `api/identity/{resource}`. Detalhe: `.ai/WORK/2026-07-14-00001-plataforma-sso.md`.

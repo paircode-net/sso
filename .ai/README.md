@@ -12,6 +12,7 @@ Ponto de entrada da missão do agente: `AI_MANIFEST.md` (raiz).
 ├── README.md          # Este índice
 ├── PLAYBOOK/          # Como a equipe engenheira
 ├── CONTEXT/           # Estado atual do projeto
+│   └── adr/           # Architecture Decision Records Aceitos
 ├── TEMPLATES/         # Modelos reutilizáveis
 ├── CHECKLISTS/        # Verificações com checkboxes
 ├── WORK/              # workflow.md + planos temporários
@@ -54,6 +55,7 @@ Missão, processo, prioridade de fontes, regras de planejamento/documentação/i
 | `glossary.md` | Termos do repo |
 | `dependencies.md` | Pacotes e project refs |
 | `Decisions.md` | Decisões e pendências |
+| `adr/` | ADRs formais (Aceito / Depreciado) |
 
 **Quando atualizar:** sempre que o estado do sistema mudar (novo módulo, pacote, integração, decisão).
 

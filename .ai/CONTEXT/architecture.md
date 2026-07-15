@@ -57,7 +57,10 @@ Tests → Application, Domain, Data, Middleware, Web.Api
 
 | Context | Schema / DbContext | Status |
 |---------|--------------------|--------|
-| Default | `DefaultDb` / `DefaultDbContext` | Ativo (única implementação) |
+| Default | `DefaultDb` / `DefaultDbContext` | Ativo (Sample) |
+| Identity | `IdentityDb` / `IdentityDbContext` | **Planejado** (ADR-006) — ainda não no código |
+
+Rotas de gestão Identity (alvo): `api/identity/{resource}`. Protocolo OIDC: `/connect/*` (OpenIddict).
 
 ## Composition root
 
@@ -75,13 +78,23 @@ Arquivo central: `src/SSO.Middleware/Configurations.cs`
 
 ## Autenticação na pipeline
 
-Em `UseMiddleware`: `UseAuthentication` / `UseAuthorization` estão **comentados**.
+**Estado no código hoje:** em `UseMiddleware`, `UseAuthentication` / `UseAuthorization` estão **comentados**. Em `Program.cs`, `app.UseAuthorization()` é chamado sem schemes configurados.
 
-Em `Program.cs`: `app.UseAuthorization()` é chamado, mas sem schemes de autenticação configurados.
+**Alvo decidido (ainda não implementado):**
+
+| Tema | Decisão |
+|------|---------|
+| Authorization Server | OpenIddict (ADR-001) |
+| AuthN / conta | ASP.NET Identity (ADR-002) |
+| Contexto tenant/branch | switch-context + claims no token (ADR-003) |
+| AuthZ | Contextual; sem herança Branch MVP (ADR-004) |
+| Permissions no token | Todas as efetivas do contexto no JWT (ADR-005) |
+| UI login/consent | Razor em `SSO.Web.Api` (F00001-D6) |
+
+Detalhe: feature plan `.ai/WORK/2026-07-14-00001-plataforma-sso.md`.
 
 ## A definir
 
-- Evolução do produto SSO além do scaffold Sample
 - Papel futuro de `SSO.Shared`
-- Estratégia de multi-contexto (novos schemas) e boundaries oficiais
-- AuthN/AuthZ e padrões de segurança de API
+- Observabilidade e CI/CD (P-002, P-003)
+- Estratégia de migrations em produção (P-004)

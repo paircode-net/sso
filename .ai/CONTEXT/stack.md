@@ -42,12 +42,17 @@
 
 ## AuthN / AuthZ
 
-| Item | Status |
-|------|--------|
-| Authentication middleware | Comentado / não configurado |
-| Authorization scheme | Não configurado (apenas `UseAuthorization` no pipeline) |
-| Identity / JWT / cookies | Não presente |
-| Estratégia SSO real | **Pendente de definição** |
+| Item | Status no código | Alvo decidido |
+|------|------------------|---------------|
+| Authentication middleware | Comentado / não configurado | Habilitar completo (Fase 0+) |
+| Authorization scheme | Só `UseAuthorization` sem schemes | OpenIddict + policies |
+| ASP.NET Identity | Não presente | AuthN / conta (ADR-002) |
+| OpenIddict | Não presente | Authorization Server (ADR-001) |
+| JWT | Não presente | Claims de contexto + permissões efetivas (ADR-005) |
+| Signing keys | N/A | Dev: cert/key local; Prod: Key Vault + rotação (D9) |
+| UI login/consent | N/A | Razor em `SSO.Web.Api` (D6) |
+
+Pacotes alvo (Fase 0, ainda não adicionados): `Microsoft.AspNetCore.Identity.EntityFrameworkCore`, `OpenIddict.AspNetCore`, `OpenIddict.EntityFrameworkCore`.
 
 ## Qualidade / CI
 
@@ -59,7 +64,6 @@
 
 ## A definir
 
-- Estratégia de autenticação/autorização do produto SSO
-- Observabilidade (Serilog, App Insights, etc.)
-- CI/CD e containers
-- Padrão de analyzers / Nullable consistente em todos os projetos
+- Observabilidade (Serilog, App Insights, etc.) — P-002
+- CI/CD e containers — P-003
+- Padrão de analyzers / Nullable consistente em todos os projetos — P-005
