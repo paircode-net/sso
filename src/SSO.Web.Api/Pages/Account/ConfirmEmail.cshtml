@@ -1,0 +1,28 @@
+@page
+@model SSO.Web.Api.Pages.Account.ConfirmEmailModel
+@{
+	Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>Confirm email</title>
+	<style>
+		body { font-family: Segoe UI, sans-serif; margin: 2rem auto; max-width: 420px; }
+		.ok { color: #0a5; }
+		.error { color: #a40000; }
+	</style>
+</head>
+<body>
+	<h1>Confirm email</h1>
+	@if (Model.Succeeded)
+	{
+		<p class="ok">Email confirmed. You can <a href="/Account/Login">sign in</a>.</p>
+	}
+	else
+	{
+		<p class="error">@Model.ErrorMessage</p>
+	}
+</body>
+</html>

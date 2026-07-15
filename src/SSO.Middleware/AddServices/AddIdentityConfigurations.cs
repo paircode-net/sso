@@ -22,7 +22,10 @@ namespace SSO.Middleware.AddServices
 				{
 					options.Password.RequiredLength = 8;
 					options.User.RequireUniqueEmail = true;
-					options.SignIn.RequireConfirmedAccount = false;
+					options.SignIn.RequireConfirmedAccount = true;
+					options.Lockout.AllowedForNewUsers = true;
+					options.Lockout.MaxFailedAccessAttempts = 5;
+					options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
 				})
 				.AddEntityFrameworkStores<IdentityDbContext>()
 				.AddDefaultTokenProviders();

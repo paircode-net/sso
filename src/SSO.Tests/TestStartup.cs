@@ -1,4 +1,5 @@
 ﻿using SSO.Infrastructures.Data.Identity;
+using SSO.Infrastructures.Services;
 using SSO.Middleware;
 using SSO.Web.Api.Default;
 using Microsoft.AspNetCore.Builder;
@@ -8,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SSO.Core.Domain.Identity.Users.Entity;
+using SSO.Core.Domain.Interfaces.Infrastructures.Services;
+using System.Linq;
 using System.Reflection;
 
 namespace SSO.Tests
@@ -26,6 +29,15 @@ namespace SSO.Tests
 			var assembly = typeof(TestStartup).GetTypeInfo().Assembly;
 
 			services.AddMiddlewareTest(Configuration, assembly);
+
+			var mailDescriptors = services.Where(d => d.ServiceType == typeof(IMailService)).ToList();
+			foreach (var descriptor in mailDescriptors)
+			{
+				services.Remove(descriptor);
+			}
+
+			services.AddSingleton<CapturingMailService>();
+			services.AddSingleton<IMailService>(sp => sp.GetRequiredService<CapturingMailService>());
 
 			services.AddControllersWithViews()
 				.AddApplicationPart(typeof(SamplesController).Assembly);

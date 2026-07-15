@@ -1,0 +1,42 @@
+@page
+@model SSO.Web.Api.Pages.Account.EnableAuthenticatorModel
+@{
+	Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>Enable authenticator</title>
+	<style>
+		body { font-family: Segoe UI, sans-serif; margin: 2rem auto; max-width: 480px; }
+		code { word-break: break-all; }
+		label { display: block; margin-top: 1rem; font-weight: 600; }
+		input { width: 100%; padding: 0.5rem; box-sizing: border-box; }
+		button { margin-top: 1.25rem; padding: 0.6rem 1rem; width: 100%; }
+		.error { color: #a40000; }
+		.ok { color: #0a5; }
+	</style>
+</head>
+<body>
+	<h1>Enable authenticator</h1>
+	@if (Model.Enabled)
+	{
+		<p class="ok">Two-factor authentication is enabled.</p>
+	}
+	else
+	{
+		<p>Shared key:</p>
+		<p><code>@Model.SharedKey</code></p>
+		<form method="post">
+			<label asp-for="Input.Code">Verification code</label>
+			<input asp-for="Input.Code" />
+			@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+			{
+				<p class="error">@Model.ErrorMessage</p>
+			}
+			<button type="submit">Enable</button>
+		</form>
+	}
+</body>
+</html>

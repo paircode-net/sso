@@ -18,17 +18,15 @@
 |------------|------|--------|
 | `SamplesController` | `api/default/samples` | GET, GET `{id}`, POST, PUT, PATCH, DELETE |
 
-## Context: Identity (ADR-006 — Fases 0–3)
+## Context: Identity (ADR-006 — Fases 0–4)
 
 | Aspecto | Detalhe |
 |---------|---------|
 | Schema / DbContext | `IdentityDb` / `IdentityDbContext` |
-| Auditoria | `IdentityAuditableEntity` |
-| Soft-delete | Delete services marcam `IsDeleted` |
-| Seed | Org/Product/User/Membership + Branches HQ/Filial + Role/Permission matrix + OpenIddict clients |
-| Wiring | `AddIdentityFoundation` + `/connect/*` + Razor login |
-| OIDC | grant `switch_context`; JWT com `permissions` efetivas |
-| Permissions | `EffectivePermissionsResolver` (Role→Permission; Branch exact match) |
+| Conta | Confirm e-mail, forgot/reset, 2FA TOTP (Razor) |
+| Auditoria | `AuthAuditEvents` |
+| Sessões | Revoke all tokens por subject (`POST .../sessions/{userId}/revoke`) |
+| Mail | `IMailService` / logger; capture nos testes |
 
 ### Aggregates / entidades
 
@@ -38,31 +36,36 @@
 | Product | `Products` | `api/identity/products` | Code único |
 | Membership | `Memberships` | `api/identity/memberships` | User×Org |
 | User | AspNetUsers | `api/identity/users` | IdentityUser |
-| Branch | `Branches` | `api/identity/branches` | `ParentBranchId` estrutural; code único por org |
+| Branch | `Branches` | `api/identity/branches` | `ParentBranchId` estrutural |
 | Permission | `Permissions` | `api/identity/permissions` | Code único |
-| Role | `AuthRoles` | `api/identity/roles` | Domain role (≠ AspNetRoles) |
+| Role | `AuthRoles` | `api/identity/roles` | Domain role |
 | RolePermission | `RolePermissions` | `api/identity/rolepermissions` | Role→Permission |
-| UserRoleAssignment | `UserRoleAssignments` | `api/identity/userroleassignments` | User×Role×Org×Branch?×Product |
-| ClientProductBinding | `ClientProductBindings` | `api/identity/clientproductbindings` | `client_id` → Product |
+| UserRoleAssignment | `UserRoleAssignments` | `api/identity/userroleassignments` | Contexto Org/Branch/Product |
+| ClientProductBinding | `ClientProductBindings` | `api/identity/clientproductbindings` | client_id → Product |
+| AuthAuditEvent | `AuthAuditEvents` | `api/identity/auth-audit-events` | Append-only |
 
-### Seed de autorização (dev)
+### Páginas de conta
 
-| Contexto | Permissions no JWT |
-|----------|-------------------|
-| Org (sem branch) | `sso.access` |
-| Branch HQ | `sso.access`, `hq.reports` |
-| Branch Filial (filho de HQ) | `sso.access`, `filial.ops` — **sem** `hq.reports` |
+| Página | Função |
+|--------|--------|
+| `/Account/Login` | Senha + lockout + redirect 2FA |
+| `/Account/LoginWith2fa` | TOTP |
+| `/Account/EnableAuthenticator` | Ativar TOTP (autenticado) |
+| `/Account/ForgotPassword` / `ResetPassword` | Reset |
+| `/Account/ConfirmEmail` | Confirmação |
 
 ### Pendente (fases seguintes)
 
-`ClaimDefinition`, `UserClaimAssignment`, AuthClient/Scope como domínio completo, `Session`, `ExternalIdentityProvider`, `AuthAuditEvent`, ProductEnablement.
+`ClaimDefinition`, `UserClaimAssignment`, AuthClient/Scope como domínio completo, `ExternalIdentityProvider`, SMTP real, authZ nas APIs admin de audit/revoke.
 
 ## Serviços de infraestrutura transversais
 
 | Serviço | Interface | Implementação | Status |
 |---------|-----------|---------------|--------|
-| Mail | `IMailService` | `MailService` | Stub; DI comentado |
+| Mail | `IMailService` | `MailService` (+ `CapturingMailService` em testes) | Ativo (logger MVP) |
 | Permissions efetivas | `IEffectivePermissionsResolver` | `EffectivePermissionsResolver` | Ativo (Fase 3) |
+| Auditoria | `IAuthAuditService` | `AuthAuditService` | Ativo (Fase 4) |
+| Sessões | `IUserSessionService` | `UserSessionService` | Ativo (Fase 4) |
 
 ## Shared
 

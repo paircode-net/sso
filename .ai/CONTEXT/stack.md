@@ -50,7 +50,7 @@
 | Signing keys (dev) | `AddDevelopmentEncryptionCertificate` / `AddDevelopmentSigningCertificate` |
 | Signing keys (prod) | Key Vault + rotação — pendente (D9) |
 | JWT com permissions / switch-context | Ativo — motor Role→Permission por Org/Branch/Product (ADR-005, ADR-003, ADR-004) |
-| UI login/consent | Login Razor ativo; consent implícito no seed (D6) |
+| UI login/consent | Login + forgot/reset/confirm/2FA Razor (D6) |
 
 ## Qualidade / CI
 

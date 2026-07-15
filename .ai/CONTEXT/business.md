@@ -2,7 +2,7 @@
 
 ## Escopo atual no código
 
-O repositório tem o scaffold **Sample** e o context **Identity** (Fases 0–3): Organization, Product, Membership, User, Branch; Role/Permission/assignments; OpenIddict `/connect/*` com permissions efetivas no JWT por contexto Org/Branch/Product. Próximo foco: conta/credenciais/sessão (Fase 4).
+O repositório tem o scaffold **Sample** e o context **Identity** (Fases 0–4): Organization…Branch, Role/Permission, OpenIddict `/connect/*`, fluxos de conta (confirm/reset/2FA), auditoria e revogação de sessões. Próximo foco: Fase 5 (docs/menus/permissões dinâmicas).
 
 ### Regras de negócio inferíveis do código (Sample)
 

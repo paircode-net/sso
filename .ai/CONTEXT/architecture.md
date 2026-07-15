@@ -58,7 +58,7 @@ Tests → Application, Domain, Data, Middleware, Web.Api
 | Context | Schema / DbContext | Status |
 |---------|--------------------|--------|
 | Default | `DefaultDb` / `DefaultDbContext` | Ativo (Sample) |
-| Identity | `IdentityDb` / `IdentityDbContext` | **Ativo (Fase 3)** — Branch + Role/Permission + motor efetivo + `/connect/*` |
+| Identity | `IdentityDb` / `IdentityDbContext` | **Ativo (Fase 4)** — conta/2FA/audit + authz contextual + `/connect/*` |
 
 Rotas de gestão: `api/identity/{resource}`. Protocolo OIDC: `/connect/*` (authorize, token, userinfo, logout, revoke; grant `switch_context`).
 
@@ -91,6 +91,10 @@ Arquivo central: `src/SSO.Middleware/Configurations.cs`
 | Controllers `/connect/*` | `AuthorizationController` + revoke |
 | Claims JWT | `organization_id` / `branch_id` / `permissions` / `perm_ver` via `TokenClaimsFactory` |
 | Permissions resolver | Ativo — Role→Permission + UserRoleAssignment (ADR-004, sem herança Branch) |
+| Conta / e-mail / 2FA | Ativo — Razor + `RequireConfirmedAccount` + TOTP |
+| Sessões | Revogação em massa via OpenIddict tokens (`IUserSessionService`) |
+| Auditoria AuthN/AuthZ | `AuthAuditEvents` + `GET /api/identity/auth-audit-events` |
+| Mail | `IMailService` (logger); spy `CapturingMailService` em testes |
 | UI login Razor | `/Account/Login` (consent implícito no seed MVP) |
 
 Detalhe: feature plan `.ai/WORK/2026-07-14-00001-plataforma-sso.md`.

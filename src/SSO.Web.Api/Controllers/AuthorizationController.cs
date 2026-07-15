@@ -15,6 +15,8 @@ using OpenIddict.Server.AspNetCore;
 using OpenIddict.Validation.AspNetCore;
 using SSO.Core.Domain.Identity.Memberships.Entity;
 using SSO.Core.Domain.Identity.Users.Entity;
+using SSO.Core.Domain.Identity._Context.Interfaces.Services;
+using SSO.Core.Domain.Identity.AuthAuditEvents.Entity;
 using SSO.Infrastructures.Data.Identity;
 using SSO.Middleware.Identity;
 using SSO.Shared.Identity;
@@ -31,6 +33,8 @@ namespace SSO.Web.Api.Controllers
 		private readonly UserManager<User> _userManager;
 		private readonly TokenClaimsFactory _tokenClaimsFactory;
 		private readonly IdentityDbContext _dbContext;
+		private readonly IUserSessionService _sessionService;
+		private readonly IAuthAuditService _auditService;
 
 		public AuthorizationController(
 			IOpenIddictApplicationManager applicationManager,
@@ -39,7 +43,9 @@ namespace SSO.Web.Api.Controllers
 			SignInManager<User> signInManager,
 			UserManager<User> userManager,
 			TokenClaimsFactory tokenClaimsFactory,
-			IdentityDbContext dbContext)
+			IdentityDbContext dbContext,
+			IUserSessionService sessionService,
+			IAuthAuditService auditService)
 		{
 			_applicationManager = applicationManager;
 			_authorizationManager = authorizationManager;
@@ -48,6 +54,8 @@ namespace SSO.Web.Api.Controllers
 			_userManager = userManager;
 			_tokenClaimsFactory = tokenClaimsFactory;
 			_dbContext = dbContext;
+			_sessionService = sessionService;
+			_auditService = auditService;
 		}
 
 		[HttpGet("~/connect/authorize")]
@@ -254,8 +262,21 @@ namespace SSO.Web.Api.Controllers
 		}
 
 		[HttpGet("~/connect/logout")]
+		[HttpPost("~/connect/logout")]
 		public async Task<IActionResult> Logout()
 		{
+			var user = await _userManager.GetUserAsync(User);
+			if (user is not null)
+			{
+				await _sessionService.RevokeAllForUserAsync(user.Id, "connect.logout");
+				await _auditService.WriteAsync(AuthAuditEvent.Create(
+					AuthAuditEventTypes.Logout,
+					AuthAuditOutcomes.Success,
+					userId: user.Id,
+					email: user.Email,
+					ipAddress: HttpContext.Connection.RemoteIpAddress?.ToString()));
+			}
+
 			await _signInManager.SignOutAsync();
 			return SignOut(
 				authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,

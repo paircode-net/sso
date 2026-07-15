@@ -1,17 +1,21 @@
-
-//using SSO.Core.Domain.Interfaces.Infrastructures.Services;
+using SSO.Core.Domain.Interfaces.Infrastructures.Services;
+using SSO.Core.Domain.Identity._Context.Interfaces.Services;
+using SSO.Infrastructures.Services;
+using SSO.Infrastructures.Services.Identity;
+using SSO.Middleware.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace SSO.Middleware.AddServices
 {
 	public static class AddDomainServicesConfigurations
-    {
-        public static IServiceCollection AddDomainServices(this IServiceCollection services)
+	{
+		public static IServiceCollection AddDomainServices(this IServiceCollection services)
 		{
-			// Add services
-            // services.AddTransient<IMailService, MailService>();
+			services.AddSingleton<IMailService, MailService>();
+			services.AddScoped<IAuthAuditService, AuthAuditService>();
+			services.AddScoped<IUserSessionService, UserSessionService>();
 
-	        return services;
-	    }
+			return services;
+		}
 	}
 }

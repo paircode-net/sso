@@ -1,6 +1,7 @@
 using System;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SSO.Core.Domain.Identity.AuthAuditEvents.Entity;
 using SSO.Core.Domain.Identity.Branches.Entity;
 using SSO.Core.Domain.Identity.ClientProductBindings.Entity;
 using SSO.Core.Domain.Identity.Memberships.Entity;
@@ -28,6 +29,7 @@ namespace SSO.Infrastructures.Data.Identity
 		public DbSet<RolePermission> RolePermissions { get; set; }
 		public DbSet<UserRoleAssignment> UserRoleAssignments { get; set; }
 		public DbSet<ClientProductBinding> ClientProductBindings { get; set; }
+		public DbSet<AuthAuditEvent> AuthAuditEvents { get; set; }
 
 		public IdentityDbContext()
 		{
@@ -62,6 +64,7 @@ namespace SSO.Infrastructures.Data.Identity
 			builder.ApplyConfiguration(new RolePermissionMap());
 			builder.ApplyConfiguration(new UserRoleAssignmentMap());
 			builder.ApplyConfiguration(new ClientProductBindingMap());
+			builder.ApplyConfiguration(new AuthAuditEventMap());
 		}
 	}
 }
