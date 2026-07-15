@@ -49,7 +49,7 @@
 | OpenIddict | 7.5.0 — AspNetCore + EntityFrameworkCore |
 | Signing keys (dev) | `AddDevelopmentEncryptionCertificate` / `AddDevelopmentSigningCertificate` |
 | Signing keys (prod) | Key Vault + rotação — pendente (D9) |
-| JWT com permissions / switch-context | Ativo (stub permissions + grant `switch_context`; ADR-005, ADR-003) |
+| JWT com permissions / switch-context | Ativo — motor Role→Permission por Org/Branch/Product (ADR-005, ADR-003, ADR-004) |
 | UI login/consent | Login Razor ativo; consent implícito no seed (D6) |
 
 ## Qualidade / CI

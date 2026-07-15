@@ -18,44 +18,51 @@
 |------------|------|--------|
 | `SamplesController` | `api/default/samples` | GET, GET `{id}`, POST, PUT, PATCH, DELETE |
 
-## Context: Identity (ADR-006 — Fases 0–2)
+## Context: Identity (ADR-006 — Fases 0–3)
 
 | Aspecto | Detalhe |
 |---------|---------|
 | Schema / DbContext | `IdentityDb` / `IdentityDbContext` |
-| Auditoria | `IdentityAuditableEntity` (`CreatedAt`, `UpdatedAt`, `DeletedAt`, `IsDeleted`) |
-| Soft-delete | Delete services marcam `IsDeleted` (não removem fisicamente) |
-| Seed | `IdentitySeed` (org/product/user/membership + OpenIddict clients/scopes) |
+| Auditoria | `IdentityAuditableEntity` |
+| Soft-delete | Delete services marcam `IsDeleted` |
+| Seed | Org/Product/User/Membership + Branches HQ/Filial + Role/Permission matrix + OpenIddict clients |
 | Wiring | `AddIdentityFoundation` + `/connect/*` + Razor login |
-| OIDC | `AuthorizationController`; grant `urn:sso:params:oauth:grant-type:switch_context` |
-| Permissions | `IEffectivePermissionsResolver` stub → `sso.access` |
+| OIDC | grant `switch_context`; JWT com `permissions` efetivas |
+| Permissions | `EffectivePermissionsResolver` (Role→Permission; Branch exact match) |
 
-### Aggregates implementados
+### Aggregates / entidades
 
 | Aggregate | Tabela | Rotas | Notas |
 |-----------|--------|-------|-------|
-| Organization | `Organizations` | `api/identity/organizations` | Code único (ativo) |
-| Product | `Products` | `api/identity/products` | Code único (ativo) |
-| Membership | `Memberships` | `api/identity/memberships` | UserId + OrganizationId únicos (ativo) |
-| User | AspNetUsers (+ audit cols) | `api/identity/users` POST/GET `{id}` | `IdentityUser<Guid>` + `IDomainEntityBase`; senha via `UserManager` |
+| Organization | `Organizations` | `api/identity/organizations` | Code único |
+| Product | `Products` | `api/identity/products` | Code único |
+| Membership | `Memberships` | `api/identity/memberships` | User×Org |
+| User | AspNetUsers | `api/identity/users` | IdentityUser |
+| Branch | `Branches` | `api/identity/branches` | `ParentBranchId` estrutural; code único por org |
+| Permission | `Permissions` | `api/identity/permissions` | Code único |
+| Role | `AuthRoles` | `api/identity/roles` | Domain role (≠ AspNetRoles) |
+| RolePermission | `RolePermissions` | `api/identity/rolepermissions` | Role→Permission |
+| UserRoleAssignment | `UserRoleAssignments` | `api/identity/userroleassignments` | User×Role×Org×Branch?×Product |
+| ClientProductBinding | `ClientProductBindings` | `api/identity/clientproductbindings` | `client_id` → Product |
 
-### Auth clients (OpenIddict seed — não são aggregate Domain ainda)
+### Seed de autorização (dev)
 
-| ClientId | Tipo | Uso |
-|----------|------|-----|
-| `dev-product-spa` | public / PKCE | SPA de desenvolvimento |
-| `dev-product-service` | confidential | client_credentials |
+| Contexto | Permissions no JWT |
+|----------|-------------------|
+| Org (sem branch) | `sso.access` |
+| Branch HQ | `sso.access`, `hq.reports` |
+| Branch Filial (filho de HQ) | `sso.access`, `filial.ops` — **sem** `hq.reports` |
 
 ### Pendente (fases seguintes)
 
-`Branch`, `Role`, `ClaimDefinition`, `Permission`, AuthClient/Scope como domínio, `Session`, `ExternalIdentityProvider`, `AuthAuditEvent`, ProductEnablement, assignments, motor efetivo real.
+`ClaimDefinition`, `UserClaimAssignment`, AuthClient/Scope como domínio completo, `Session`, `ExternalIdentityProvider`, `AuthAuditEvent`, ProductEnablement.
 
 ## Serviços de infraestrutura transversais
 
 | Serviço | Interface | Implementação | Status |
 |---------|-----------|---------------|--------|
 | Mail | `IMailService` | `MailService` | Stub; DI comentado |
-| Permissions efetivas | `IEffectivePermissionsResolver` | `EffectivePermissionsResolver` | Stub membership → `sso.access` |
+| Permissions efetivas | `IEffectivePermissionsResolver` | `EffectivePermissionsResolver` | Ativo (Fase 3) |
 
 ## Shared
 

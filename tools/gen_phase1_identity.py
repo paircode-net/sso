@@ -758,51 +758,51 @@ namespace SSO.Web.Api.Identity
     )
 
 
-# --- generate ---
-write(
-    ROOT / "SSO.Core.Domain/Identity/_Shared/IdentityAuditableEntity.cs",
-    """using BAYSOFT.Abstractions.Core.Domain.Entities;
+if __name__ == "__main__":
+	write(
+		ROOT / "SSO.Core.Domain/Identity/_Shared/IdentityAuditableEntity.cs",
+		"""using BAYSOFT.Abstractions.Core.Domain.Entities;
 using System;
 
 namespace SSO.Core.Domain.Identity._Shared
 {
 	public abstract class IdentityAuditableEntity : DomainEntity<Guid>
 	{
-		public DateTimeOffset CreatedAt { get; set; }
-		public DateTimeOffset? UpdatedAt { get; set; }
-		public DateTimeOffset? DeletedAt { get; set; }
+		public DateTime CreatedAt { get; set; }
+		public DateTime? UpdatedAt { get; set; }
+		public DateTime? DeletedAt { get; set; }
 		public bool IsDeleted { get; set; }
 
 		public void MarkCreated()
 		{
-			CreatedAt = DateTimeOffset.UtcNow;
+			CreatedAt = DateTime.UtcNow;
 			IsDeleted = false;
 			DeletedAt = null;
 		}
 
 		public void TouchUpdated()
 		{
-			UpdatedAt = DateTimeOffset.UtcNow;
+			UpdatedAt = DateTime.UtcNow;
 		}
 
 		public void MarkDeleted()
 		{
 			IsDeleted = true;
-			DeletedAt = DateTimeOffset.UtcNow;
+			DeletedAt = DateTime.UtcNow;
 			UpdatedAt = DeletedAt;
 		}
 	}
 }
 """,
-)
+	)
 
-gen_simple_crud("Organization", "Organizations", [("Name", "string", 128), ("Code", "string", 64)], "Code")
-gen_simple_crud("Product", "Products", [("Name", "string", 128), ("Code", "string", 64)], "Code")
-gen_simple_crud(
-    "Membership",
-    "Memberships",
-    [("UserId", "Guid", 0), ("OrganizationId", "Guid", 0)],
-    None,
-)
+	gen_simple_crud("Organization", "Organizations", [("Name", "string", 128), ("Code", "string", 64)], "Code")
+	gen_simple_crud("Product", "Products", [("Name", "string", 128), ("Code", "string", 64)], "Code")
+	gen_simple_crud(
+		"Membership",
+		"Memberships",
+		[("UserId", "Guid", 0), ("OrganizationId", "Guid", 0)],
+		None,
+	)
 
-print("done")
+	print("done")

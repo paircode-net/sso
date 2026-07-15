@@ -1,0 +1,13 @@
+using BAYSOFT.Abstractions.Core.Domain.Entities.Validations;
+using SSO.Core.Domain.Identity.UserRoleAssignments.Entity;
+
+namespace SSO.Core.Domain.Identity.UserRoleAssignments.Validations.DomainValidations
+{
+	public sealed class DeleteUserRoleAssignmentSpecificationsValidator : DomainValidator<UserRoleAssignment>
+	{
+		public DeleteUserRoleAssignmentSpecificationsValidator()
+		{
+
+		}
+	}
+}

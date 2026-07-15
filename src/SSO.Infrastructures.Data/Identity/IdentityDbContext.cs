@@ -1,9 +1,15 @@
 using System;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SSO.Core.Domain.Identity.Branches.Entity;
+using SSO.Core.Domain.Identity.ClientProductBindings.Entity;
 using SSO.Core.Domain.Identity.Memberships.Entity;
 using SSO.Core.Domain.Identity.Organizations.Entity;
+using SSO.Core.Domain.Identity.Permissions.Entity;
 using SSO.Core.Domain.Identity.Products.Entity;
+using SSO.Core.Domain.Identity.RolePermissions.Entity;
+using SSO.Core.Domain.Identity.Roles.Entity;
+using SSO.Core.Domain.Identity.UserRoleAssignments.Entity;
 using SSO.Core.Domain.Identity.Users.Entity;
 using SSO.Infrastructures.Data.Identity.EntityMappings;
 
@@ -16,6 +22,12 @@ namespace SSO.Infrastructures.Data.Identity
 		public DbSet<Organization> Organizations { get; set; }
 		public DbSet<Product> Products { get; set; }
 		public DbSet<Membership> Memberships { get; set; }
+		public DbSet<Branch> Branches { get; set; }
+		public DbSet<Permission> Permissions { get; set; }
+		public DbSet<Role> AuthRoles { get; set; }
+		public DbSet<RolePermission> RolePermissions { get; set; }
+		public DbSet<UserRoleAssignment> UserRoleAssignments { get; set; }
+		public DbSet<ClientProductBinding> ClientProductBindings { get; set; }
 
 		public IdentityDbContext()
 		{
@@ -44,6 +56,12 @@ namespace SSO.Infrastructures.Data.Identity
 			builder.ApplyConfiguration(new OrganizationMap());
 			builder.ApplyConfiguration(new ProductMap());
 			builder.ApplyConfiguration(new MembershipMap());
+			builder.ApplyConfiguration(new BranchMap());
+			builder.ApplyConfiguration(new PermissionMap());
+			builder.ApplyConfiguration(new RoleMap());
+			builder.ApplyConfiguration(new RolePermissionMap());
+			builder.ApplyConfiguration(new UserRoleAssignmentMap());
+			builder.ApplyConfiguration(new ClientProductBindingMap());
 		}
 	}
 }

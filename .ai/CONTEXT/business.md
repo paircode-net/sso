@@ -2,7 +2,7 @@
 
 ## Escopo atual no código
 
-O repositório tem o scaffold **Sample** e o context **Identity** (Fases 0–2): Organization, Product, Membership, User; OpenIddict `/connect/*` com login Razor, client_credentials, PKCE preparado, switch-context e permissions stub no JWT. Autorização contextual completa (Branch + motor de permissions) é Fase 3.
+O repositório tem o scaffold **Sample** e o context **Identity** (Fases 0–3): Organization, Product, Membership, User, Branch; Role/Permission/assignments; OpenIddict `/connect/*` com permissions efetivas no JWT por contexto Org/Branch/Product. Próximo foco: conta/credenciais/sessão (Fase 4).
 
 ### Regras de negócio inferíveis do código (Sample)
 

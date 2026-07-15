@@ -2,15 +2,31 @@ using Microsoft.Extensions.DependencyInjection;
 using SSO.Core.Domain.Default.Samples.Specifications;
 using SSO.Core.Domain.Default.Samples.Validations.DomainValidations;
 using SSO.Core.Domain.Default.Samples.Validations.EntityValidations;
+using SSO.Core.Domain.Identity.Branches.Specifications;
+using SSO.Core.Domain.Identity.Branches.Validations.DomainValidations;
+using SSO.Core.Domain.Identity.Branches.Validations.EntityValidations;
+using SSO.Core.Domain.Identity.ClientProductBindings.Specifications;
+using SSO.Core.Domain.Identity.ClientProductBindings.Validations.DomainValidations;
+using SSO.Core.Domain.Identity.ClientProductBindings.Validations.EntityValidations;
 using SSO.Core.Domain.Identity.Memberships.Specifications;
 using SSO.Core.Domain.Identity.Memberships.Validations.DomainValidations;
 using SSO.Core.Domain.Identity.Memberships.Validations.EntityValidations;
 using SSO.Core.Domain.Identity.Organizations.Specifications;
 using SSO.Core.Domain.Identity.Organizations.Validations.DomainValidations;
 using SSO.Core.Domain.Identity.Organizations.Validations.EntityValidations;
+using SSO.Core.Domain.Identity.Permissions.Specifications;
+using SSO.Core.Domain.Identity.Permissions.Validations.DomainValidations;
+using SSO.Core.Domain.Identity.Permissions.Validations.EntityValidations;
 using SSO.Core.Domain.Identity.Products.Specifications;
 using SSO.Core.Domain.Identity.Products.Validations.DomainValidations;
 using SSO.Core.Domain.Identity.Products.Validations.EntityValidations;
+using SSO.Core.Domain.Identity.RolePermissions.Validations.DomainValidations;
+using SSO.Core.Domain.Identity.RolePermissions.Validations.EntityValidations;
+using SSO.Core.Domain.Identity.Roles.Specifications;
+using SSO.Core.Domain.Identity.Roles.Validations.DomainValidations;
+using SSO.Core.Domain.Identity.Roles.Validations.EntityValidations;
+using SSO.Core.Domain.Identity.UserRoleAssignments.Validations.DomainValidations;
+using SSO.Core.Domain.Identity.UserRoleAssignments.Validations.EntityValidations;
 using SSO.Core.Domain.Identity.Users.Specifications;
 using SSO.Core.Domain.Identity.Users.Validations.DomainValidations;
 using SSO.Core.Domain.Identity.Users.Validations.EntityValidations;
@@ -27,6 +43,10 @@ namespace SSO.Middleware.AddServices
 			services.AddTransient<ProductCodeAlreadyExistsSpecification>();
 			services.AddTransient<MembershipUserOrganizationAlreadyExistsSpecification>();
 			services.AddTransient<UserEmailAlreadyExistsSpecification>();
+			services.AddTransient<BranchCodeAlreadyExistsSpecification>();
+			services.AddTransient<PermissionCodeAlreadyExistsSpecification>();
+			services.AddTransient<RoleCodeAlreadyExistsSpecification>();
+			services.AddTransient<ClientProductBindingClientIdAlreadyExistsSpecification>();
 
 			return services;
 		}
@@ -39,6 +59,12 @@ namespace SSO.Middleware.AddServices
 			services.AddTransient<ProductValidator>();
 			services.AddTransient<MembershipValidator>();
 			services.AddTransient<UserValidator>();
+			services.AddTransient<BranchValidator>();
+			services.AddTransient<PermissionValidator>();
+			services.AddTransient<RoleValidator>();
+			services.AddTransient<RolePermissionValidator>();
+			services.AddTransient<UserRoleAssignmentValidator>();
+			services.AddTransient<ClientProductBindingValidator>();
 
 			return services;
 		}
@@ -62,6 +88,30 @@ namespace SSO.Middleware.AddServices
 			services.AddTransient<DeleteMembershipSpecificationsValidator>();
 
 			services.AddTransient<CreateUserSpecificationsValidator>();
+
+			services.AddTransient<CreateBranchSpecificationsValidator>();
+			services.AddTransient<UpdateBranchSpecificationsValidator>();
+			services.AddTransient<DeleteBranchSpecificationsValidator>();
+
+			services.AddTransient<CreatePermissionSpecificationsValidator>();
+			services.AddTransient<UpdatePermissionSpecificationsValidator>();
+			services.AddTransient<DeletePermissionSpecificationsValidator>();
+
+			services.AddTransient<CreateRoleSpecificationsValidator>();
+			services.AddTransient<UpdateRoleSpecificationsValidator>();
+			services.AddTransient<DeleteRoleSpecificationsValidator>();
+
+			services.AddTransient<CreateRolePermissionSpecificationsValidator>();
+			services.AddTransient<UpdateRolePermissionSpecificationsValidator>();
+			services.AddTransient<DeleteRolePermissionSpecificationsValidator>();
+
+			services.AddTransient<CreateUserRoleAssignmentSpecificationsValidator>();
+			services.AddTransient<UpdateUserRoleAssignmentSpecificationsValidator>();
+			services.AddTransient<DeleteUserRoleAssignmentSpecificationsValidator>();
+
+			services.AddTransient<CreateClientProductBindingSpecificationsValidator>();
+			services.AddTransient<UpdateClientProductBindingSpecificationsValidator>();
+			services.AddTransient<DeleteClientProductBindingSpecificationsValidator>();
 
 			return services;
 		}

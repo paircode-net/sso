@@ -4,9 +4,15 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using OpenIddict.Abstractions;
+using SSO.Core.Domain.Identity.Branches.Entity;
+using SSO.Core.Domain.Identity.ClientProductBindings.Entity;
 using SSO.Core.Domain.Identity.Memberships.Entity;
 using SSO.Core.Domain.Identity.Organizations.Entity;
+using SSO.Core.Domain.Identity.Permissions.Entity;
 using SSO.Core.Domain.Identity.Products.Entity;
+using SSO.Core.Domain.Identity.RolePermissions.Entity;
+using SSO.Core.Domain.Identity.Roles.Entity;
+using SSO.Core.Domain.Identity.UserRoleAssignments.Entity;
 using SSO.Core.Domain.Identity.Users.Entity;
 using SSO.Shared.Identity;
 using static OpenIddict.Abstractions.OpenIddictConstants;
@@ -19,9 +25,20 @@ namespace SSO.Infrastructures.Data.Identity
 		public static readonly Guid DevProductId = Guid.Parse("22222222-2222-2222-2222-222222222222");
 		public static readonly Guid DevUserId = Guid.Parse("33333333-3333-3333-3333-333333333333");
 		public static readonly Guid DevMembershipId = Guid.Parse("44444444-4444-4444-4444-444444444444");
+		public static readonly Guid DevBranchHqId = Guid.Parse("55555555-5555-5555-5555-555555555555");
+		public static readonly Guid DevBranchFilialId = Guid.Parse("66666666-6666-6666-6666-666666666666");
+		public static readonly Guid DevPermissionAccessId = Guid.Parse("71111111-1111-1111-1111-111111111111");
+		public static readonly Guid DevPermissionHqReportsId = Guid.Parse("72222222-2222-2222-2222-222222222222");
+		public static readonly Guid DevPermissionFilialOpsId = Guid.Parse("73333333-3333-3333-3333-333333333333");
+		public static readonly Guid DevRoleOrgMemberId = Guid.Parse("81111111-1111-1111-1111-111111111111");
+		public static readonly Guid DevRoleHqManagerId = Guid.Parse("82222222-2222-2222-2222-222222222222");
+		public static readonly Guid DevRoleFilialStaffId = Guid.Parse("83333333-3333-3333-3333-333333333333");
 
 		public const string DevUserEmail = "admin@sso.local";
 		public const string DevUserPassword = "ChangeMe!123";
+		public const string PermissionAccess = "sso.access";
+		public const string PermissionHqReports = "hq.reports";
+		public const string PermissionFilialOps = "filial.ops";
 
 		public static async Task EnsureAsync(IServiceProvider services)
 		{
@@ -87,7 +104,146 @@ namespace SSO.Infrastructures.Data.Identity
 				await context.SaveChangesAsync();
 			}
 
+			await EnsureBranchesAsync(context);
+			await EnsureAuthzCatalogAsync(context);
 			await EnsureOpenIddictClientsAsync(services);
+		}
+
+		private static async Task EnsureBranchesAsync(IdentityDbContext context)
+		{
+			if (!await context.Branches.AnyAsync(x => x.Id == DevBranchHqId))
+			{
+				var hq = new Branch
+				{
+					Id = DevBranchHqId,
+					OrganizationId = DevOrganizationId,
+					ParentBranchId = null,
+					Name = "HQ",
+					Code = "hq"
+				};
+				hq.MarkCreated();
+				context.Branches.Add(hq);
+			}
+
+			if (!await context.Branches.AnyAsync(x => x.Id == DevBranchFilialId))
+			{
+				var filial = new Branch
+				{
+					Id = DevBranchFilialId,
+					OrganizationId = DevOrganizationId,
+					ParentBranchId = DevBranchHqId,
+					Name = "Filial",
+					Code = "filial"
+				};
+				filial.MarkCreated();
+				context.Branches.Add(filial);
+			}
+
+			await context.SaveChangesAsync();
+		}
+
+		private static async Task EnsureAuthzCatalogAsync(IdentityDbContext context)
+		{
+			await EnsurePermissionAsync(context, DevPermissionAccessId, PermissionAccess, "SSO Access");
+			await EnsurePermissionAsync(context, DevPermissionHqReportsId, PermissionHqReports, "HQ Reports");
+			await EnsurePermissionAsync(context, DevPermissionFilialOpsId, PermissionFilialOps, "Filial Operations");
+
+			await EnsureRoleAsync(context, DevRoleOrgMemberId, "org-member", "Organization Member");
+			await EnsureRoleAsync(context, DevRoleHqManagerId, "hq-manager", "HQ Manager");
+			await EnsureRoleAsync(context, DevRoleFilialStaffId, "filial-staff", "Filial Staff");
+
+			await EnsureRolePermissionAsync(context, DevRoleOrgMemberId, DevPermissionAccessId);
+			await EnsureRolePermissionAsync(context, DevRoleHqManagerId, DevPermissionHqReportsId);
+			await EnsureRolePermissionAsync(context, DevRoleFilialStaffId, DevPermissionFilialOpsId);
+
+			await EnsureAssignmentAsync(context, DevUserId, DevRoleOrgMemberId, DevOrganizationId, null, DevProductId);
+			await EnsureAssignmentAsync(context, DevUserId, DevRoleHqManagerId, DevOrganizationId, DevBranchHqId, DevProductId);
+			await EnsureAssignmentAsync(context, DevUserId, DevRoleFilialStaffId, DevOrganizationId, DevBranchFilialId, DevProductId);
+
+			await EnsureClientBindingAsync(context, SsoClients.DevSpaClientId, DevProductId);
+			await EnsureClientBindingAsync(context, SsoClients.DevServiceClientId, DevProductId);
+
+			await context.SaveChangesAsync();
+		}
+
+		private static async Task EnsurePermissionAsync(IdentityDbContext context, Guid id, string code, string name)
+		{
+			if (await context.Permissions.AnyAsync(x => x.Id == id))
+			{
+				return;
+			}
+
+			var permission = new Permission { Id = id, Code = code, Name = name };
+			permission.MarkCreated();
+			context.Permissions.Add(permission);
+		}
+
+		private static async Task EnsureRoleAsync(IdentityDbContext context, Guid id, string code, string name)
+		{
+			if (await context.AuthRoles.AnyAsync(x => x.Id == id))
+			{
+				return;
+			}
+
+			var role = new Role { Id = id, Code = code, Name = name };
+			role.MarkCreated();
+			context.AuthRoles.Add(role);
+		}
+
+		private static async Task EnsureRolePermissionAsync(IdentityDbContext context, Guid roleId, Guid permissionId)
+		{
+			if (await context.RolePermissions.AnyAsync(x =>
+				!x.IsDeleted && x.RoleId == roleId && x.PermissionId == permissionId))
+			{
+				return;
+			}
+
+			var link = new RolePermission { RoleId = roleId, PermissionId = permissionId };
+			link.MarkCreated();
+			context.RolePermissions.Add(link);
+		}
+
+		private static async Task EnsureAssignmentAsync(
+			IdentityDbContext context,
+			Guid userId,
+			Guid roleId,
+			Guid organizationId,
+			Guid? branchId,
+			Guid productId)
+		{
+			if (await context.UserRoleAssignments.AnyAsync(x =>
+				!x.IsDeleted
+				&& x.UserId == userId
+				&& x.RoleId == roleId
+				&& x.OrganizationId == organizationId
+				&& x.BranchId == branchId
+				&& x.ProductId == productId))
+			{
+				return;
+			}
+
+			var assignment = new UserRoleAssignment
+			{
+				UserId = userId,
+				RoleId = roleId,
+				OrganizationId = organizationId,
+				BranchId = branchId,
+				ProductId = productId
+			};
+			assignment.MarkCreated();
+			context.UserRoleAssignments.Add(assignment);
+		}
+
+		private static async Task EnsureClientBindingAsync(IdentityDbContext context, string clientId, Guid productId)
+		{
+			if (await context.ClientProductBindings.AnyAsync(x => !x.IsDeleted && x.ClientId == clientId))
+			{
+				return;
+			}
+
+			var binding = new ClientProductBinding { ClientId = clientId, ProductId = productId };
+			binding.MarkCreated();
+			context.ClientProductBindings.Add(binding);
 		}
 
 		private static async Task EnsureOpenIddictClientsAsync(IServiceProvider services)

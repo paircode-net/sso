@@ -328,6 +328,20 @@ namespace SSO.Web.Api.Controllers
 				}
 
 				branchId = parsedBranch;
+
+				var branchOk = await _dbContext.Branches.AsNoTracking().AnyAsync(x =>
+					!x.IsDeleted && x.Id == branchId.Value && x.OrganizationId == organizationId);
+				if (!branchOk)
+				{
+					return Forbid(
+						authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+						properties: new AuthenticationProperties(new Dictionary<string, string?>
+						{
+							[OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidRequest,
+							[OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+								"branch_id does not belong to the requested organization."
+						}));
+				}
 			}
 
 			var hasMembership = await _dbContext.Memberships.AsNoTracking().AnyAsync(x =>

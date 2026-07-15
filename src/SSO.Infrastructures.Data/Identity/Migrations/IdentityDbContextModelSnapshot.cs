@@ -365,6 +365,89 @@ namespace SSO.Infrastructures.Data.Identity.Migrations
                     b.ToTable("OpenIddictTokens", "IdentityDb");
                 });
 
+            modelBuilder.Entity("SSO.Core.Domain.Identity.Branches.Entity.Branch", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("UNIQUEIDENTIFIER")
+                        .HasColumnName("Id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(64)")
+                        .HasColumnName("Code");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(128)")
+                        .HasColumnName("Name");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("UNIQUEIDENTIFIER")
+                        .HasColumnName("OrganizationId");
+
+                    b.Property<Guid?>("ParentBranchId")
+                        .HasColumnType("UNIQUEIDENTIFIER")
+                        .HasColumnName("ParentBranchId");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId", "Code")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("Branches", "IdentityDb");
+                });
+
+            modelBuilder.Entity("SSO.Core.Domain.Identity.ClientProductBindings.Entity.ClientProductBinding", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("UNIQUEIDENTIFIER")
+                        .HasColumnName("Id");
+
+                    b.Property<string>("ClientId")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(128)")
+                        .HasColumnName("ClientId");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("UNIQUEIDENTIFIER")
+                        .HasColumnName("ProductId");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("ClientProductBindings", "IdentityDb");
+                });
+
             modelBuilder.Entity("SSO.Core.Domain.Identity.Memberships.Entity.Membership", b =>
                 {
                     b.Property<Guid>("Id")
@@ -439,6 +522,44 @@ namespace SSO.Infrastructures.Data.Identity.Migrations
                     b.ToTable("Organizations", "IdentityDb");
                 });
 
+            modelBuilder.Entity("SSO.Core.Domain.Identity.Permissions.Entity.Permission", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("UNIQUEIDENTIFIER")
+                        .HasColumnName("Id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(128)")
+                        .HasColumnName("Code");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(256)")
+                        .HasColumnName("Name");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("Permissions", "IdentityDb");
+                });
+
             modelBuilder.Entity("SSO.Core.Domain.Identity.Products.Entity.Product", b =>
                 {
                     b.Property<Guid>("Id")
@@ -475,6 +596,128 @@ namespace SSO.Infrastructures.Data.Identity.Migrations
                         .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("Products", "IdentityDb");
+                });
+
+            modelBuilder.Entity("SSO.Core.Domain.Identity.RolePermissions.Entity.RolePermission", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("UNIQUEIDENTIFIER")
+                        .HasColumnName("Id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("PermissionId")
+                        .HasColumnType("UNIQUEIDENTIFIER")
+                        .HasColumnName("PermissionId");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("UNIQUEIDENTIFIER")
+                        .HasColumnName("RoleId");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId", "PermissionId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("RolePermissions", "IdentityDb");
+                });
+
+            modelBuilder.Entity("SSO.Core.Domain.Identity.Roles.Entity.Role", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("UNIQUEIDENTIFIER")
+                        .HasColumnName("Id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(128)")
+                        .HasColumnName("Code");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(256)")
+                        .HasColumnName("Name");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("AuthRoles", "IdentityDb");
+                });
+
+            modelBuilder.Entity("SSO.Core.Domain.Identity.UserRoleAssignments.Entity.UserRoleAssignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("UNIQUEIDENTIFIER")
+                        .HasColumnName("Id");
+
+                    b.Property<Guid?>("BranchId")
+                        .HasColumnType("UNIQUEIDENTIFIER")
+                        .HasColumnName("BranchId");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("UNIQUEIDENTIFIER")
+                        .HasColumnName("OrganizationId");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("UNIQUEIDENTIFIER")
+                        .HasColumnName("ProductId");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("UNIQUEIDENTIFIER")
+                        .HasColumnName("RoleId");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("UNIQUEIDENTIFIER")
+                        .HasColumnName("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "RoleId", "OrganizationId", "BranchId", "ProductId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("UserRoleAssignments", "IdentityDb");
                 });
 
             modelBuilder.Entity("SSO.Core.Domain.Identity.Users.Entity.User", b =>

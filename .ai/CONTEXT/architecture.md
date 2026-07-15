@@ -58,7 +58,7 @@ Tests → Application, Domain, Data, Middleware, Web.Api
 | Context | Schema / DbContext | Status |
 |---------|--------------------|--------|
 | Default | `DefaultDb` / `DefaultDbContext` | Ativo (Sample) |
-| Identity | `IdentityDb` / `IdentityDbContext` | **Ativo (Fase 2)** — Identity/OpenIddict + aggregates + `/connect/*` |
+| Identity | `IdentityDb` / `IdentityDbContext` | **Ativo (Fase 3)** — Branch + Role/Permission + motor efetivo + `/connect/*` |
 
 Rotas de gestão: `api/identity/{resource}`. Protocolo OIDC: `/connect/*` (authorize, token, userinfo, logout, revoke; grant `switch_context`).
 
@@ -90,7 +90,7 @@ Arquivo central: `src/SSO.Middleware/Configurations.cs`
 | Flows | Authorization Code+PKCE, Refresh, Client Credentials, `switch_context` |
 | Controllers `/connect/*` | `AuthorizationController` + revoke |
 | Claims JWT | `organization_id` / `branch_id` / `permissions` / `perm_ver` via `TokenClaimsFactory` |
-| Permissions resolver | Stub (`sso.access` se membership); motor completo na Fase 3 |
+| Permissions resolver | Ativo — Role→Permission + UserRoleAssignment (ADR-004, sem herança Branch) |
 | UI login Razor | `/Account/Login` (consent implícito no seed MVP) |
 
 Detalhe: feature plan `.ai/WORK/2026-07-14-00001-plataforma-sso.md`.
