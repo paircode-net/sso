@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using OpenIddict.Abstractions;
+using SSO.Core.Domain.Identity.ExternalIdentityProviders.Entity;
 using SSO.Core.Domain.Identity.Branches.Entity;
 using SSO.Core.Domain.Identity.ClientProductBindings.Entity;
 using SSO.Core.Domain.Identity.Memberships.Entity;
@@ -37,6 +38,9 @@ namespace SSO.Infrastructures.Data.Identity
 		public static readonly Guid DevMenuHomeId = Guid.Parse("91111111-1111-1111-1111-111111111111");
 		public static readonly Guid DevMenuHqReportsId = Guid.Parse("92222222-2222-2222-2222-222222222222");
 		public static readonly Guid DevMenuFilialOpsId = Guid.Parse("93333333-3333-3333-3333-333333333333");
+		public static readonly Guid DevEntraIdpId = Guid.Parse("a1111111-1111-1111-1111-111111111111");
+		public static readonly Guid DevGoogleIdpId = Guid.Parse("a2222222-2222-2222-2222-222222222222");
+		public static readonly Guid DevLdapIdpId = Guid.Parse("a3333333-3333-3333-3333-333333333333");
 
 		public const string DevUserEmail = "admin@sso.local";
 		public const string DevUserPassword = "ChangeMe!123";
@@ -171,6 +175,34 @@ namespace SSO.Infrastructures.Data.Identity
 			await EnsureMenuAsync(context, DevMenuHqReportsId, DevProductId, "hq-reports", "HQ Reports", "/app/hq/reports", PermissionHqReports, 20);
 			await EnsureMenuAsync(context, DevMenuFilialOpsId, DevProductId, "filial-ops", "Filial Ops", "/app/filial/ops", PermissionFilialOps, 30);
 
+			await EnsureExternalIdpAsync(
+				context,
+				DevEntraIdpId,
+				ExternalIdpTypes.Entra,
+				"entra-homolog",
+				"Microsoft Entra ID",
+				isEnabled: true,
+				authority: "https://login.microsoftonline.com/common/v2.0",
+				clientId: null);
+			await EnsureExternalIdpAsync(
+				context,
+				DevGoogleIdpId,
+				ExternalIdpTypes.Google,
+				"google-stub",
+				"Google (stub)",
+				isEnabled: false,
+				authority: "https://accounts.google.com",
+				clientId: null);
+			await EnsureExternalIdpAsync(
+				context,
+				DevLdapIdpId,
+				ExternalIdpTypes.Ldap,
+				"ldap-stub",
+				"LDAP (stub)",
+				isEnabled: false,
+				authority: null,
+				clientId: null);
+
 			await context.SaveChangesAsync();
 		}
 
@@ -281,6 +313,35 @@ namespace SSO.Infrastructures.Data.Identity
 			};
 			menu.MarkCreated();
 			context.MenuItems.Add(menu);
+		}
+
+		private static async Task EnsureExternalIdpAsync(
+			IdentityDbContext context,
+			Guid id,
+			string providerType,
+			string code,
+			string displayName,
+			bool isEnabled,
+			string authority,
+			string clientId)
+		{
+			if (await context.ExternalIdentityProviders.AnyAsync(x => x.Id == id))
+			{
+				return;
+			}
+
+			var idp = new ExternalIdentityProvider
+			{
+				Id = id,
+				ProviderType = providerType,
+				Code = code,
+				DisplayName = displayName,
+				IsEnabled = isEnabled,
+				Authority = authority,
+				ClientId = clientId
+			};
+			idp.MarkCreated();
+			context.ExternalIdentityProviders.Add(idp);
 		}
 
 		private static async Task EnsureOpenIddictClientsAsync(IServiceProvider services)

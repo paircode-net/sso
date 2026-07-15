@@ -1,5 +1,8 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -33,6 +36,8 @@ namespace SSO.Web.Api.Pages.Account
 
 		public string? ErrorMessage { get; set; }
 
+		public IList<AuthenticationScheme> ExternalProviders { get; set; } = new List<AuthenticationScheme>();
+
 		public sealed class InputModel
 		{
 			[Required]
@@ -44,9 +49,10 @@ namespace SSO.Web.Api.Pages.Account
 			public string Password { get; set; } = string.Empty;
 		}
 
-		public void OnGet(string? returnUrl = null)
+		public async Task OnGetAsync(string? returnUrl = null)
 		{
 			ReturnUrl = returnUrl ?? Url.Content("~/");
+			ExternalProviders = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 		}
 
 		public async Task<IActionResult> OnPostAsync(string? returnUrl = null)

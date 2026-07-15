@@ -1,11 +1,9 @@
 using SSO.Middleware;
-using SSO.Infrastructures.Data.Identity;
-using Microsoft.AspNetCore.Identity;
-using SSO.Core.Domain.Identity.Users.Entity;
+using SSO.Shared.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddMiddleware(builder.Configuration, typeof(Program).Assembly);
+builder.Services.AddMiddleware(builder.Configuration, typeof(Program).Assembly, builder.Environment);
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddEndpointsApiExplorer();

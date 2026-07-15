@@ -2,7 +2,7 @@
 
 ## Escopo atual no código
 
-O repositório tem o scaffold **Sample** e o context **Identity** (Fases 0–5): authz contextual, conta/2FA, menus por permission, JWT com `permissions`/`perm_ver` dinâmico. Contrato de product: `CONTEXT/product-integration.md`. Próximo: Fase 6 (IdPs + harden).
+O repositório tem o scaffold **Sample** e o context **Identity** (Fases 0–6): authz contextual, conta/2FA, menus, JWT `permissions`/`perm_ver`, IdPs externos (Entra homologável; Google/LDAP stub) e hardening (CORS, rate limit, lockout, P-004). Contratos: `product-integration.md`, `phase6-hardening.md`.
 
 ### Regras de negócio inferíveis do código (Sample)
 
@@ -35,7 +35,7 @@ Fonte: `.ai/WORK/2026-07-14-00001-plataforma-sso.md` e `.ai/CONTEXT/adr/`.
 | Administrador de organização | Gerencia memberships, branches, roles no tenant |
 | Administrador de plataforma | Gerencia products, AuthClients, configuração global (via API no MVP) |
 | Aplicação (AuthClient) | Consome JWT com permissões efetivas do contexto |
-| IdP externo | Federação (Entra → Google → LDAP na Fase 6) |
+| IdP externo | Federação Entra (homologável) → Google/LDAP (stub) |
 
 ### Regras de contexto e autorização (MVP)
 

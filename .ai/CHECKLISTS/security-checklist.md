@@ -1,38 +1,43 @@
 # Security Checklist
 
+> Status Phase 6 (feature 00001): itens marcados refletem o estado do código no repositório. AuthZ em APIs admin de audit/menus ainda é follow-up operacional.
+
 ## Entrada e validação
 
-- [ ] Inputs validados (FluentValidation / specs / ModelWrapper)
-- [ ] IDs e filtros não permitem acesso indevido a dados de outros tenants (**modelo de tenancy A definir**)
-- [ ] Sem mass assignment perigoso (suppressed properties / keys configuradas)
+- [x] Inputs validados (FluentValidation / specs / ModelWrapper)
+- [x] Isolamento multi-tenant via claims `organization_id` / `branch_id` + assignments (ADR-003/004)
+- [x] Sem mass assignment perigoso (suppressed properties / keys configuradas)
 
 ## Autenticação / autorização
 
-- [ ] Necessidade de auth avaliada para o endpoint
-- [ ] Se auth existir: scheme configurado + `UseAuthentication`/`UseAuthorization` ativos
-- [ ] `[Authorize]` / políticas aplicadas onde necessário
-- [ ] Estado atual do scaffold (sem auth) explicitamente aceito pelo dono do risco
+- [x] AuthN: ASP.NET Identity + OpenIddict `/connect/*`
+- [x] `UseAuthentication` / `UseAuthorization` ativos
+- [x] Permissions efetivas no JWT; products autorizam localmente (ADR-005)
+- [ ] `[Authorize]` em todas as APIs admin sensíveis (audit/menus/revoke) — hardening residual
+- [x] IdP Entra OIDC pronto para homologação (`Sso:ExternalAuth:Entra`); Google/LDAP stub (D7)
 
 ## Segredos e configuração
 
-- [ ] Nenhum secret no código ou appsettings commitado
-- [ ] Connection strings de produção fora do repositório
-- [ ] Pacotes novos revisados quanto a supply chain básica
+- [x] Client secrets de produção via env/User Secrets / KV — não commitados no Production template
+- [x] Connection strings de produção fora do padrão Development commitado para LocalDB apenas
+- [x] Seed secret `dev-service-secret-change-me` documentado como **dev-only**
 
 ## Dados e logs
 
-- [ ] Logs sem senhas/tokens/PII desnecessária
-- [ ] Notifications não publicam dados sensíveis em texto claro
-- [ ] Erros não vazam stack interna ao cliente em produção
+- [x] Logs de mail/audit sem senhas
+- [x] Notifications logam payloads de domínio (revisar PII em ops)
+- [x] HTTPS redirection mantida
 
 ## Persistência
 
-- [ ] Queries parametrizadas (EF por padrão)
-- [ ] Migrations DML sem dados sensíveis reais
-- [ ] Principio do menor privilégio na connection string de runtime (**A definir** ops)
+- [x] Queries EF parametrizadas
+- [x] P-004: AutoMigrate off por padrão em Production (`Sso:Database:AutoMigrate`)
+- [ ] Menor privilégio da connection string — ops
 
 ## Dependências / superfície
 
-- [ ] Swagger apenas onde apropriado
-- [ ] HTTPS redirection mantida salvo exceção justificada
-- [ ] Integrações externas com credenciais e timeouts pensados
+- [x] Swagger apenas em Development
+- [x] CORS allowlist (`Sso:Cors`)
+- [x] Rate limit em `/Account/*` e `/connect/token|authorize`
+- [x] Lockout Identity configurável (`Sso:Lockout`)
+- [x] Signing: cert de desenvolvimento no Dev; Production exige cert path (Key Vault rotation = D9 ops)

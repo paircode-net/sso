@@ -1,27 +1,32 @@
-
 using BAYSOFT.Abstractions.Core.Domain.Entities;
 using BAYSOFT.Abstractions.Crosscutting.InheritStringLocalization;
 using SSO.Middleware.AddServices;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using ModelWrapper.Middleware;
+using SSO.Shared.Identity;
 using System;
 using System.Reflection;
 
 namespace SSO.Middleware
 {
 	public static class Configurations
-    {
-        public static IServiceCollection AddMiddleware(this IServiceCollection services, IConfiguration configuration, Assembly presentationAssembly)
-        {
-            services.AddLocalization();
+	{
+		public static IServiceCollection AddMiddleware(
+			this IServiceCollection services,
+			IConfiguration configuration,
+			Assembly presentationAssembly,
+			IHostEnvironment environment = null)
+		{
+			services.AddLocalization();
 
 			services.AddDbContexts(configuration);
 			services.AddSpecifications();
-            services.AddEntityValidations();
-            services.AddDomainValidations();
-            services.AddDomainServices();
+			services.AddEntityValidations();
+			services.AddDomainValidations();
+			services.AddDomainServices();
 
 			var assemblyApplication = AppDomain.CurrentDomain.Load("SSO.Core.Application");
 			var assemblyDomain = AppDomain.CurrentDomain.Load("SSO.Core.Domain");
@@ -29,7 +34,7 @@ namespace SSO.Middleware
 			services.AddMediatR(options => options.RegisterServicesFromAssemblies(assemblyApplication, assemblyDomain, assemblyInfrastructuresServices));
 
 			services.AddModelWrapper()
-                .AddDefaultReturnedCollectionSize(10)
+				.AddDefaultReturnedCollectionSize(10)
 				.AddMinimumReturnedCollectionSize(1)
 				.AddMaximumReturnedCollectionSize(500)
 				.AddQueryTermsMinimumSize(1)
@@ -40,29 +45,39 @@ namespace SSO.Middleware
 
 			services.AddInheritStringLocalizerFactory();
 
-			services.AddIdentityFoundation();
+			services.AddIdentityFoundation(configuration, environment);
+			if (environment != null)
+			{
+				services.AddSsoHardening(configuration, environment);
+			}
 
 			return services;
-        }
-
-        public static IApplicationBuilder UseMiddleware(this IApplicationBuilder app)
-        {
-			app.UseMigrations();
-
-            var supportedCultures = new string[] { "pt-BR" };
-
-            var localizationOptions = new RequestLocalizationOptions()
-                .SetDefaultCulture(supportedCultures[0])
-                .AddSupportedCultures(supportedCultures)
-                .AddSupportedUICultures(supportedCultures);
-
-            app.UseRequestLocalization(localizationOptions);
-
-            app.UseAuthentication();
-            app.UseAuthorization();
-
-            return app;
 		}
+
+		public static IApplicationBuilder UseMiddleware(this IApplicationBuilder app)
+		{
+			var configuration = app.ApplicationServices.GetRequiredService<IConfiguration>();
+			var environment = app.ApplicationServices.GetRequiredService<IHostEnvironment>();
+			var hardening = app.ApplicationServices.GetService<SsoHardeningOptions>() ?? new SsoHardeningOptions();
+
+			app.UseMigrations(configuration, environment);
+			app.UseSsoHardening(hardening);
+
+			var supportedCultures = new string[] { "pt-BR" };
+
+			var localizationOptions = new RequestLocalizationOptions()
+				.SetDefaultCulture(supportedCultures[0])
+				.AddSupportedCultures(supportedCultures)
+				.AddSupportedUICultures(supportedCultures);
+
+			app.UseRequestLocalization(localizationOptions);
+
+			app.UseAuthentication();
+			app.UseAuthorization();
+
+			return app;
+		}
+
 		#region TESTS
 		public static IServiceCollection AddMiddlewareTest(this IServiceCollection services, IConfiguration configuration, Assembly presentationAssembly)
 		{
@@ -88,7 +103,29 @@ namespace SSO.Middleware
 
 			services.AddInheritStringLocalizerFactory();
 
-			services.AddIdentityFoundation(disableTransportSecurityRequirement: true);
+			services.AddIdentityFoundation(configuration, environment: null, disableTransportSecurityRequirement: true);
+
+			var hardening = configuration.GetSection(SsoHardeningOptions.SectionName).Get<SsoHardeningOptions>()
+				?? new SsoHardeningOptions
+				{
+					RateLimit = { Enabled = true, PermitLimit = 1000, WindowSeconds = 60 },
+					Cors = { Enabled = true },
+					Signing = { UseDevelopmentCertificates = true }
+				};
+			services.AddSingleton(hardening);
+			if (hardening.Cors.Enabled)
+			{
+				services.AddCors(cors => cors.AddPolicy("SsoCors", p =>
+					p.WithOrigins(hardening.Cors.AllowedOrigins ?? Array.Empty<string>())
+						.AllowAnyHeader()
+						.AllowAnyMethod()
+						.AllowCredentials()));
+			}
+
+			if (hardening.RateLimit.Enabled)
+			{
+				services.AddRateLimiter(_ => { });
+			}
 
 			return services;
 		}
@@ -104,10 +141,8 @@ namespace SSO.Middleware
 
 			app.UseRequestLocalization(localizationOptions);
 
-			// Authentication/Authorization are applied in TestStartup after UseRouting.
 			return app;
 		}
 		#endregion
 	}
 }
-

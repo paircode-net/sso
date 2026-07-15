@@ -17,6 +17,8 @@
 		input { width: 100%; padding: 0.5rem; margin-top: 0.25rem; box-sizing: border-box; }
 		button { margin-top: 1.25rem; padding: 0.6rem 1rem; width: 100%; }
 		.error { color: #a40000; margin-top: 1rem; }
+		.ext { margin-top: 1.5rem; border-top: 1px solid #ddd; padding-top: 1rem; }
+		.ext form { margin-top: 0.5rem; }
 	</style>
 </head>
 <body>
@@ -38,5 +40,18 @@
 		<button type="submit">Sign in</button>
 	</form>
 	<p style="margin-top:1rem"><a href="/Account/ForgotPassword">Forgot password?</a></p>
+	@if (Model.ExternalProviders.Count > 0)
+	{
+		<div class="ext">
+			<p>Or continue with</p>
+			@foreach (var provider in Model.ExternalProviders)
+			{
+				<form method="post" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl">
+					<input type="hidden" name="provider" value="@provider.Name" />
+					<button type="submit">@provider.DisplayName</button>
+				</form>
+			}
+		</div>
+	}
 </body>
 </html>

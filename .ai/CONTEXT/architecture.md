@@ -58,7 +58,7 @@ Tests → Application, Domain, Data, Middleware, Web.Api
 | Context | Schema / DbContext | Status |
 |---------|--------------------|--------|
 | Default | `DefaultDb` / `DefaultDbContext` | Ativo (Sample) |
-| Identity | `IdentityDb` / `IdentityDbContext` | **Ativo (Fase 5)** — menus + perm_ver dinâmico + authz JWT |
+| Identity | `IdentityDb` / `IdentityDbContext` | **Ativo (Fase 6)** — JWT authz + IdPs externos + hardening |
 
 Rotas de gestão: `api/identity/{resource}`. Protocolo OIDC: `/connect/*` (authorize, token, userinfo, logout, revoke; grant `switch_context`).
 
@@ -98,12 +98,15 @@ Arquivo central: `src/SSO.Middleware/Configurations.cs`
 | Menus | `MenuItem` + `GET /api/identity/menus/effective` |
 | `perm_ver` | Dinâmico (policy stamps) via `IPermissionPolicyVersionProvider` |
 | Product contract | `.ai/CONTEXT/product-integration.md` |
-| UI login Razor | `/Account/Login` (consent implícito no seed MVP) |
+| UI login Razor | `/Account/Login` + `/Account/ExternalLogin` |
+| IdPs externos | `ExternalIdentityProviders` + OIDC Entra/Google; LDAP stub |
+| Hardening | CORS, rate limit, lockout, signing certs (`Sso:*`) |
+| Migrations prod (P-004) | AutoMigrate **off** em Production por default |
 
-Detalhe: feature plan `.ai/WORK/2026-07-14-00001-plataforma-sso.md`.
+Detalhe: feature plan `.ai/WORK/2026-07-14-00001-plataforma-sso.md`; `phase6-hardening.md`.
 
 ## A definir
 
 - Papel futuro de `SSO.Shared`
 - Observabilidade e CI/CD (P-002, P-003)
-- Estratégia de migrations em produção (P-004)
+- AuthZ nas APIs admin sensíveis (audit/menus/revoke)

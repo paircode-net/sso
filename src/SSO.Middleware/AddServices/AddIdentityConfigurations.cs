@@ -1,6 +1,9 @@
 using System;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using SSO.Core.Domain.Identity._Context.Interfaces.Services;
 using SSO.Core.Domain.Identity.Users.Entity;
 using SSO.Infrastructures.Data.Identity;
@@ -15,17 +18,22 @@ namespace SSO.Middleware.AddServices
 	{
 		public static IServiceCollection AddIdentityFoundation(
 			this IServiceCollection services,
+			IConfiguration configuration = null,
+			IHostEnvironment environment = null,
 			bool disableTransportSecurityRequirement = false)
 		{
+			var hardening = configuration?.GetSection(SsoHardeningOptions.SectionName).Get<SsoHardeningOptions>()
+				?? new SsoHardeningOptions();
+
 			services
 				.AddIdentity<User, IdentityRole<Guid>>(options =>
 				{
 					options.Password.RequiredLength = 8;
 					options.User.RequireUniqueEmail = true;
 					options.SignIn.RequireConfirmedAccount = true;
-					options.Lockout.AllowedForNewUsers = true;
-					options.Lockout.MaxFailedAccessAttempts = 5;
-					options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+					options.Lockout.AllowedForNewUsers = hardening.Lockout.AllowedForNewUsers;
+					options.Lockout.MaxFailedAccessAttempts = hardening.Lockout.MaxFailedAccessAttempts;
+					options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(hardening.Lockout.DefaultLockoutMinutes);
 				})
 				.AddEntityFrameworkStores<IdentityDbContext>()
 				.AddDefaultTokenProviders();
@@ -72,9 +80,10 @@ namespace SSO.Middleware.AddServices
 
 					options.DisableAccessTokenEncryption();
 
-					options
-						.AddDevelopmentEncryptionCertificate()
-						.AddDevelopmentSigningCertificate();
+					using var loggerFactory = LoggerFactory.Create(_ => { });
+					var logger = loggerFactory.CreateLogger("OpenIddict.Signing");
+					var hostEnv = environment ?? new HostingEnvironmentStub();
+					AddHardeningConfigurations.ConfigureOpenIddictSigning(options, hardening, hostEnv, logger);
 
 					var aspNetCore = options
 						.UseAspNetCore()
@@ -95,6 +104,15 @@ namespace SSO.Middleware.AddServices
 				});
 
 			return services;
+		}
+
+		private sealed class HostingEnvironmentStub : IHostEnvironment
+		{
+			public string EnvironmentName { get; set; } = Environments.Development;
+			public string ApplicationName { get; set; } = "SSO";
+			public string ContentRootPath { get; set; } = AppContext.BaseDirectory;
+			public Microsoft.Extensions.FileProviders.IFileProvider ContentRootFileProvider { get; set; }
+				= new Microsoft.Extensions.FileProviders.NullFileProvider();
 		}
 	}
 }

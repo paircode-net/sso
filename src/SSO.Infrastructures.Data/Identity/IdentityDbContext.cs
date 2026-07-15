@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SSO.Core.Domain.Identity.AuthAuditEvents.Entity;
 using SSO.Core.Domain.Identity.Branches.Entity;
 using SSO.Core.Domain.Identity.ClientProductBindings.Entity;
+using SSO.Core.Domain.Identity.ExternalIdentityProviders.Entity;
 using SSO.Core.Domain.Identity.Memberships.Entity;
 using SSO.Core.Domain.Identity.MenuItems.Entity;
 using SSO.Core.Domain.Identity.Organizations.Entity;
@@ -32,6 +33,7 @@ namespace SSO.Infrastructures.Data.Identity
 		public DbSet<ClientProductBinding> ClientProductBindings { get; set; }
 		public DbSet<AuthAuditEvent> AuthAuditEvents { get; set; }
 		public DbSet<MenuItem> MenuItems { get; set; }
+		public DbSet<ExternalIdentityProvider> ExternalIdentityProviders { get; set; }
 
 		public IdentityDbContext()
 		{
@@ -68,6 +70,7 @@ namespace SSO.Infrastructures.Data.Identity
 			builder.ApplyConfiguration(new ClientProductBindingMap());
 			builder.ApplyConfiguration(new AuthAuditEventMap());
 			builder.ApplyConfiguration(new MenuItemMap());
+			builder.ApplyConfiguration(new ExternalIdentityProviderMap());
 		}
 	}
 }

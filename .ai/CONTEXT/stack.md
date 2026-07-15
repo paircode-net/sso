@@ -26,10 +26,11 @@
 
 ## Persistência
 
-- Provider produção/dev: SQL Server (`ConnectionStrings:DefaultConnection`)
+- Provider produção/dev: SQL Server (`DefaultConnection` + `IdentityConnection`)
 - Dev observado: LocalDB `SSO_DB`
 - Testes: EF Core InMemory
-- Migrations: EF Core, pasta `Default/Migrations`, auto-apply no startup
+- Migrations IdentityDb: pasta `Identity/Migrations`
+- P-004: Production **não** auto-migra por default (`Sso:Database:AutoMigrate`)
 
 ## Observabilidade
 
@@ -48,10 +49,12 @@
 | ASP.NET Identity | Presente — `User` / stores em `IdentityDbContext` |
 | OpenIddict | 7.5.0 — AspNetCore + EntityFrameworkCore |
 | Signing keys (dev) | `AddDevelopmentEncryptionCertificate` / `AddDevelopmentSigningCertificate` |
-| Signing keys (prod) | Key Vault + rotação — pendente (D9) |
+| Signing keys (prod) | Cert path / Key Vault (ops D9); exigido quando não usar DevelopmentCertificates |
 | JWT com permissions / switch-context | Ativo — motor Role→Permission + `perm_ver` dinâmico |
-| UI login/consent | Login + forgot/reset/confirm/2FA Razor (D6) |
+| UI login/consent | Login + ExternalLogin + forgot/reset/confirm/2FA Razor (D6) |
 | Menus por permission | `MenuItem` + API effective; contrato em `product-integration.md` |
+| IdPs externos | Entra OIDC homologável; Google OIDC / LDAP stub |
+| Hardening | CORS, rate limit, lockout (`Sso:*`); ver `phase6-hardening.md` |
 
 ## Qualidade / CI
 

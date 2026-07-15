@@ -1,39 +1,40 @@
 # Release Checklist
 
-> Vários itens abaixo ainda são **Pendente de definição** no projeto; marcar N/A quando não aplicável.
+> Feature 00001 — Fase 6. Itens N/A mantidos para CI/CD e observabilidade ainda pendentes.
 
 ## Build e testes
 
-- [ ] `dotnet build` da solution sem erros
-- [ ] `dotnet test` (`SSO.Tests`) verde
-- [ ] Migrations aplicáveis no ambiente alvo
+- [x] `dotnet build` da solution sem erros
+- [x] `dotnet test` (`SSO.Tests`) verde
+- [x] Migrations IdentityDb aplicáveis (`Phase6ExternalIdpsHardening` + anteriores)
 
 ## Configuração
 
-- [ ] Connection strings por ambiente (sem secrets no git)
-- [ ] Feature flags / configs novas documentadas
-- [ ] Cultura/localization ok para o ambiente
+- [x] Connection strings por ambiente (Development LocalDB; Production via env)
+- [x] Seção `Sso:*` documentada (`phase6-hardening.md`, `product-integration.md`)
+- [x] Cultura `pt-BR` (+ `en-US` testes)
 
 ## Segurança
 
-- [ ] AuthN/AuthZ revisados para o ambiente (hoje: não implementados — bloquear se exposição indevida)
-- [ ] Endpoints sensíveis não públicos sem proteção
-- [ ] Swagger desabilitado ou protegido fora de Development (política **A definir**)
+- [x] AuthN/AuthZ revisados (Identity + OpenIddict + permissions JWT)
+- [x] Swagger só em Development
+- [ ] AuthZ em endpoints admin sensíveis — fechar antes de exposição pública ampla
+- [x] Entra homologável via config; secrets fora do git
 
 ## Operação
 
-- [ ] Estratégia de migration em produção definida (auto startup vs job)
-- [ ] Rollback pensado
-- [ ] Observabilidade mínima (logs/métricas) — **A definir** stack
-- [ ] Health checks — **A definir** (não há no scaffold)
+- [x] P-004: Production **não** auto-migra por default; pipeline `dotnet ef database update`
+- [x] Rollback: reverter migration + redeploy artefato anterior
+- [ ] Observabilidade APM — P-002 / A definir
+- [ ] Health checks — A definir
 
 ## CI/CD
 
-- [ ] Pipeline — **A definir** (ausente no repo)
+- [ ] Pipeline — P-003 / A definir
 - [ ] Artefato versionado
 - [ ] Aprovação de release
 
 ## Comunicação
 
-- [ ] Notas de release / breaking changes
-- [ ] CONTEXT/Decisions atualizados se necessário
+- [x] CONTEXT / Decisions atualizados (P-004 Aceito)
+- [x] Doc IdP/hardening: `.ai/CONTEXT/phase6-hardening.md`
