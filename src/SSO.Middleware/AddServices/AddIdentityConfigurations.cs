@@ -31,6 +31,8 @@ namespace SSO.Middleware.AddServices
 				.AddDefaultTokenProviders();
 
 			services.AddScoped<IEffectivePermissionsResolver, EffectivePermissionsResolver>();
+			services.AddScoped<IPermissionPolicyVersionProvider, PermissionPolicyVersionProvider>();
+			services.AddScoped<IEffectiveMenusResolver, EffectiveMenusResolver>();
 			services.AddScoped<TokenClaimsFactory>();
 
 			services.AddOpenIddict()

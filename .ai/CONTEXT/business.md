@@ -2,7 +2,7 @@
 
 ## Escopo atual no código
 
-O repositório tem o scaffold **Sample** e o context **Identity** (Fases 0–4): Organization…Branch, Role/Permission, OpenIddict `/connect/*`, fluxos de conta (confirm/reset/2FA), auditoria e revogação de sessões. Próximo foco: Fase 5 (docs/menus/permissões dinâmicas).
+O repositório tem o scaffold **Sample** e o context **Identity** (Fases 0–5): authz contextual, conta/2FA, menus por permission, JWT com `permissions`/`perm_ver` dinâmico. Contrato de product: `CONTEXT/product-integration.md`. Próximo: Fase 6 (IdPs + harden).
 
 ### Regras de negócio inferíveis do código (Sample)
 

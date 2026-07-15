@@ -58,7 +58,7 @@ Tests → Application, Domain, Data, Middleware, Web.Api
 | Context | Schema / DbContext | Status |
 |---------|--------------------|--------|
 | Default | `DefaultDb` / `DefaultDbContext` | Ativo (Sample) |
-| Identity | `IdentityDb` / `IdentityDbContext` | **Ativo (Fase 4)** — conta/2FA/audit + authz contextual + `/connect/*` |
+| Identity | `IdentityDb` / `IdentityDbContext` | **Ativo (Fase 5)** — menus + perm_ver dinâmico + authz JWT |
 
 Rotas de gestão: `api/identity/{resource}`. Protocolo OIDC: `/connect/*` (authorize, token, userinfo, logout, revoke; grant `switch_context`).
 
@@ -95,6 +95,9 @@ Arquivo central: `src/SSO.Middleware/Configurations.cs`
 | Sessões | Revogação em massa via OpenIddict tokens (`IUserSessionService`) |
 | Auditoria AuthN/AuthZ | `AuthAuditEvents` + `GET /api/identity/auth-audit-events` |
 | Mail | `IMailService` (logger); spy `CapturingMailService` em testes |
+| Menus | `MenuItem` + `GET /api/identity/menus/effective` |
+| `perm_ver` | Dinâmico (policy stamps) via `IPermissionPolicyVersionProvider` |
+| Product contract | `.ai/CONTEXT/product-integration.md` |
 | UI login Razor | `/Account/Login` (consent implícito no seed MVP) |
 
 Detalhe: feature plan `.ai/WORK/2026-07-14-00001-plataforma-sso.md`.

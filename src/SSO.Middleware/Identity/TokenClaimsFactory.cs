@@ -17,13 +17,16 @@ namespace SSO.Middleware.Identity
 	{
 		private readonly UserManager<User> _userManager;
 		private readonly IEffectivePermissionsResolver _permissionsResolver;
+		private readonly IPermissionPolicyVersionProvider _policyVersionProvider;
 
 		public TokenClaimsFactory(
 			UserManager<User> userManager,
-			IEffectivePermissionsResolver permissionsResolver)
+			IEffectivePermissionsResolver permissionsResolver,
+			IPermissionPolicyVersionProvider policyVersionProvider)
 		{
 			_userManager = userManager;
 			_permissionsResolver = permissionsResolver;
+			_policyVersionProvider = policyVersionProvider;
 		}
 
 		public async Task<ClaimsPrincipal> CreateUserPrincipalAsync(
@@ -66,7 +69,8 @@ namespace SSO.Middleware.Identity
 				identity.AddClaim(new Claim(SsoClaimTypes.Permissions, permission));
 			}
 
-			identity.SetClaim(SsoClaimTypes.PermissionVersion, "1");
+			var permVer = await _policyVersionProvider.GetVersionAsync(cancellationToken);
+			identity.SetClaim(SsoClaimTypes.PermissionVersion, permVer);
 
 			identity.SetScopes(scopes);
 			identity.SetAudiences(ResolveAudiences(clientId));

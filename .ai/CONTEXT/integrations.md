@@ -4,31 +4,22 @@
 
 | Integração | Tipo | Status |
 |------------|------|--------|
-| SQL Server | Persistência | Configurada via `DefaultConnection` |
+| SQL Server | Persistência | `DefaultConnection` + `IdentityConnection` |
 | Swagger / OpenAPI | Documentação de API (dev) | Swashbuckle no host |
-| MediatR Notifications | In-process | Handlers apenas logam JSON |
-| Mail (`IMailService`) | Serviço externo (pretendido) | Stub; DI comentado |
-| Forge | Metadados de scaffold | `.forge/project.json` |
+| OpenIddict / OIDC | Authorization Server | `/connect/*` (Fases 2–5) |
+| ASP.NET Identity | AuthN (conta/2FA) | IdentityDb |
+| MediatR Notifications | In-process | Handlers logam JSON |
+| Mail (`IMailService`) | E-mail | Logger MVP; capture em testes |
+
+## Contrato para products (JWT)
+
+Ver **[product-integration.md](product-integration.md)** — claim names, TTL, `perm_ver`, menus, fluxo de permission dinâmica.
 
 ## Integrações não presentes
 
-- Identity Providers externos (Entra ID, Auth0, etc.) — **Pendente de definição**
-- Message bus (RabbitMQ, Azure Service Bus, MassTransit) — não encontrado
-- HTTP clients para APIs terceiras — não encontrado
-- Cache distribuído (Redis) — não encontrado
-- Telemetria cloud (App Insights) — não encontrado
+- Identity Providers externos (Entra ID → Google → LDAP) — Fase 6
+- Message bus / cache distribuído / APM cloud — não no MVP
 
 ## Contratos HTTP internos (API)
 
-Base observada: Controllers REST JSON sob `api/{context}/{resource}`.
-
-Exemplo Sample: `api/default/samples`.
-
-Arquivo `.http` em Web.Api ainda referencia `/weatherforecast/` (legado de template) — não é contrato oficial.
-
-## A definir
-
-- Provedores de identidade e protocolo (OIDC/OAuth2) se este repo for o SSO real
-- Canal de e-mail / templates
-- Event-driven integrations pós-commit (além de notifications in-process)
-- Ambientes e secrets management
+Rotas de gestão: `api/identity/{resource}`. Protocolo OIDC: `/connect/*`.

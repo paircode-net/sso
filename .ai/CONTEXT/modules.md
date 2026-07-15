@@ -43,6 +43,7 @@
 | UserRoleAssignment | `UserRoleAssignments` | `api/identity/userroleassignments` | Contexto Org/Branch/Product |
 | ClientProductBinding | `ClientProductBindings` | `api/identity/clientproductbindings` | client_id → Product |
 | AuthAuditEvent | `AuthAuditEvents` | `api/identity/auth-audit-events` | Append-only |
+| MenuItem | `MenuItems` | `api/identity/menuitems` + `api/identity/menus/effective` | PermissionCode → UI |
 
 ### Páginas de conta
 
@@ -56,7 +57,7 @@
 
 ### Pendente (fases seguintes)
 
-`ClaimDefinition`, `UserClaimAssignment`, AuthClient/Scope como domínio completo, `ExternalIdentityProvider`, SMTP real, authZ nas APIs admin de audit/revoke.
+`ClaimDefinition`, `UserClaimAssignment`, AuthClient/Scope como domínio completo, `ExternalIdentityProvider`, SMTP real, authZ nas APIs admin, ProductEnablement.
 
 ## Serviços de infraestrutura transversais
 

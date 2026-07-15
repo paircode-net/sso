@@ -25,6 +25,8 @@ using SSO.Core.Domain.Identity.RolePermissions.Validations.EntityValidations;
 using SSO.Core.Domain.Identity.Roles.Specifications;
 using SSO.Core.Domain.Identity.Roles.Validations.DomainValidations;
 using SSO.Core.Domain.Identity.Roles.Validations.EntityValidations;
+using SSO.Core.Domain.Identity.MenuItems.Validations.DomainValidations;
+using SSO.Core.Domain.Identity.MenuItems.Validations.EntityValidations;
 using SSO.Core.Domain.Identity.UserRoleAssignments.Validations.DomainValidations;
 using SSO.Core.Domain.Identity.UserRoleAssignments.Validations.EntityValidations;
 using SSO.Core.Domain.Identity.Users.Specifications;
@@ -65,6 +67,7 @@ namespace SSO.Middleware.AddServices
 			services.AddTransient<RolePermissionValidator>();
 			services.AddTransient<UserRoleAssignmentValidator>();
 			services.AddTransient<ClientProductBindingValidator>();
+			services.AddTransient<MenuItemValidator>();
 
 			return services;
 		}
@@ -112,6 +115,10 @@ namespace SSO.Middleware.AddServices
 			services.AddTransient<CreateClientProductBindingSpecificationsValidator>();
 			services.AddTransient<UpdateClientProductBindingSpecificationsValidator>();
 			services.AddTransient<DeleteClientProductBindingSpecificationsValidator>();
+
+			services.AddTransient<CreateMenuItemSpecificationsValidator>();
+			services.AddTransient<UpdateMenuItemSpecificationsValidator>();
+			services.AddTransient<DeleteMenuItemSpecificationsValidator>();
 
 			return services;
 		}

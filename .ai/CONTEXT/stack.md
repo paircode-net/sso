@@ -49,8 +49,9 @@
 | OpenIddict | 7.5.0 — AspNetCore + EntityFrameworkCore |
 | Signing keys (dev) | `AddDevelopmentEncryptionCertificate` / `AddDevelopmentSigningCertificate` |
 | Signing keys (prod) | Key Vault + rotação — pendente (D9) |
-| JWT com permissions / switch-context | Ativo — motor Role→Permission por Org/Branch/Product (ADR-005, ADR-003, ADR-004) |
+| JWT com permissions / switch-context | Ativo — motor Role→Permission + `perm_ver` dinâmico |
 | UI login/consent | Login + forgot/reset/confirm/2FA Razor (D6) |
+| Menus por permission | `MenuItem` + API effective; contrato em `product-integration.md` |
 
 ## Qualidade / CI
 

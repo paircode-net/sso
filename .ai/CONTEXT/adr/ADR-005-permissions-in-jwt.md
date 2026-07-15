@@ -21,7 +21,8 @@ Clients de produto precisam autorizar localmente com baixa latência. Uma API se
    - monitorar tamanho do token; se exceder limites práticos de header, reabrir ADR.
 5. API de consulta de permissões pode existir para **administração/diagnóstico**, mas **não** é o mecanismo primário de authz dos products no MVP.
 
-Formato da claim (nome final na implementação): lista compacta de códigos de permission (ex.: claim `permissions` ou `perm`), estável e documentada para os times de produto.
+Formato da claim (implementado): múltiplas claims `permissions` (uma por código) + `perm_ver` (etag dinâmico da policy).
+
 
 ## Alternativas consideradas
 

@@ -7,6 +7,7 @@ using OpenIddict.Abstractions;
 using SSO.Core.Domain.Identity.Branches.Entity;
 using SSO.Core.Domain.Identity.ClientProductBindings.Entity;
 using SSO.Core.Domain.Identity.Memberships.Entity;
+using SSO.Core.Domain.Identity.MenuItems.Entity;
 using SSO.Core.Domain.Identity.Organizations.Entity;
 using SSO.Core.Domain.Identity.Permissions.Entity;
 using SSO.Core.Domain.Identity.Products.Entity;
@@ -33,6 +34,9 @@ namespace SSO.Infrastructures.Data.Identity
 		public static readonly Guid DevRoleOrgMemberId = Guid.Parse("81111111-1111-1111-1111-111111111111");
 		public static readonly Guid DevRoleHqManagerId = Guid.Parse("82222222-2222-2222-2222-222222222222");
 		public static readonly Guid DevRoleFilialStaffId = Guid.Parse("83333333-3333-3333-3333-333333333333");
+		public static readonly Guid DevMenuHomeId = Guid.Parse("91111111-1111-1111-1111-111111111111");
+		public static readonly Guid DevMenuHqReportsId = Guid.Parse("92222222-2222-2222-2222-222222222222");
+		public static readonly Guid DevMenuFilialOpsId = Guid.Parse("93333333-3333-3333-3333-333333333333");
 
 		public const string DevUserEmail = "admin@sso.local";
 		public const string DevUserPassword = "ChangeMe!123";
@@ -163,6 +167,10 @@ namespace SSO.Infrastructures.Data.Identity
 			await EnsureClientBindingAsync(context, SsoClients.DevSpaClientId, DevProductId);
 			await EnsureClientBindingAsync(context, SsoClients.DevServiceClientId, DevProductId);
 
+			await EnsureMenuAsync(context, DevMenuHomeId, DevProductId, "home", "Home", "/app", PermissionAccess, 10);
+			await EnsureMenuAsync(context, DevMenuHqReportsId, DevProductId, "hq-reports", "HQ Reports", "/app/hq/reports", PermissionHqReports, 20);
+			await EnsureMenuAsync(context, DevMenuFilialOpsId, DevProductId, "filial-ops", "Filial Ops", "/app/filial/ops", PermissionFilialOps, 30);
+
 			await context.SaveChangesAsync();
 		}
 
@@ -244,6 +252,35 @@ namespace SSO.Infrastructures.Data.Identity
 			var binding = new ClientProductBinding { ClientId = clientId, ProductId = productId };
 			binding.MarkCreated();
 			context.ClientProductBindings.Add(binding);
+		}
+
+		private static async Task EnsureMenuAsync(
+			IdentityDbContext context,
+			Guid id,
+			Guid productId,
+			string code,
+			string title,
+			string route,
+			string permissionCode,
+			int sortOrder)
+		{
+			if (await context.MenuItems.AnyAsync(x => x.Id == id))
+			{
+				return;
+			}
+
+			var menu = new MenuItem
+			{
+				Id = id,
+				ProductId = productId,
+				Code = code,
+				Title = title,
+				Route = route,
+				PermissionCode = permissionCode,
+				SortOrder = sortOrder
+			};
+			menu.MarkCreated();
+			context.MenuItems.Add(menu);
 		}
 
 		private static async Task EnsureOpenIddictClientsAsync(IServiceProvider services)
