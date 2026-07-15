@@ -32,6 +32,7 @@ namespace SSO.Web.Api.Pages.Account
 		[BindProperty]
 		public InputModel Input { get; set; } = new();
 
+		[BindProperty]
 		public string? ReturnUrl { get; set; }
 
 		public string? ErrorMessage { get; set; }
@@ -55,9 +56,10 @@ namespace SSO.Web.Api.Pages.Account
 			ExternalProviders = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 		}
 
-		public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
+		public async Task<IActionResult> OnPostAsync()
 		{
-			ReturnUrl = returnUrl ?? Url.Content("~/");
+			ReturnUrl ??= Url.Content("~/");
+			ExternalProviders = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
 			if (!ModelState.IsValid)
 			{

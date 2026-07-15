@@ -25,6 +25,7 @@
 	<h1>SSO</h1>
 	<p>Sign in to continue.</p>
 	<form method="post">
+		<input type="hidden" asp-for="ReturnUrl" />
 		<div>
 			<label asp-for="Input.Email">Email</label>
 			<input asp-for="Input.Email" autocomplete="username" />
