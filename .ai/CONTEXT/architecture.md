@@ -16,7 +16,7 @@ O README da raiz descreve: `Architecture CQRS Full (.NET 10.0)`.
 | Core / Domain | `SSO.Core.Domain` | Entities, Domain Services, Specs, Validations, interfaces de infra |
 | Infrastructures / Data | `SSO.Infrastructures.Data` | DbContext, mappings, migrations, Reader/Writer |
 | Infrastructures / Services | `SSO.Infrastructures.Services` | Serviços externos (hoje stub de mail) |
-| Shared | `SSO.Shared` | Projeto compartilhado (**sem arquivos .cs hoje**) |
+| Shared | `SSO.Shared` | Claims/grants/client constants Identity |
 | Tests | `SSO.Tests` | Unit + Integration |
 
 ## Fluxo de uma request de escrita
@@ -58,9 +58,9 @@ Tests → Application, Domain, Data, Middleware, Web.Api
 | Context | Schema / DbContext | Status |
 |---------|--------------------|--------|
 | Default | `DefaultDb` / `DefaultDbContext` | Ativo (Sample) |
-| Identity | `IdentityDb` / `IdentityDbContext` | **Ativo (Fase 1)** — Identity/OpenIddict + Organization/Product/Membership/User |
+| Identity | `IdentityDb` / `IdentityDbContext` | **Ativo (Fase 2)** — Identity/OpenIddict + aggregates + `/connect/*` |
 
-Rotas de gestão: `api/identity/{resource}`. Protocolo OIDC: `/connect/*` (configurado; controllers de token/authorize na Fase 2).
+Rotas de gestão: `api/identity/{resource}`. Protocolo OIDC: `/connect/*` (authorize, token, userinfo, logout, revoke; grant `switch_context`).
 
 ## Composition root
 
@@ -80,17 +80,18 @@ Arquivo central: `src/SSO.Middleware/Configurations.cs`
 
 ## Autenticação na pipeline
 
-**Estado no código (Fase 0):**
+**Estado no código (Fase 2):**
 
 | Tema | Status |
 |------|--------|
 | `UseAuthentication` / `UseAuthorization` | Habilitados em `UseMiddleware` (prod) e `TestStartup` (testes) |
 | ASP.NET Identity | `User` + `IdentityRole<Guid>` + EF stores |
 | OpenIddict | Core + Server (dev certs) + Validation local |
-| Flows habilitados (config) | Authorization Code+PKCE, Refresh, Client Credentials |
-| Controllers `/connect/*` | Ainda não — passthrough preparado para Fase 2 |
-| switch-context / permissions no JWT | Fase 2+ (ADRs 003–005) |
-| UI login/consent Razor | Fase 2 (D6) |
+| Flows | Authorization Code+PKCE, Refresh, Client Credentials, `switch_context` |
+| Controllers `/connect/*` | `AuthorizationController` + revoke |
+| Claims JWT | `organization_id` / `branch_id` / `permissions` / `perm_ver` via `TokenClaimsFactory` |
+| Permissions resolver | Stub (`sso.access` se membership); motor completo na Fase 3 |
+| UI login Razor | `/Account/Login` (consent implícito no seed MVP) |
 
 Detalhe: feature plan `.ai/WORK/2026-07-14-00001-plataforma-sso.md`.
 

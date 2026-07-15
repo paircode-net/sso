@@ -88,7 +88,7 @@ namespace SSO.Middleware
 
 			services.AddInheritStringLocalizerFactory();
 
-			services.AddIdentityFoundation();
+			services.AddIdentityFoundation(disableTransportSecurityRequirement: true);
 
 			return services;
 		}

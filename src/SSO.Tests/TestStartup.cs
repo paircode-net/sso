@@ -1,9 +1,13 @@
-﻿using SSO.Middleware;
+﻿using SSO.Infrastructures.Data.Identity;
+using SSO.Middleware;
 using SSO.Web.Api.Default;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SSO.Core.Domain.Identity.Users.Entity;
 using System.Reflection;
 
 namespace SSO.Tests
@@ -17,17 +21,24 @@ namespace SSO.Tests
 
 		public IConfiguration Configuration { get; }
 
-		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
 			var assembly = typeof(TestStartup).GetTypeInfo().Assembly;
 
 			services.AddMiddlewareTest(Configuration, assembly);
 
-			services.AddControllers().AddApplicationPart(typeof(SamplesController).Assembly);
+			services.AddControllersWithViews()
+				.AddApplicationPart(typeof(SamplesController).Assembly);
+
+			services.AddRazorPages()
+				.AddApplicationPart(typeof(SamplesController).Assembly);
+
+			services.ConfigureApplicationCookie(options =>
+			{
+				options.LoginPath = "/Account/Login";
+			});
 		}
 
-		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
 			app.UseHttpsRedirection();
@@ -39,9 +50,17 @@ namespace SSO.Tests
 			app.UseAuthentication();
 			app.UseAuthorization();
 
+			using (var scope = app.ApplicationServices.CreateScope())
+			{
+				var context = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
+				context.Database.EnsureCreated();
+				IdentitySeed.EnsureAsync(scope.ServiceProvider).GetAwaiter().GetResult();
+			}
+
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapControllers();
+				endpoints.MapRazorPages();
 			});
 		}
 	}

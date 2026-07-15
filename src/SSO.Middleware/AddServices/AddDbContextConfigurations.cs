@@ -96,8 +96,9 @@ namespace SSO.Middleware.AddServices
                 if (identityDbContext.Database.IsRelational())
                 {
                     identityDbContext.Database.Migrate();
-                    IdentitySeed.EnsureAsync(scope.ServiceProvider).GetAwaiter().GetResult();
                 }
+
+                IdentitySeed.EnsureAsync(scope.ServiceProvider).GetAwaiter().GetResult();
                 #endregion
 			}
 

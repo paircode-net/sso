@@ -3,10 +3,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using OpenIddict.Abstractions;
 using SSO.Core.Domain.Identity.Memberships.Entity;
 using SSO.Core.Domain.Identity.Organizations.Entity;
 using SSO.Core.Domain.Identity.Products.Entity;
 using SSO.Core.Domain.Identity.Users.Entity;
+using SSO.Shared.Identity;
+using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace SSO.Infrastructures.Data.Identity
 {
@@ -23,10 +26,6 @@ namespace SSO.Infrastructures.Data.Identity
 		public static async Task EnsureAsync(IServiceProvider services)
 		{
 			var context = services.GetRequiredService<IdentityDbContext>();
-			if (!context.Database.IsRelational())
-			{
-				return;
-			}
 
 			if (!await context.Organizations.AnyAsync(x => x.Id == DevOrganizationId))
 			{
@@ -86,6 +85,90 @@ namespace SSO.Infrastructures.Data.Identity
 				membership.MarkCreated();
 				context.Memberships.Add(membership);
 				await context.SaveChangesAsync();
+			}
+
+			await EnsureOpenIddictClientsAsync(services);
+		}
+
+		private static async Task EnsureOpenIddictClientsAsync(IServiceProvider services)
+		{
+			var scopeManager = services.GetRequiredService<IOpenIddictScopeManager>();
+			var applicationManager = services.GetRequiredService<IOpenIddictApplicationManager>();
+
+			if (await scopeManager.FindByNameAsync(Scopes.OpenId) is null)
+			{
+				await scopeManager.CreateAsync(new OpenIddictScopeDescriptor
+				{
+					Name = Scopes.OpenId,
+					DisplayName = "OpenID"
+				});
+			}
+
+			if (await scopeManager.FindByNameAsync(Scopes.OfflineAccess) is null)
+			{
+				await scopeManager.CreateAsync(new OpenIddictScopeDescriptor
+				{
+					Name = Scopes.OfflineAccess,
+					DisplayName = "Offline access"
+				});
+			}
+
+			if (await applicationManager.FindByClientIdAsync(SsoClients.DevSpaClientId) is null)
+			{
+				await applicationManager.CreateAsync(new OpenIddictApplicationDescriptor
+				{
+					ClientId = SsoClients.DevSpaClientId,
+					DisplayName = "Dev Product SPA",
+					ClientType = ClientTypes.Public,
+					ConsentType = ConsentTypes.Implicit,
+					RedirectUris =
+					{
+						new Uri("https://localhost/callback"),
+						new Uri("https://localhost:5001/callback")
+					},
+					PostLogoutRedirectUris =
+					{
+						new Uri("https://localhost/"),
+						new Uri("https://localhost:5001/")
+					},
+					Permissions =
+					{
+						Permissions.Endpoints.Authorization,
+						Permissions.Endpoints.Token,
+						Permissions.Endpoints.EndSession,
+						Permissions.Endpoints.Revocation,
+						Permissions.GrantTypes.AuthorizationCode,
+						Permissions.GrantTypes.RefreshToken,
+						Permissions.Prefixes.GrantType + SsoGrantTypes.SwitchContext,
+						Permissions.ResponseTypes.Code,
+						Permissions.Scopes.Email,
+						Permissions.Scopes.Profile,
+						Permissions.Scopes.Roles,
+						Permissions.Prefixes.Scope + Scopes.OfflineAccess
+					},
+					Requirements =
+					{
+						Requirements.Features.ProofKeyForCodeExchange
+					}
+				});
+			}
+
+			if (await applicationManager.FindByClientIdAsync(SsoClients.DevServiceClientId) is null)
+			{
+				await applicationManager.CreateAsync(new OpenIddictApplicationDescriptor
+				{
+					ClientId = SsoClients.DevServiceClientId,
+					ClientSecret = SsoClients.DevServiceClientSecret,
+					DisplayName = "Dev Product Service",
+					ClientType = ClientTypes.Confidential,
+					Permissions =
+					{
+						Permissions.Endpoints.Token,
+						Permissions.Endpoints.Revocation,
+						Permissions.GrantTypes.ClientCredentials,
+						Permissions.Prefixes.Scope + Scopes.OpenId
+					}
+				});
 			}
 		}
 	}

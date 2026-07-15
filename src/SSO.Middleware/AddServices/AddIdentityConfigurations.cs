@@ -1,15 +1,21 @@
 using System;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using SSO.Core.Domain.Identity._Context.Interfaces.Services;
 using SSO.Core.Domain.Identity.Users.Entity;
 using SSO.Infrastructures.Data.Identity;
+using SSO.Infrastructures.Services.Identity;
+using SSO.Middleware.Identity;
+using SSO.Shared.Identity;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace SSO.Middleware.AddServices
 {
 	public static class AddIdentityConfigurations
 	{
-		public static IServiceCollection AddIdentityFoundation(this IServiceCollection services)
+		public static IServiceCollection AddIdentityFoundation(
+			this IServiceCollection services,
+			bool disableTransportSecurityRequirement = false)
 		{
 			services
 				.AddIdentity<User, IdentityRole<Guid>>(options =>
@@ -20,6 +26,9 @@ namespace SSO.Middleware.AddServices
 				})
 				.AddEntityFrameworkStores<IdentityDbContext>()
 				.AddDefaultTokenProviders();
+
+			services.AddScoped<IEffectivePermissionsResolver, EffectivePermissionsResolver>();
+			services.AddScoped<TokenClaimsFactory>();
 
 			services.AddOpenIddict()
 				.AddCore(options =>
@@ -42,7 +51,8 @@ namespace SSO.Middleware.AddServices
 						.AllowAuthorizationCodeFlow()
 						.RequireProofKeyForCodeExchange()
 						.AllowRefreshTokenFlow()
-						.AllowClientCredentialsFlow();
+						.AllowClientCredentialsFlow()
+						.AllowCustomFlow(SsoGrantTypes.SwitchContext);
 
 					options.RegisterScopes(
 						Scopes.OpenId,
@@ -51,16 +61,27 @@ namespace SSO.Middleware.AddServices
 						Scopes.Roles,
 						Scopes.OfflineAccess);
 
+					options.SetAccessTokenLifetime(TimeSpan.FromMinutes(15));
+					options.SetIdentityTokenLifetime(TimeSpan.FromMinutes(15));
+					options.SetRefreshTokenLifetime(TimeSpan.FromDays(14));
+
+					options.DisableAccessTokenEncryption();
+
 					options
 						.AddDevelopmentEncryptionCertificate()
 						.AddDevelopmentSigningCertificate();
 
-					options
+					var aspNetCore = options
 						.UseAspNetCore()
 						.EnableAuthorizationEndpointPassthrough()
 						.EnableTokenEndpointPassthrough()
 						.EnableEndSessionEndpointPassthrough()
 						.EnableUserInfoEndpointPassthrough();
+
+					if (disableTransportSecurityRequirement)
+					{
+						aspNetCore.DisableTransportSecurityRequirement();
+					}
 				})
 				.AddValidation(options =>
 				{

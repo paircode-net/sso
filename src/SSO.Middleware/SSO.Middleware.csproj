@@ -21,6 +21,7 @@
     <ProjectReference Include="..\SSO.Core.Domain\SSO.Core.Domain.csproj" />
     <ProjectReference Include="..\SSO.Infrastructures.Data\SSO.Infrastructures.Data.csproj" />
     <ProjectReference Include="..\SSO.Infrastructures.Services\SSO.Infrastructures.Services.csproj" />
+    <ProjectReference Include="..\SSO.Shared\SSO.Shared.csproj" />
   </ItemGroup>
 
 </Project>

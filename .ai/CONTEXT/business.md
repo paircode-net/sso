@@ -2,7 +2,7 @@
 
 ## Escopo atual no código
 
-O repositório tem o scaffold **Sample** e o context **Identity** (Fases 0–1): Organization, Product, Membership, User (senha hasheada), soft-delete/auditoria e seed de desenvolvimento. Fluxos OIDC de emissão de token ainda são Fase 2.
+O repositório tem o scaffold **Sample** e o context **Identity** (Fases 0–2): Organization, Product, Membership, User; OpenIddict `/connect/*` com login Razor, client_credentials, PKCE preparado, switch-context e permissions stub no JWT. Autorização contextual completa (Branch + motor de permissions) é Fase 3.
 
 ### Regras de negócio inferíveis do código (Sample)
 

@@ -8,4 +8,8 @@
     <ProjectReference Include="..\SSO.Core.Domain\SSO.Core.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.3" />
+  </ItemGroup>
+
 </Project>
