@@ -84,20 +84,61 @@ namespace SSO.Web.Api.Controllers
 			var application = await _applicationManager.FindByClientIdAsync(request.ClientId!)
 				?? throw new InvalidOperationException("The application details cannot be found.");
 
+			var metadata = await _dbContext.AuthClientMetadata.AsNoTracking()
+				.FirstOrDefaultAsync(x => !x.IsDeleted && x.ClientId == request.ClientId);
+			if (metadata is not null && !metadata.IsEnabled)
+			{
+				return Forbid(
+					authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+					properties: new AuthenticationProperties(new Dictionary<string, string?>
+					{
+						[OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidClient,
+						[OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+							"The client application is disabled."
+					}));
+			}
+
+			var subject = await _userManager.GetUserIdAsync(user);
+			var clientAppId = await _applicationManager.GetIdAsync(application);
+			var policy = metadata?.RequireConsent ?? AuthClientConsentPolicies.Never;
+			var rememberDays = metadata?.ConsentRememberDays > 0 ? metadata.ConsentRememberDays : 180;
 			var authorizations = new List<object>();
 			await foreach (var existingAuthorization in _authorizationManager.FindAsync(
-				subject: await _userManager.GetUserIdAsync(user),
-				client: await _applicationManager.GetIdAsync(application),
+				subject: subject,
+				client: clientAppId,
 				status: Statuses.Valid,
 				type: AuthorizationTypes.Permanent,
 				scopes: request.GetScopes()))
 			{
+				var created = await _authorizationManager.GetCreationDateAsync(existingAuthorization);
+				if (AuthClientConsentEvaluator.IsRememberExpired(policy, created, rememberDays, DateTime.UtcNow))
+				{
+					continue;
+				}
+
 				authorizations.Add(existingAuthorization);
+			}
+
+			var needsConsent = AuthClientConsentEvaluator.ShouldPrompt(policy, authorizations.Count > 0);
+
+			if (needsConsent)
+			{
+				var returnUrl = Request.PathBase + Request.Path + QueryString.Create(
+					Request.HasFormContentType ? Request.Form.ToList() : Request.Query.ToList());
+				return RedirectToPage(
+					"/Account/Consent",
+					new
+					{
+						returnUrl,
+						clientId = request.ClientId,
+						scope = string.Join(' ', request.GetScopes())
+					});
 			}
 
 			var consentType = await _applicationManager.GetConsentTypeAsync(application);
 			if (authorizations.Count is 0
-				&& consentType == ConsentTypes.External)
+				&& consentType == ConsentTypes.External
+				&& policy == AuthClientConsentPolicies.First)
 			{
 				return Forbid(
 					authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
@@ -128,8 +169,8 @@ namespace SSO.Web.Api.Controllers
 			var authorizationEntry = authorizations.LastOrDefault();
 			authorizationEntry ??= await _authorizationManager.CreateAsync(
 				principal: principal,
-				subject: await _userManager.GetUserIdAsync(user),
-				client: (await _applicationManager.GetIdAsync(application))!,
+				subject: subject,
+				client: clientAppId!,
 				type: AuthorizationTypes.Permanent,
 				scopes: principal.GetScopes());
 
@@ -144,6 +185,23 @@ namespace SSO.Web.Api.Controllers
 		{
 			var request = HttpContext.GetOpenIddictServerRequest()
 				?? throw new InvalidOperationException("The OpenID Connect request cannot be retrieved.");
+
+			if (!string.IsNullOrWhiteSpace(request.ClientId))
+			{
+				var meta = await _dbContext.AuthClientMetadata.AsNoTracking()
+					.FirstOrDefaultAsync(x => !x.IsDeleted && x.ClientId == request.ClientId);
+				if (meta is not null && !meta.IsEnabled)
+				{
+					return Forbid(
+						authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+						properties: new AuthenticationProperties(new Dictionary<string, string?>
+						{
+							[OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidClient,
+							[OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+								"The client application is disabled."
+						}));
+				}
+			}
 
 			if (request.IsClientCredentialsGrantType())
 			{

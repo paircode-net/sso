@@ -77,7 +77,7 @@ Plano: `.ai/WORK/2026-07-16-00006-federacao-google-ldap.md` (**implementado**).
 | F00007-D3 | Scopes custom `{product_code}.{feature}` | **Aceito** |
 | F00007-D4 | First-party via flag no registro (`IsFirstParty`); `RequireConsent=Never` só se first-party | **Aceito** |
 
-Plano: `.ai/WORK/2026-07-16-00007-consent-authclients.md` (**pronto p/ implementar**).
+Plano: `.ai/WORK/2026-07-16-00007-consent-authclients.md` (**implementado**).
 
 ## Decisões feature 00001 (D1–D12)
 
@@ -88,7 +88,7 @@ Plano: `.ai/WORK/2026-07-16-00007-consent-authclients.md` (**pronto p/ implement
 | F00001-D3 | Permissões efetivas embutidas no JWT (TTL curto + reemissão no switch-context) | Aceito (ADR-005 revisado) |
 | F00001-D4 | Sem herança automática Branch pai→filho no MVP | Aceito (ADR-004) |
 | F00001-D5 | Identity para AuthN; roles/claims de produto no domínio SSO | Aceito (ADR-002, ADR-004) |
-| F00001-D6 | Login/consent Razor em `SSO.Web.Api` no MVP | Aceito |
+| F00001-D6 | Login/consent Razor em `SSO.Web.Api` no MVP | Aceito — consent **explícito** por client (00007); seed first-party permanece implícito/`Never` |
 | F00001-D7 | IdPs: Entra ID → Google → LDAP | Aceito — Google/LDAP **implementados** (00006) |
 | F00001-D8 | Manter Sample até Fase 2 estável | Aceito |
 | F00001-D9 | Dev: key/cert local; Prod: Key Vault + rotação | Aceito (ADR-001) |

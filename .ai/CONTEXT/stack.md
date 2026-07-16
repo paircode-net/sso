@@ -51,7 +51,8 @@
 | Signing keys (dev) | `AddDevelopmentEncryptionCertificate` / `AddDevelopmentSigningCertificate` |
 | Signing keys (prod) | Cert path / Key Vault (ops D9); exigido quando não usar DevelopmentCertificates |
 | JWT com permissions / switch-context | Ativo — motor Role→Permission + `perm_ver` dinâmico |
-| UI login/consent | Login + ExternalLogin + forgot/reset/confirm/2FA Razor (D6) |
+| UI login/consent | Login + ExternalLogin + Consent + forgot/reset/confirm/2FA Razor (D6 / 00007) |
+| AuthClients admin | `api/identity/auth-clients` + `AuthClientMetadata` (00007) |
 | Menus por permission | `MenuItem` + API effective; contrato em `product-integration.md` |
 | IdPs externos | Entra OIDC; Google OIDC; LDAP/AD (SDS.Protocols) — feature 00006 |
 | Hardening | CORS, rate limit, lockout (`Sso:*`); ver `phase6-hardening.md` |

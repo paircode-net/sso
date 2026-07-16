@@ -11,9 +11,14 @@ namespace SSO.Tests.Helpers
 		public static TestServer Create(Action<IServiceCollection>? actionServices = null)
 		{
 			if (actionServices != null)
-				return new TestServer(new WebHostBuilder().ConfigureTestServices(actionServices).UseStartup<TestStartup>());
+				return new TestServer(new WebHostBuilder()
+					.UseEnvironment("Development")
+					.ConfigureTestServices(actionServices)
+					.UseStartup<TestStartup>());
 
-			return new TestServer(new WebHostBuilder().UseStartup<TestStartup>());
+			return new TestServer(new WebHostBuilder()
+				.UseEnvironment("Development")
+				.UseStartup<TestStartup>());
 		}
 
 		public static TestServer SetupData<TContext, TEntity>(this TestServer server, IEnumerable<TEntity> entities)

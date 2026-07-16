@@ -56,13 +56,14 @@ namespace SSO.Tests
 			services.ConfigureApplicationCookie(options =>
 			{
 				options.LoginPath = "/Account/Login";
+				options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.None;
+				options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
 			});
 		}
 
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
-			app.UseHttpsRedirection();
-
+			// Avoid HTTPS redirect in TestServer so auth cookies stick on http://localhost.
 			app.UseMiddlewareTest();
 
 			app.UseRouting();

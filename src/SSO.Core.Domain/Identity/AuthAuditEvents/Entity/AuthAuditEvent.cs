@@ -59,6 +59,8 @@ namespace SSO.Core.Domain.Identity.AuthAuditEvents.Entity
 		public const string Logout = "logout";
 		public const string TokensRevoked = "tokens.revoked";
 		public const string SessionRevoked = "session.revoked";
+		public const string ConsentGranted = "consent.granted";
+		public const string ConsentDenied = "consent.denied";
 	}
 
 	public static class AuthAuditOutcomes

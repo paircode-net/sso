@@ -13,7 +13,7 @@ Planos de feature derivados das evolutivas prioritárias após o MVP SSO.
 | 00004 | SDK / BFF integração | [2026-07-16-00004-sdk-integracao-produtos.md](2026-07-16-00004-sdk-integracao-produtos.md) — **implementado** | P1 | P0 |
 | 00005 | Revogação quente + sessão | [2026-07-16-00005-revogacao-quente-sessao.md](2026-07-16-00005-revogacao-quente-sessao.md) — **implementado** | P1 | P1 |
 | 00006 | Federação Google + LDAP | [2026-07-16-00006-federacao-google-ldap.md](2026-07-16-00006-federacao-google-ldap.md) — **implementado** | P2 | P1 |
-| 00007 | Consent + AuthClients | [2026-07-16-00007-consent-authclients.md](2026-07-16-00007-consent-authclients.md) — **pronto p/ implementar** | P2 | P0 |
+| 00007 | Consent + AuthClients | [2026-07-16-00007-consent-authclients.md](2026-07-16-00007-consent-authclients.md) — **implementado** | P2 | P0 |
 | 00008 | Claims tipadas | [2026-07-16-00008-claims-tipadas.md](2026-07-16-00008-claims-tipadas.md) | P2 | P1 |
 | 00009 | Herança Branch opt-in | [2026-07-16-00009-heranca-branch-opt-in.md](2026-07-16-00009-heranca-branch-opt-in.md) | P3 | P2 |
 | 00010 | Observabilidade + CI/CD | [2026-07-16-00010-observabilidade-cicd.md](2026-07-16-00010-observabilidade-cicd.md) | P0 (ops) | P0 (ops) |

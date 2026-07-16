@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using OpenIddict.Abstractions;
+using SSO.Core.Domain.Identity.AuthClientMetadata.Entity;
 using SSO.Core.Domain.Identity.ExternalIdentityProviders.Entity;
 using SSO.Core.Domain.Identity.Branches.Entity;
 using SSO.Core.Domain.Identity.ClientProductBindings.Entity;
@@ -137,6 +138,7 @@ namespace SSO.Infrastructures.Data.Identity
 			await EnsureBranchesAsync(context);
 			await EnsureAuthzCatalogAsync(context);
 			await EnsureOpenIddictClientsAsync(services);
+			await EnsureAuthClientMetadataAsync(context);
 		}
 
 		private static async Task EnsureBranchesAsync(IdentityDbContext context)
@@ -411,6 +413,11 @@ namespace SSO.Infrastructures.Data.Identity
 				});
 			}
 
+			// Product-scoped OAuth scopes (F00007-D3): {product_code}.{feature}
+			await EnsureScopeAsync(scopeManager, "dev-product.reports", "Dev Product — reports");
+			await EnsureScopeAsync(scopeManager, "dev-product.ops", "Dev Product — ops");
+			await EnsureScopeAsync(scopeManager, "sso-platform.admin", "SSO Platform — admin");
+
 			if (await applicationManager.FindByClientIdAsync(SsoClients.DevSpaClientId) is null)
 			{
 				await applicationManager.CreateAsync(new OpenIddictApplicationDescriptor
@@ -442,7 +449,9 @@ namespace SSO.Infrastructures.Data.Identity
 						Permissions.Scopes.Email,
 						Permissions.Scopes.Profile,
 						Permissions.Scopes.Roles,
-						Permissions.Prefixes.Scope + Scopes.OfflineAccess
+						Permissions.Prefixes.Scope + Scopes.OfflineAccess,
+						Permissions.Prefixes.Scope + "dev-product.reports",
+						Permissions.Prefixes.Scope + "dev-product.ops"
 					},
 					Requirements =
 					{
@@ -499,6 +508,65 @@ namespace SSO.Infrastructures.Data.Identity
 					}
 				});
 			}
+		}
+
+		private static async Task EnsureScopeAsync(IOpenIddictScopeManager scopeManager, string name, string displayName)
+		{
+			if (await scopeManager.FindByNameAsync(name) is null)
+			{
+				await scopeManager.CreateAsync(new OpenIddictScopeDescriptor
+				{
+					Name = name,
+					DisplayName = displayName
+				});
+			}
+		}
+
+		private static async Task EnsureAuthClientMetadataAsync(IdentityDbContext context)
+		{
+			await EnsureMetaAsync(
+				context,
+				SsoClients.DevSpaClientId,
+				"Dev Product SPA",
+				isSystem: true,
+				isFirstParty: true,
+				AuthClientConsentPolicies.Never);
+			await EnsureMetaAsync(
+				context,
+				SsoClients.DevServiceClientId,
+				"Dev Product Service",
+				isSystem: true,
+				isFirstParty: true,
+				AuthClientConsentPolicies.Never);
+			await EnsureMetaAsync(
+				context,
+				AdminClientId,
+				"SSO Admin API",
+				isSystem: true,
+				isFirstParty: true,
+				AuthClientConsentPolicies.Never);
+			await context.SaveChangesAsync();
+		}
+
+		private static async Task EnsureMetaAsync(
+			IdentityDbContext context,
+			string clientId,
+			string displayName,
+			bool isSystem,
+			bool isFirstParty,
+			string requireConsent)
+		{
+			if (await context.AuthClientMetadata.AnyAsync(x => x.ClientId == clientId && !x.IsDeleted))
+			{
+				return;
+			}
+
+			context.AuthClientMetadata.Add(AuthClientMetadataEntity.Create(
+				clientId,
+				displayName,
+				isSystem,
+				isFirstParty,
+				requireConsent));
 		}
 	}
 }

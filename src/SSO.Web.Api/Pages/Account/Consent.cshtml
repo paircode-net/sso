@@ -1,0 +1,51 @@
+@page
+@model SSO.Web.Api.Pages.Account.ConsentModel
+@{
+	Layout = null;
+	ViewData["Title"] = "Consent";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>SSO Consent</title>
+	<style>
+		body { font-family: Segoe UI, sans-serif; margin: 2rem auto; max-width: 480px; color: #1a1a1a; }
+		h1 { font-size: 1.5rem; }
+		ul { padding-left: 1.25rem; }
+		button { margin-top: 1rem; margin-right: 0.5rem; padding: 0.6rem 1rem; }
+		.error { color: #a40000; }
+		label { display: block; margin-top: 1rem; }
+	</style>
+</head>
+<body>
+	<h1>Authorize application</h1>
+	<p><strong>@Model.ClientDisplayName</strong> (<code>@Model.ClientId</code>) requests access on your behalf.</p>
+	@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+	{
+		<p class="error">@Model.ErrorMessage</p>
+	}
+	<p>Requested scopes:</p>
+	<ul>
+		@foreach (var scope in Model.Scopes)
+		{
+			<li><code>@scope</code></li>
+		}
+	</ul>
+	<form method="post">
+		<input type="hidden" asp-for="ReturnUrl" />
+		<input type="hidden" asp-for="ClientId" />
+		<input type="hidden" asp-for="Scope" />
+		@if (Model.AllowRemember)
+		{
+			<label>
+				<input asp-for="Remember" type="checkbox" />
+				Remember this consent
+			</label>
+		}
+		<button type="submit" asp-page-handler="Accept">Allow</button>
+		<button type="submit" asp-page-handler="Deny" formnovalidate>Deny</button>
+	</form>
+</body>
+</html>

@@ -143,7 +143,20 @@ Seed (dev product):
 
 | client_id | Type | Notes |
 |-----------|------|-------|
-| `dev-product-spa` | public + PKCE | Auth code, refresh, switch_context |
-| `dev-product-service` | confidential | client_credentials (no user permissions) |
+| `dev-product-spa` | public + PKCE | Auth code, refresh, switch_context; first-party `RequireConsent=Never` |
+| `dev-product-service` | confidential | client_credentials (no user permissions); first-party |
 
 Dev user: `admin@sso.local` / `ChangeMe!123` (see `IdentitySeed`).
+
+## AuthClients + consent (feature 00007)
+
+| Topic | Detail |
+|-------|--------|
+| Admin API | `api/identity/auth-clients` (CRUD, rotate-secret, disable) — requires `sso.admin.platform` |
+| Scopes API | `api/identity/auth-scopes` — catalog; custom names `{product_code}.{feature}` (e.g. `dev-product.reports`) |
+| Metadata | Table `AuthClientMetadata`: `IsSystem`, `IsFirstParty`, `RequireConsent` (`Always`\|`First`\|`Never`), `ConsentRememberDays` (default 180) |
+| Consent UI | `/Account/Consent` when policy requires it; seed first-party clients skip consent |
+| Rule | `RequireConsent=Never` only if `IsFirstParty=true` |
+| Binding | `ClientProductBindings` still maps `client_id` → Product |
+
+Register a new product client: create Product → create AuthClient (SPA PKCE or confidential) → bind `productId` → add `{code}.{feature}` scopes → configure redirect URIs (HTTPS in Production).

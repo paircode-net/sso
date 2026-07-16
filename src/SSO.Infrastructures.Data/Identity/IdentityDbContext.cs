@@ -1,6 +1,7 @@
 using System;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SSO.Core.Domain.Identity.AuthClientMetadata.Entity;
 using SSO.Core.Domain.Identity.AuthAuditEvents.Entity;
 using SSO.Core.Domain.Identity.Branches.Entity;
 using SSO.Core.Domain.Identity.ClientProductBindings.Entity;
@@ -46,6 +47,7 @@ namespace SSO.Infrastructures.Data.Identity
 		public DbSet<WebhookOutboxMessage> WebhookOutbox { get; set; }
 		public DbSet<ClientWebhookEndpoint> ClientWebhookEndpoints { get; set; }
 		public DbSet<LdapGroupRoleMap> LdapGroupRoleMaps { get; set; }
+		public DbSet<AuthClientMetadataEntity> AuthClientMetadata { get; set; }
 
 		public IdentityDbContext()
 		{
@@ -89,6 +91,7 @@ namespace SSO.Infrastructures.Data.Identity
 			builder.ApplyConfiguration(new WebhookOutboxMessageMap());
 			builder.ApplyConfiguration(new ClientWebhookEndpointMap());
 			builder.ApplyConfiguration(new LdapGroupRoleMapMap());
+			builder.ApplyConfiguration(new AuthClientMetadataMap());
 		}
 	}
 }

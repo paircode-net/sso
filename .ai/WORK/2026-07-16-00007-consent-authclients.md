@@ -2,7 +2,7 @@
 
 > Arquivo: `.ai/WORK/2026-07-16-00007-consent-authclients.md`  
 > Template: `.ai/TEMPLATES/feature-plan.md`  
-> Status: **Pronto para implementação** (D-00007-1..4 aceitas)  
+> Status: **Implementado** (D-00007-1..4 aceitas)  
 > Data: 2026-07-16  
 > Depende de: Fase 2 (OpenIddict AS); **00002** para APIs admin protegidas  
 > Relaciona: 00003 (UI admin de clients); D6 (consent implícito no seed MVP); D10 (Product ≠ AuthClient)
@@ -99,12 +99,12 @@ Flag **`IsFirstParty`** no registro/metadado. `RequireConsent=Never` **só** per
 
 ## Critérios de aceite
 
-- [ ] Client `RequireConsent=Always` exibe Consent antes do code.
-- [ ] First-party (`Never`) não exibe Consent.
-- [ ] PlatformAdmin cria SPA PKCE e confidential via API.
-- [ ] Rotate secret invalida o antigo.
-- [ ] Disable client faz authorize/token falharem.
-- [ ] Binding client→product editável; scopes `{product_code}.{feature}` documentados.
+- [x] Client `RequireConsent=Always` exibe Consent antes do code.
+- [x] First-party (`Never`) não exibe Consent.
+- [x] PlatformAdmin cria SPA PKCE e confidential via API.
+- [x] Rotate secret invalida o antigo.
+- [x] Disable client faz authorize/token falharem.
+- [x] Binding client→product editável; scopes `{product_code}.{feature}` documentados.
 
 ## Riscos
 
@@ -117,16 +117,16 @@ Flag **`IsFirstParty`** no registro/metadado. `RequireConsent=Never` **só** per
 
 ## Estratégia de testes
 
-- [ ] Matriz RequireConsent Always/First/Never
-- [ ] API create/rotate/disable + Never sem first-party rejeitado
-- [ ] Redirect http em Production
-- [ ] Remember TTL expiry path (Always)
+- [x] Matriz RequireConsent Always/First/Never
+- [x] API create/rotate/disable + Never sem first-party rejeitado
+- [x] Redirect http em Production (validação na API)
+- [x] Remember TTL expiry path (Always — filtra authorizations por `CreationDate` + `ConsentRememberDays`)
 
 ## Checklist
 
 - [x] D-00007-1..4 aceitas
-- [ ] 00002 permissions
-- [ ] Security: redirects, secrets
-- [ ] Migrations metadados
-- [ ] CONTEXT + Decisions (revisar D6 pós-impl)
-- [x] Pronto para implementação
+- [x] 00002 permissions
+- [x] Security: redirects, secrets
+- [x] Migrations metadados (`Phase11AuthClientConsent`)
+- [x] CONTEXT + Decisions (D6 revisado pós-impl)
+- [x] Implementado

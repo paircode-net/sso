@@ -43,10 +43,22 @@ Pack local: `dotnet pack src/SSO.Client` · JS: `cd clients/js && npm run build`
 
 Ver **[external-idps.md](external-idps.md)** e **[phase6-hardening.md](phase6-hardening.md)**.
 
+## Consent + AuthClients (feature 00007)
+
+| Artefato | Nota |
+|----------|------|
+| Consent Razor | `/Account/Consent` — Always/First; Never só first-party |
+| Metadados | `AuthClientMetadata` (híbrido com OpenIddict) |
+| Admin | `api/identity/auth-clients`, `api/identity/auth-scopes` |
+| Scopes | Convenção `{product_code}.{feature}` |
+
+Detalhe: **[product-integration.md](product-integration.md)** § AuthClients + consent.
+
 ## Integrações não presentes
 
 - Message bus / cache distribuído / APM cloud — não no MVP
 - Nested LDAP group expansion / SCIM / SAML
+- Marketplace third-party / DCR público
 
 ## Contratos HTTP internos (API)
 
