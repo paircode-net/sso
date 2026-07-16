@@ -2,7 +2,7 @@
 
 > Arquivo: `.ai/WORK/2026-07-16-00007-consent-authclients.md`  
 > Template: `.ai/TEMPLATES/feature-plan.md`  
-> Status: **Refinamento**  
+> Status: **Pronto para implementação** (D-00007-1..4 aceitas)  
 > Data: 2026-07-16  
 > Depende de: Fase 2 (OpenIddict AS); **00002** para APIs admin protegidas  
 > Relaciona: 00003 (UI admin de clients); D6 (consent implícito no seed MVP); D10 (Product ≠ AuthClient)
@@ -17,6 +17,32 @@ Substituir o **consent implícito de desenvolvimento** por um fluxo OIDC de **co
 - `ClientProductBinding` liga `client_id` → Product (Fase 3/5).
 - Sem gestão formal, onboarding de novos produtos depende de seed/código.
 
+## Decisões aceitas
+
+### D-00007-1 — Consent “Remember” — **Aceito: C**
+
+Política **por client**:
+
+- First-party / `RequireConsent=Never|First`: remember **permanente** (até revoke ou scopes novos).
+- `RequireConsent=Always`: TTL configurável (default **180 dias**) via metadado `ConsentRememberDays`.
+
+### D-00007-2 — Store de metadados — **Aceito: C**
+
+**Híbrido:**
+
+- OpenIddict: redirects, secrets, consent type nativo, scopes permitidos.
+- Tabela leve `AuthClientMetadata` (ou equivalente): `IsSystem`, `IsFirstParty`, `RequireConsent` (`Always|First|Never`), `ConsentRememberDays`, display admin.
+
+`ClientProductBinding` permanece a ligação client → Product.
+
+### D-00007-3 — Naming de scopes — **Aceito: A**
+
+Scopes custom: **`{product_code}.{feature}`** (lowercase, dot-separated). Ex.: `dev-product.reports`. OIDC padrão (`openid`, `profile`, `email`) continua; authZ fina segue em claims `permissions`.
+
+### D-00007-4 — First-party — **Aceito: A**
+
+Flag **`IsFirstParty`** no registro/metadado. `RequireConsent=Never` **só** permitido se `IsFirstParty=true` (validação na API). Seed marca system/first-party.
+
 ## Escopo
 
 ### Inclui
@@ -24,103 +50,83 @@ Substituir o **consent implícito de desenvolvimento** por um fluxo OIDC de **co
 **Consent**
 
 - Página Razor `/Account/Consent` (scopes + client name + lembrar consent).
-- Persistência de consentimentos do usuário (OpenIddict authorizations / store dedicado).
-- Política por client: `RequireConsent` = Always | First time | Never (trusted first-party).
+- Persistência via OpenIddict authorizations (+ TTL por metadado quando Always).
+- Política por client: `RequireConsent` = Always | First | Never.
 - Re-consent quando scopes aumentam.
 - Audit: consent granted/denied.
 
 **AuthClients lifecycle**
 
-- Modelo de domínio/admin sobre OpenIddict applications (não expor OpenIddict entities cruas na API pública).
-- API `api/identity/auth-clients`:
+- API `api/identity/auth-clients` (wrapper sobre OpenIddict + metadados):
   - Create (public PKCE vs confidential)
-  - Update redirect URIs, post-logout URIs, scopes permitidos
-  - Rotate client secret (confidential) — secret mostrado **uma vez**
-  - Disable / soft-delete
-  - Bind/unbind Product (`ClientProductBinding`)
+  - Update redirect URIs, post-logout URIs, scopes
+  - Rotate client secret (one-shot plain)
+  - Disable / soft-delete (`IsSystem` não deletável)
+  - Bind/unbind Product
 - Validations: HTTPS redirects em Production; localhost só Dev.
-- Seed clients permanecem; marcados `IsSystem` (não deletáveis).
+- Seed clients `IsSystem` + `IsFirstParty`.
 
 **Scopes**
 
-- Catálogo de scopes (CRUD leve) + associação a clients.
-- Scopes custom de produto documentados no contract.
+- Catálogo leve + associação a clients.
+- Convention `{product_code}.{feature}` documentada.
 
 ### Fora de escopo
 
-- Marketplace de apps third-party com review humano.
-- DCR (Dynamic Client Registration RFC) público — pode ser fase futura.
-- mTLS client auth (evolução).
-- UI rica (coberta por 00003; aqui API + Consent Razor bastam).
+- Marketplace third-party / review humano.
+- DCR público.
+- mTLS client auth.
+- UI rica de clients no portal (API + Consent Razor bastam; 00003 pode consumir depois).
 
 ## Abordagem
 
 ### Fase A — Consent UI + policy
 
-1. Desligar consent implícito global; trusted clients (`sso-admin`, first-party) = Never.
-2. Implementar Consent page no pipeline authorize OpenIddict.
-3. Testes: authorize → consent → code; deny → error.
+1. Metadados + seed flags first-party / Never.
+2. Consent page no pipeline authorize.
+3. Remember permanente vs TTL conforme D1.
 
 ### Fase B — AuthClient admin API
 
-1. Commands CQRS wrapping OpenIddict `IOpenIddictApplicationManager`.
-2. Secret hashing já do OpenIddict; API retorna plain secret só no create/rotate.
-3. Permissions: `sso.admin.platform` (00002).
+1. CQRS wrapping `IOpenIddictApplicationManager` + `AuthClientMetadata`.
+2. Secret one-shot; permissions `sso.admin.platform`.
+3. Validar `Never` ⇒ `IsFirstParty`.
 
-### Fase C — Docs e samples
+### Fase C — Scopes + docs
 
-1. Guia “Registrar novo produto/client”.
-2. Atualizar `product-integration.md` + `integrations.md`.
-
-## Arquivos impactados
-
-| Camada | Caminhos previstos |
-|--------|--------------------|
-| Domain | `AuthClients/`, `Scopes/` (se ainda não first-class) |
-| Application | CRUD handlers; Consent app services |
-| Data | Possível migration se metadados extras além OpenIddict |
-| Web | `/Account/Consent.cshtml`; AuthorizationController hooks |
-| Middleware | OpenIddict server options (consent) |
-| Seed | Flags RequireConsent por client |
-| Tests | OIDC authorize com consent; API auth-clients |
-| Docs | product-integration, glossary (AuthClient) |
+1. Catálogo scopes + naming A.
+2. Guia “Registrar novo produto/client”; atualizar `product-integration.md`.
 
 ## Critérios de aceite
 
-- [ ] Client com `RequireConsent=Always` exibe Consent antes do code.
-- [ ] Trusted client não exibe Consent.
-- [ ] PlatformAdmin cria SPA PKCE e confidential service via API.
-- [ ] Rotate secret invalida secret antigo; novo funciona em client_credentials.
+- [ ] Client `RequireConsent=Always` exibe Consent antes do code.
+- [ ] First-party (`Never`) não exibe Consent.
+- [ ] PlatformAdmin cria SPA PKCE e confidential via API.
+- [ ] Rotate secret invalida o antigo.
 - [ ] Disable client faz authorize/token falharem.
-- [ ] Binding client→product afeta permissions no JWT (já existente) e é editável via API.
+- [ ] Binding client→product editável; scopes `{product_code}.{feature}` documentados.
 
 ## Riscos
 
 | Risco | Mitigação |
 |-------|-----------|
-| Quebrar dev DX (todo login pede consent) | Never para clients seed; docs claros |
-| Vazamento de secret em logs/API responses | Retorno one-shot; never log secret |
-| Redirect URI open redirect | Validação strict allowlist |
-| Divergência Product vs AuthClient | UI/API reforça D10; binding obrigatório para user tokens |
+| Dev DX (consent em todo login) | Seed first-party = Never |
+| Vazamento de secret | One-shot; never log |
+| Open redirect | Allowlist strict |
+| Never em third-party | API rejeita sem `IsFirstParty` |
 
 ## Estratégia de testes
 
-- [ ] Integração OIDC: matriz RequireConsent
-- [ ] API: create/rotate/disable
-- [ ] Negativos: redirect http em Production
-- [ ] Binding remove → permissions stub/vazio conforme regra documentada
-
-## Decisões abertas
-
-- [ ] **D-00007-1:** Consent “Remember” permanente vs tempo limitado?
-- [ ] **D-00007-2:** Metadados extras na tabela própria ou só OpenIddict properties bag?
-- [ ] **D-00007-3:** Scopes custom por Product — naming convention (`product.feature`)?
-- [ ] **D-00007-4:** First-party clients list config vs flag no registro?
+- [ ] Matriz RequireConsent Always/First/Never
+- [ ] API create/rotate/disable + Never sem first-party rejeitado
+- [ ] Redirect http em Production
+- [ ] Remember TTL expiry path (Always)
 
 ## Checklist
 
-- [ ] 00002 permissions para APIs
+- [x] D-00007-1..4 aceitas
+- [ ] 00002 permissions
 - [ ] Security: redirects, secrets
-- [ ] Migrations se houver
-- [ ] CONTEXT + Decisions (revisar D6 para pós-MVP)
-- [ ] Pronto para implementação (após D-00007-1/2)
+- [ ] Migrations metadados
+- [ ] CONTEXT + Decisions (revisar D6 pós-impl)
+- [x] Pronto para implementação

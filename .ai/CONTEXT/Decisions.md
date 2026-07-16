@@ -68,6 +68,17 @@ Plano: `.ai/WORK/2026-07-16-00005-revogacao-quente-sessao.md` (**implementado**)
 
 Plano: `.ai/WORK/2026-07-16-00006-federacao-google-ldap.md` (**implementado**).
 
+## Decisões feature 00007 (Consent + AuthClients)
+
+| ID | Decisão | Status |
+|----|---------|--------|
+| F00007-D1 | Consent “Remember” **por client**: first-party permanente; Always com TTL configurável (default 180d) | **Aceito** |
+| F00007-D2 | Metadados **híbridos**: OpenIddict = protocolo; tabela leve admin (`IsSystem`, TTL, policy, `IsFirstParty`) | **Aceito** |
+| F00007-D3 | Scopes custom `{product_code}.{feature}` | **Aceito** |
+| F00007-D4 | First-party via flag no registro (`IsFirstParty`); `RequireConsent=Never` só se first-party | **Aceito** |
+
+Plano: `.ai/WORK/2026-07-16-00007-consent-authclients.md` (**pronto p/ implementar**).
+
 ## Decisões feature 00001 (D1–D12)
 
 | ID | Decisão | Status |
