@@ -15,6 +15,16 @@ Registro leve de decisões observáveis ou pendentes. Para decisões novas forma
 
 Plano: `.ai/WORK/2026-07-14-00001-plataforma-sso.md`.
 
+## Decisões feature 00002 (AuthZ APIs admin)
+
+| ID | Decisão | Status |
+|----|---------|--------|
+| F00002-D1 | AuthZ via `IAuthorizationHandler` + `[RequiresPermission]` lendo claim `permissions` (ADR-005) | **Aceito** |
+| F00002-D2 | Platform permissions com `UserRoleAssignment.OrganizationId` null; rotas platform sem exigir `organization_id` no token; OrgAdmin amarrado ao token; PlatformAdmin pode cross-org | **Aceito** |
+| F00002-D3 | `menus/effective` permanece admin/diagnóstico (`sso.admin.menus`); products usam JWT | **Aceito** |
+
+Plano: `.ai/WORK/2026-07-16-00002-authz-apis-admin.md`.
+
 ## Decisões feature 00001 (D1–D12)
 
 | ID | Decisão | Status |

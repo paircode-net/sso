@@ -8,7 +8,7 @@ Planos de feature derivados das evolutivas prioritárias após o MVP SSO.
 
 | # | Feature | Arquivo | Prioridade sugerida (go-live) | Prioridade sugerida (plataforma) |
 |---|---------|---------|-------------------------------|----------------------------------|
-| 00002 | AuthZ nas APIs admin | [2026-07-16-00002-authz-apis-admin.md](2026-07-16-00002-authz-apis-admin.md) | P0 | P0 |
+| 00002 | AuthZ nas APIs admin | [2026-07-16-00002-authz-apis-admin.md](2026-07-16-00002-authz-apis-admin.md) — **pronto p/ implementar** | P0 | P0 |
 | 00003 | Portal admin por papel | [2026-07-16-00003-portal-admin-por-papel.md](2026-07-16-00003-portal-admin-por-papel.md) | P1 | P0 |
 | 00004 | SDK / BFF de integração | [2026-07-16-00004-sdk-integracao-produtos.md](2026-07-16-00004-sdk-integracao-produtos.md) | P1 | P0 |
 | 00005 | Revogação quente + sessão | [2026-07-16-00005-revogacao-quente-sessao.md](2026-07-16-00005-revogacao-quente-sessao.md) | P1 | P1 |
