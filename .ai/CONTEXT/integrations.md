@@ -17,6 +17,17 @@
 
 Ver **[product-integration.md](product-integration.md)** — claim names, TTL, `perm_ver`, menus, fluxo de permission dinâmica.
 
+## SDK / BFF (feature 00004)
+
+| Artefato | Caminho | Uso |
+|----------|---------|-----|
+| `SSO.Client` (.NET 0.1.0) | `src/SSO.Client/` | JwtBearer, `RequiresPermission`, claim helpers, `SsoTokenClient` |
+| `@sso/client` (JS/TS 0.1.0) | `clients/js/` | Parse claims + `requirePermission` (sem verificar assinatura) |
+| Sample product API | `samples/product-api/` | Aceite do SDK .NET |
+| Sample BFF | `samples/sso-bff/` | Cookie/session + refresh + `switch_context` |
+
+Pack local: `dotnet pack src/SSO.Client` · JS: `cd clients/js && npm run build`.
+
 ## Hardening / IdPs
 
 Ver **[phase6-hardening.md](phase6-hardening.md)** — CORS, rate limit, lockout, P-004, signing, external login.

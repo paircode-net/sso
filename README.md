@@ -16,6 +16,7 @@ O Authorization Server usa **OpenIddict** + **ASP.NET Identity**, com APIs de ge
 | IdPs externos | Microsoft Entra ID (OIDC, homologável); Google OIDC e LDAP (stubs) |
 | Hardening | CORS allowlist, rate limiting, lockout, signing Dev/Prod, migrations controladas em Production |
 | Admin MVP | Portal Razor `/Admin` + API `api/identity/*` (`sso.admin.*`) — [admin-api-authz.md](.ai/CONTEXT/admin-api-authz.md) |
+| SDK produtos | `SSO.Client` + `@sso/client` + samples BFF/API — [product-integration.md](.ai/CONTEXT/product-integration.md) |
 | Auditoria | Eventos AuthN/AuthZ (`AuthAuditEvents`) |
 
 Contrato para produtos consumidores: [`.ai/CONTEXT/product-integration.md`](.ai/CONTEXT/product-integration.md) · IdPs e hardening: [`.ai/CONTEXT/phase6-hardening.md`](.ai/CONTEXT/phase6-hardening.md).
@@ -43,7 +44,12 @@ SSO.Core.Application        Handlers CQRS
 SSO.Infrastructures.Data    EF Core / migrations
 SSO.Infrastructures.Services Mail, resolvers, adapters
 SSO.Shared                  Claims, options, constants
+SSO.Client                  SDK produtos (JwtBearer, RequirePermission, token client)
+SSO.Client.Tests            Unit do SDK
 SSO.Tests                   Unit + integration
+samples/product-api         Aceite SSO.Client
+samples/sso-bff             BFF referência (session + refresh + switch_context)
+clients/js                  Pacote @sso/client
 ```
 
 ## Desenvolvimento rápido

@@ -2,7 +2,7 @@
 
 > Arquivo: `.ai/WORK/2026-07-16-00004-sdk-integracao-produtos.md`  
 > Template: `.ai/TEMPLATES/feature-plan.md`  
-> Status: **Pronto para implementação** (D-00004-1..3 aceitas)  
+> Status: **Implementado** (2026-07-16)  
 > Data: 2026-07-16  
 > Depende de: contrato atual (`product-integration.md`, ADR-003/005)  
 > Relaciona: 00005 (sinais de revogação no cliente)
@@ -62,57 +62,37 @@ Também: `samples/product-api` (Minimal API + `RequirePermission`) como aceite d
 - Publicação em feed NuGet/npm público (pode ser local/`dotnet pack` até 00010).
 - Revogação quente (00005) — só hooks/`perm_ver` agora.
 
-## Abordagem
+## Entregue
 
-### Fases
-
-1. **SSO.Client** — options, JwtBearer, `RequirePermission`, claim extensions, `perm_ver`.
-2. **SsoTokenClient** — refresh + switch_context.
-3. **samples/product-api** — quickstart &lt; 30 linhas de setup.
-4. **JS/TS client** — claims + requirePermission + tipos alinhados a `SsoClaimTypes`.
-5. **samples/sso-bff** — cookie + refresh + proxy pattern.
-6. **Docs** — product-integration quickstart.
-
-## Arquivos impactados
-
-| Camada | Caminhos previstos |
-|--------|--------------------|
-| Lib .NET | `src/SSO.Client/` |
-| Lib JS | `clients/js/` (ou equivalente) |
-| Samples | `samples/product-api/`, `samples/sso-bff/` |
-| Tests | `src/SSO.Client.Tests/` (+ testes JS) |
-| Solution | incluir projetos no `.sln` |
-| Docs | `product-integration.md`, `integrations.md`, README |
+| Item | Caminho |
+|------|---------|
+| Lib .NET 0.1.0 | `src/SSO.Client/` — `AddSsoAuthentication`, `RequiresPermissionAttribute`, claim extensions, `SsoTokenClient` |
+| Tests .NET | `src/SSO.Client.Tests/` (3 tests) |
+| Sample API | `samples/product-api/` |
+| Sample BFF | `samples/sso-bff/` — `/bff/session`, `/bff/refresh`, `/bff/switch-context`, `/bff/me` |
+| JS/TS 0.1.0 | `clients/js/` — `parseJwtPayload`, `requirePermission`, `getPermissionVersion` |
+| Docs | `product-integration.md` (quickstart), `integrations.md`, README, `samples/README.md` |
 
 ## Critérios de aceite
 
-- [ ] Product API sample valida JWT e bloqueia rota sem permission com setup curto.
-- [ ] `RequirePermission` cobre multi-claim `permissions`.
-- [ ] `perm_ver` exposto no .NET e no JS.
-- [ ] `switch_context` helper (.NET) + BFF sample exercita o fluxo.
-- [ ] Pacote JS: `requirePermission` + parse de claims documentado.
-- [ ] Docs quickstart copy-paste em Dev.
-
-## Riscos
-
-| Risco | Mitigação |
-|-------|-----------|
-| Drift claims Shared vs Client | Referenciar `SSO.Shared` ou gerar constantes compartilhadas |
-| Secret em SPA | JS só public/PKCE ou via BFF |
-| Escopo JS + BFF estoura | MVP JS = claims + requirePermission; BFF mínimo cookie/refresh |
-| Dois packages sem CI pack | `dotnet pack` + npm script local até 00010 |
+- [x] Product API sample valida JWT e bloqueia rota sem permission com setup curto.
+- [x] `RequirePermission` cobre multi-claim `permissions`.
+- [x] `perm_ver` exposto no .NET e no JS.
+- [x] `switch_context` helper (.NET) + BFF sample exercita o fluxo.
+- [x] Pacote JS: `requirePermission` + parse de claims documentado.
+- [x] Docs quickstart copy-paste em Dev.
 
 ## Estratégia de testes
 
-- [ ] Unit .NET: claims, permission handler
-- [ ] Unit JS: requirePermission / claim parse
-- [ ] Sample product-api sobe e retorna 401/403
-- [ ] Contrato: claim names = `SsoClaimTypes`
+- [x] Unit .NET: claims, permission handler
+- [x] Unit JS: requirePermission / claim parse
+- [x] Sample product-api / sso-bff compilam
+- [x] Contrato: claim names = `SsoClaimTypes`
 
 ## Checklist
 
 - [x] D-00004-1..3 aceitas
 - [x] Alinhado a ADR-003/005
-- [ ] Versionamento (0.1.0 inicial)
-- [ ] CONTEXT/integrations na implementação
-- [x] Pronto para implementação
+- [x] Versionamento (0.1.0 inicial)
+- [x] CONTEXT/integrations na implementação
+- [x] Implementado

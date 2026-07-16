@@ -43,7 +43,7 @@ Plano: `.ai/WORK/2026-07-16-00003-portal-admin-por-papel.md`.
 | F00004-D2 | Mesmo épico: .NET + JS/TS (`requirePermission` + claims) | **Aceito** |
 | F00004-D3 | Sample BFF entregável em `samples/sso-bff` (+ `samples/product-api`) | **Aceito** |
 
-Plano: `.ai/WORK/2026-07-16-00004-sdk-integracao-produtos.md`.
+Plano: `.ai/WORK/2026-07-16-00004-sdk-integracao-produtos.md` (**implementado**).
 
 ## Decisões feature 00001 (D1–D12)
 

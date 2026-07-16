@@ -17,7 +17,10 @@ O README da raiz descreve: `Architecture CQRS Full (.NET 10.0)`.
 | Infrastructures / Data | `SSO.Infrastructures.Data` | DbContext, mappings, migrations, Reader/Writer |
 | Infrastructures / Services | `SSO.Infrastructures.Services` | Serviços externos (hoje stub de mail) |
 | Shared | `SSO.Shared` | Claims/grants/client constants Identity |
-| Tests | `SSO.Tests` | Unit + Integration |
+| Client SDK | `SSO.Client` | JwtBearer, RequirePermission, token helpers (produtos) |
+| Tests | `SSO.Tests` / `SSO.Client.Tests` | Unit + Integration |
+| Samples | `samples/product-api`, `samples/sso-bff` | Aceite SDK + BFF (feature 00004) |
+| JS client | `clients/js` (`@sso/client`) | Claim helpers SPA (sem verificar JWT) |
 
 ## Fluxo de uma request de escrita
 
