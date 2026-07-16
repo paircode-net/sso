@@ -221,24 +221,27 @@ namespace SSO.Infrastructures.Data.Identity
 				"entra-homolog",
 				"Microsoft Entra ID",
 				isEnabled: true,
+				allowJit: false,
 				authority: "https://login.microsoftonline.com/common/v2.0",
 				clientId: null);
 			await EnsureExternalIdpAsync(
 				context,
 				DevGoogleIdpId,
 				ExternalIdpTypes.Google,
-				"google-stub",
-				"Google (stub)",
+				"google",
+				"Google",
 				isEnabled: false,
+				allowJit: false,
 				authority: "https://accounts.google.com",
 				clientId: null);
 			await EnsureExternalIdpAsync(
 				context,
 				DevLdapIdpId,
 				ExternalIdpTypes.Ldap,
-				"ldap-stub",
-				"LDAP (stub)",
+				"ldap",
+				"LDAP / Active Directory",
 				isEnabled: false,
+				allowJit: false,
 				authority: null,
 				clientId: null);
 
@@ -361,6 +364,7 @@ namespace SSO.Infrastructures.Data.Identity
 			string code,
 			string displayName,
 			bool isEnabled,
+			bool allowJit,
 			string authority,
 			string clientId)
 		{
@@ -376,6 +380,7 @@ namespace SSO.Infrastructures.Data.Identity
 				Code = code,
 				DisplayName = displayName,
 				IsEnabled = isEnabled,
+				AllowJitProvisioning = allowJit,
 				Authority = authority,
 				ClientId = clientId
 			};

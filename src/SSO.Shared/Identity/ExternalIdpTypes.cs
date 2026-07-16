@@ -11,5 +11,6 @@ namespace SSO.Shared.Identity
 	{
 		public const string Entra = "Entra";
 		public const string Google = "Google";
+		public const string Ldap = "Ldap";
 	}
 }

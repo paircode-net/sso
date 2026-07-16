@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Options;
 using SSO.Core.Domain.Identity._Context.Interfaces.Services;
 using SSO.Core.Domain.Identity.AuthAuditEvents.Entity;
 using SSO.Core.Domain.Identity.Users.Entity;
+using SSO.Shared.Identity;
 
 namespace SSO.Web.Api.Pages.Account
 {
@@ -18,15 +20,18 @@ namespace SSO.Web.Api.Pages.Account
 		private readonly SignInManager<User> _signInManager;
 		private readonly UserManager<User> _userManager;
 		private readonly IAuthAuditService _auditService;
+		private readonly SsoHardeningOptions _options;
 
 		public LoginModel(
 			SignInManager<User> signInManager,
 			UserManager<User> userManager,
-			IAuthAuditService auditService)
+			IAuthAuditService auditService,
+			IOptions<SsoHardeningOptions> options)
 		{
 			_signInManager = signInManager;
 			_userManager = userManager;
 			_auditService = auditService;
+			_options = options.Value;
 		}
 
 		[BindProperty]
@@ -38,6 +43,8 @@ namespace SSO.Web.Api.Pages.Account
 		public string? ErrorMessage { get; set; }
 
 		public IList<AuthenticationScheme> ExternalProviders { get; set; } = new List<AuthenticationScheme>();
+
+		public bool LdapEnabled => _options.ExternalAuth?.Ldap?.Enabled == true;
 
 		public sealed class InputModel
 		{

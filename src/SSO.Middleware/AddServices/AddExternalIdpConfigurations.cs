@@ -1,9 +1,11 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using SSO.Core.Domain.Identity._Context.Interfaces.Services;
+using SSO.Middleware.Identity;
 using SSO.Shared.Identity;
 
 namespace SSO.Middleware.AddServices
@@ -17,6 +19,9 @@ namespace SSO.Middleware.AddServices
 			var entra = options.ExternalAuth?.Entra ?? new EntraOptions();
 			var google = options.ExternalAuth?.Google ?? new GoogleOptions();
 			var ldap = options.ExternalAuth?.Ldap ?? new LdapOptions();
+
+			services.AddScoped<FederatedAccountService>();
+			services.AddScoped<LdapGroupRoleSyncService>();
 
 			if (entra.Enabled || google.Enabled)
 			{
@@ -64,42 +69,36 @@ namespace SSO.Middleware.AddServices
 						oidc.CallbackPath = google.CallbackPath;
 						oidc.ResponseType = OpenIdConnectResponseType.Code;
 						oidc.SaveTokens = true;
+						oidc.GetClaimsFromUserInfoEndpoint = true;
 						oidc.Scope.Clear();
 						oidc.Scope.Add("openid");
 						oidc.Scope.Add("profile");
 						oidc.Scope.Add("email");
+						oidc.MapInboundClaims = false;
+						oidc.TokenValidationParameters.NameClaimType = "name";
 					});
 				}
 			}
 
 			if (ldap.Enabled)
 			{
-				services.AddSingleton<ILdapAuthenticationStub, LdapAuthenticationStub>();
+				services.AddSingleton<ILdapAuthenticationService, LdapAuthenticationService>();
+			}
+			else
+			{
+				services.AddSingleton<ILdapAuthenticationService, DisabledLdapAuthenticationService>();
 			}
 
 			return services;
 		}
 	}
 
-	public interface ILdapAuthenticationStub
+	public sealed class DisabledLdapAuthenticationService : ILdapAuthenticationService
 	{
-		Task<bool> ValidateCredentialsAsync(string username, string password);
-	}
-
-	/// <summary>Placeholder until real LDAP/AD bind is implemented (D7).</summary>
-	public sealed class LdapAuthenticationStub : ILdapAuthenticationStub
-	{
-		private readonly ILogger<LdapAuthenticationStub> _logger;
-
-		public LdapAuthenticationStub(ILogger<LdapAuthenticationStub> logger)
-		{
-			_logger = logger;
-		}
-
-		public Task<bool> ValidateCredentialsAsync(string username, string password)
-		{
-			_logger.LogWarning("LDAP IdP stub invoked for {User}; not implemented.", username);
-			return Task.FromResult(false);
-		}
+		public Task<LdapAuthResult> AuthenticateAsync(
+			string username,
+			string password,
+			CancellationToken cancellationToken = default)
+			=> Task.FromResult(LdapAuthResult.Fail("ldap_disabled"));
 	}
 }

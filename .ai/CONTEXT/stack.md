@@ -53,7 +53,7 @@
 | JWT com permissions / switch-context | Ativo — motor Role→Permission + `perm_ver` dinâmico |
 | UI login/consent | Login + ExternalLogin + forgot/reset/confirm/2FA Razor (D6) |
 | Menus por permission | `MenuItem` + API effective; contrato em `product-integration.md` |
-| IdPs externos | Entra OIDC homologável; Google OIDC / LDAP stub |
+| IdPs externos | Entra OIDC; Google OIDC; LDAP/AD (SDS.Protocols) — feature 00006 |
 | Hardening | CORS, rate limit, lockout (`Sso:*`); ver `phase6-hardening.md` |
 
 ## Qualidade / CI

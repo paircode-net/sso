@@ -8,8 +8,9 @@
 | Swagger / OpenAPI | Documentação de API (dev) | Swashbuckle no host |
 | OpenIddict / OIDC | Authorization Server | `/connect/*` (Fases 2–6) |
 | ASP.NET Identity | AuthN (conta/2FA) | IdentityDb |
-| Microsoft Entra ID | IdP externo (OIDC) | Homologável via `Sso:ExternalAuth:Entra`; catálogo `entra-homolog` |
-| Google / LDAP | IdP externo | Stubs (`google-stub` / `ldap-stub`); habilitar via config |
+| Entra ID | IdP externo (OIDC) | Homologável via `Sso:ExternalAuth:Entra`; catálogo `entra-homolog` |
+| Google OIDC | IdP externo | `Sso:ExternalAuth:Google`; catálogo `google`; JIT/auto-link (00006) |
+| LDAP / AD | IdP externo | `System.DirectoryServices.Protocols`; `/Account/LoginWithLdap`; grupo→Role |
 | MediatR Notifications | In-process | Handlers logam JSON |
 | Mail (`IMailService`) | E-mail | Logger MVP; capture em testes |
 
@@ -40,12 +41,12 @@ Pack local: `dotnet pack src/SSO.Client` · JS: `cd clients/js && npm run build`
 
 ## Hardening / IdPs
 
-Ver **[phase6-hardening.md](phase6-hardening.md)** — CORS, rate limit, lockout, P-004, signing, external login.
+Ver **[external-idps.md](external-idps.md)** e **[phase6-hardening.md](phase6-hardening.md)**.
 
 ## Integrações não presentes
 
 - Message bus / cache distribuído / APM cloud — não no MVP
-- Google/LDAP production-ready (apenas stub até enable + secrets)
+- Nested LDAP group expansion / SCIM / SAML
 
 ## Contratos HTTP internos (API)
 

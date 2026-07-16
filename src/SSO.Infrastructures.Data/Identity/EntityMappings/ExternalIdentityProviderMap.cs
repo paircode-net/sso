@@ -22,6 +22,7 @@ namespace SSO.Infrastructures.Data.Identity.EntityMappings
 			builder.Property(e => e.Code).HasColumnType("NVARCHAR(64)").IsRequired(true);
 			builder.Property(e => e.DisplayName).HasColumnType("NVARCHAR(128)").IsRequired(true);
 			builder.Property(e => e.IsEnabled).HasColumnType("bit").IsRequired(true);
+			builder.Property(e => e.AllowJitProvisioning).HasColumnType("bit").IsRequired(true);
 			builder.Property(e => e.Authority).HasColumnType("NVARCHAR(512)").IsRequired(false);
 			builder.Property(e => e.ClientId).HasColumnType("NVARCHAR(128)").IsRequired(false);
 

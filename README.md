@@ -13,7 +13,7 @@ O Authorization Server usa **OpenIddict** + **ASP.NET Identity**, com APIs de ge
 | Autorização | Roles → Permissions dinâmicas; permissões efetivas no JWT (`permissions`, `perm_ver`) |
 | Multi-tenant | Organizations (tenants), Branches (sem herança authz pai→filho no MVP), Products |
 | Multi-produto | Bindings client → product; menus efetivos por permission |
-| IdPs externos | Microsoft Entra ID (OIDC, homologável); Google OIDC e LDAP (stubs) |
+| IdPs externos | Microsoft Entra ID (OIDC); Google OIDC; LDAP/AD (SDS.Protocols) — [external-idps.md](.ai/CONTEXT/external-idps.md) |
 | Hardening | CORS allowlist, rate limiting, lockout, signing Dev/Prod, migrations controladas em Production |
 | Admin MVP | Portal Razor `/Admin` + API `api/identity/*` (`sso.admin.*`) — [admin-api-authz.md](.ai/CONTEXT/admin-api-authz.md) |
 | SDK produtos | `SSO.Client` + `@sso/client` + samples BFF/API — [product-integration.md](.ai/CONTEXT/product-integration.md) |

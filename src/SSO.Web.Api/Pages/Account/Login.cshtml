@@ -41,6 +41,10 @@
 		<button type="submit">Sign in</button>
 	</form>
 	<p style="margin-top:1rem"><a href="/Account/ForgotPassword">Forgot password?</a></p>
+	@if (Model.LdapEnabled)
+	{
+		<p style="margin-top:0.75rem"><a href="/Account/LoginWithLdap?returnUrl=@Uri.EscapeDataString(Model.ReturnUrl ?? "/")">Sign in with LDAP / Active Directory</a></p>
+	}
 	@if (Model.ExternalProviders.Count > 0)
 	{
 		<div class="ext">

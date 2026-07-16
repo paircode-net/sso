@@ -117,6 +117,17 @@ namespace SSO.Middleware
 					Signing = { UseDevelopmentCertificates = true }
 				};
 			services.AddSingleton(hardening);
+			services.Configure<SsoHardeningOptions>(_ =>
+			{
+				_.Database = hardening.Database;
+				_.Cors = hardening.Cors;
+				_.RateLimit = hardening.RateLimit;
+				_.Lockout = hardening.Lockout;
+				_.Signing = hardening.Signing;
+				_.ExternalAuth = hardening.ExternalAuth;
+			});
+			services.AddExternalIdentityProviders(hardening);
+
 			if (hardening.Cors.Enabled)
 			{
 				services.AddCors(cors => cors.AddPolicy("SsoCors", p =>

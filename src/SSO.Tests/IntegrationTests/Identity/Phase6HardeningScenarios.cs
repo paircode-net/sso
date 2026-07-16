@@ -43,8 +43,8 @@ namespace SSO.Tests.IntegrationTests.Identity
 			using var scope = server.Services.CreateScope();
 			var context = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
 			Assert.IsTrue(await context.ExternalIdentityProviders.AnyAsync(x => x.Code == "entra-homolog" && x.IsEnabled));
-			Assert.IsTrue(await context.ExternalIdentityProviders.AnyAsync(x => x.Code == "google-stub" && !x.IsEnabled));
-			Assert.IsTrue(await context.ExternalIdentityProviders.AnyAsync(x => x.Code == "ldap-stub" && !x.IsEnabled));
+			Assert.IsTrue(await context.ExternalIdentityProviders.AnyAsync(x => x.Code == "google" && !x.IsEnabled));
+			Assert.IsTrue(await context.ExternalIdentityProviders.AnyAsync(x => x.Code == "ldap" && !x.IsEnabled));
 		}
 
 		[TestMethod]

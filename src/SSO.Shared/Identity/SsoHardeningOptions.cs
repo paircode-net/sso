@@ -78,7 +78,16 @@ namespace SSO.Shared.Identity
 	{
 		public bool Enabled { get; set; }
 		public string Host { get; set; }
-		public int Port { get; set; } = 389;
+		public int Port { get; set; } = 636;
+		public bool UseSsl { get; set; } = true;
+		/// <summary>When true (default), Production rejects LDAP if UseSsl is false.</summary>
+		public bool EnforceTlsInProduction { get; set; } = true;
 		public string BaseDn { get; set; }
+		/// <summary>Pattern with {username}, e.g. "{username}@contoso.com" or "uid={username},{BaseDn}".</summary>
+		public string BindDnPattern { get; set; } = "{username}";
+		public string UserSearchFilter { get; set; } = "(sAMAccountName={username})";
+		public int TimeoutSeconds { get; set; } = 10;
+		/// <summary>Default organization for LDAP group→role maps when not specified at login.</summary>
+		public string? DefaultOrganizationId { get; set; }
 	}
 }

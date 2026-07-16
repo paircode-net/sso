@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using SSO.Core.Domain.Identity._Context.Interfaces.Services;
 using SSO.Core.Domain.Identity.AuthAuditEvents.Entity;
 using SSO.Core.Domain.Identity.Users.Entity;
+using SSO.Middleware.Identity;
 
 namespace SSO.Web.Api.Pages.Account
 {
@@ -15,17 +16,17 @@ namespace SSO.Web.Api.Pages.Account
 	public sealed class ExternalLoginModel : PageModel
 	{
 		private readonly SignInManager<User> _signInManager;
-		private readonly UserManager<User> _userManager;
 		private readonly IAuthAuditService _auditService;
+		private readonly FederatedAccountService _federated;
 
 		public ExternalLoginModel(
 			SignInManager<User> signInManager,
-			UserManager<User> userManager,
-			IAuthAuditService auditService)
+			IAuthAuditService auditService,
+			FederatedAccountService federated)
 		{
 			_signInManager = signInManager;
-			_userManager = userManager;
 			_auditService = auditService;
+			_federated = federated;
 		}
 
 		public string? StatusMessage { get; set; }
@@ -43,7 +44,11 @@ namespace SSO.Web.Api.Pages.Account
 
 			if (!string.IsNullOrEmpty(remoteError))
 			{
-				StatusMessage = $"External provider error: {remoteError}";
+				StatusMessage = "External provider error.";
+				await _auditService.WriteAsync(AuthAuditEvent.Create(
+					AuthAuditEventTypes.LoginFailed,
+					AuthAuditOutcomes.Failure,
+					detail: $"external:remote_error"));
 				return Page();
 			}
 
@@ -62,7 +67,7 @@ namespace SSO.Web.Api.Pages.Account
 
 			if (signInResult.Succeeded)
 			{
-				var existing = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+				var existing = await _signInManager.UserManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
 				await _auditService.WriteAsync(AuthAuditEvent.Create(
 					AuthAuditEventTypes.LoginSucceeded,
 					AuthAuditOutcomes.Success,
@@ -76,44 +81,41 @@ namespace SSO.Web.Api.Pages.Account
 				?? info.Principal.FindFirstValue("email")
 				?? info.Principal.FindFirstValue("preferred_username");
 
-			if (string.IsNullOrWhiteSpace(email))
-			{
-				StatusMessage = "External provider did not return an email claim.";
-				return Page();
-			}
+			var emailVerified = FederatedAccountService.IsEmailVerifiedFromClaims(
+				info.Principal.Claims,
+				info.LoginProvider);
 
-			var user = await _userManager.FindByEmailAsync(email);
-			if (user is null)
+			var outcome = await _federated.ResolveOrProvisionAsync(
+				info.LoginProvider,
+				info.ProviderKey,
+				email,
+				emailVerified,
+				info.ProviderDisplayName);
+
+			if (!outcome.Succeeded || outcome.User is null)
 			{
-				user = new User
+				StatusMessage = outcome.Error switch
 				{
-					UserName = email,
-					Email = email,
-					EmailConfirmed = true
+					"user_not_provisioned" => "No local account exists for this identity. Contact an administrator.",
+					"email_not_verified" => "Email must be verified by the identity provider.",
+					"email_required" => "External provider did not return an email claim.",
+					_ => "Unable to complete external login."
 				};
-				user.MarkCreated();
-				var create = await _userManager.CreateAsync(user);
-				if (!create.Succeeded)
-				{
-					StatusMessage = string.Join(" ", create.Errors.Select(e => e.Description));
-					return Page();
-				}
-			}
-
-			var addLogin = await _userManager.AddLoginAsync(user, info);
-			if (!addLogin.Succeeded && addLogin.Errors.All(e => e.Code != "LoginAlreadyAssociated"))
-			{
-				StatusMessage = string.Join(" ", addLogin.Errors.Select(e => e.Description));
+				await _auditService.WriteAsync(AuthAuditEvent.Create(
+					AuthAuditEventTypes.LoginFailed,
+					AuthAuditOutcomes.Failure,
+					email: email,
+					detail: $"external:{info.LoginProvider}:{outcome.Detail}"));
 				return Page();
 			}
 
-			await _signInManager.SignInAsync(user, isPersistent: false);
+			await _signInManager.SignInAsync(outcome.User, isPersistent: false);
 			await _auditService.WriteAsync(AuthAuditEvent.Create(
 				AuthAuditEventTypes.LoginSucceeded,
 				AuthAuditOutcomes.Success,
-				userId: user.Id,
-				email: user.Email,
-				detail: $"external:{info.LoginProvider}:linked"));
+				userId: outcome.User.Id,
+				email: outcome.User.Email,
+				detail: $"external:{info.LoginProvider}:{outcome.Detail}"));
 
 			return LocalRedirect(returnUrl);
 		}

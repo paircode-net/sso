@@ -66,7 +66,7 @@ Plano: `.ai/WORK/2026-07-16-00005-revogacao-quente-sessao.md` (**implementado**)
 | F00006-D3 | Auto-link por e-mail se `email_verified` (IdP confiável) | **Aceito** |
 | F00006-D4 | MVP mapeamento **grupo LDAP → Role** no login (config por org) | **Aceito** |
 
-Plano: `.ai/WORK/2026-07-16-00006-federacao-google-ldap.md` (**pronto p/ implementar**).
+Plano: `.ai/WORK/2026-07-16-00006-federacao-google-ldap.md` (**implementado**).
 
 ## Decisões feature 00001 (D1–D12)
 
@@ -78,7 +78,7 @@ Plano: `.ai/WORK/2026-07-16-00006-federacao-google-ldap.md` (**pronto p/ impleme
 | F00001-D4 | Sem herança automática Branch pai→filho no MVP | Aceito (ADR-004) |
 | F00001-D5 | Identity para AuthN; roles/claims de produto no domínio SSO | Aceito (ADR-002, ADR-004) |
 | F00001-D6 | Login/consent Razor em `SSO.Web.Api` no MVP | Aceito |
-| F00001-D7 | IdPs: Entra ID → Google → LDAP | Aceito |
+| F00001-D7 | IdPs: Entra ID → Google → LDAP | Aceito — Google/LDAP **implementados** (00006) |
 | F00001-D8 | Manter Sample até Fase 2 estável | Aceito |
 | F00001-D9 | Dev: key/cert local; Prod: Key Vault + rotação | Aceito (ADR-001) |
 | F00001-D10 | `Product` ≠ `AuthClient` | Aceito |

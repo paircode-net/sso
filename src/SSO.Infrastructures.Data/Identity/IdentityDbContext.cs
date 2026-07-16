@@ -12,6 +12,7 @@ using SSO.Core.Domain.Identity.OrganizationInvites.Entity;
 using SSO.Core.Domain.Identity.Organizations.Entity;
 using SSO.Core.Domain.Identity.Permissions.Entity;
 using SSO.Core.Domain.Identity.Products.Entity;
+using SSO.Core.Domain.Identity.LdapGroupRoleMaps.Entity;
 using SSO.Core.Domain.Identity.RevokedSessions.Entity;
 using SSO.Core.Domain.Identity.RolePermissions.Entity;
 using SSO.Core.Domain.Identity.Roles.Entity;
@@ -44,6 +45,7 @@ namespace SSO.Infrastructures.Data.Identity
 		public DbSet<RevokedSession> RevokedSessions { get; set; }
 		public DbSet<WebhookOutboxMessage> WebhookOutbox { get; set; }
 		public DbSet<ClientWebhookEndpoint> ClientWebhookEndpoints { get; set; }
+		public DbSet<LdapGroupRoleMap> LdapGroupRoleMaps { get; set; }
 
 		public IdentityDbContext()
 		{
@@ -86,6 +88,7 @@ namespace SSO.Infrastructures.Data.Identity
 			builder.ApplyConfiguration(new RevokedSessionMap());
 			builder.ApplyConfiguration(new WebhookOutboxMessageMap());
 			builder.ApplyConfiguration(new ClientWebhookEndpointMap());
+			builder.ApplyConfiguration(new LdapGroupRoleMapMap());
 		}
 	}
 }

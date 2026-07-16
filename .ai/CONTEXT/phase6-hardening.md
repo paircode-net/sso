@@ -1,30 +1,8 @@
 # External IdPs & hardening (Phase 6)
 
-## IdP order (D7)
+> See **[external-idps.md](external-idps.md)** for Google/LDAP (feature 00006) homologation, JIT, auto-link, and LDAP group→role maps.
 
-1. **Microsoft Entra ID** — OpenID Connect (`Sso:ExternalAuth:Entra`). Homologation catalog row: `entra-homolog`.
-2. **Google** — OIDC scaffolding (`Sso:ExternalAuth:Google`); seed `google-stub` disabled until enabled in config.
-3. **LDAP** — stub (`ILdapAuthenticationStub`); seed `ldap-stub` disabled.
-
-### Homologation Entra
-
-```json
-"Sso": {
-  "ExternalAuth": {
-    "Entra": {
-      "Enabled": true,
-      "TenantId": "<tenant-guid-or-common>",
-      "ClientId": "<app-registration-client-id>",
-      "ClientSecret": "<from-user-secrets-or-kv>",
-      "CallbackPath": "/signin-entra"
-    }
-  }
-}
-```
-
-Store secrets in User Secrets / env / Key Vault — not in git. Login UI shows external buttons when schemes are registered.
-
-## Hardening
+## Hardening (summary)
 
 | Control | Config | Behavior |
 |---------|--------|----------|

@@ -16,6 +16,8 @@ namespace SSO.Core.Domain.Identity.ExternalIdentityProviders.Entity
 		public string Code { get; set; }
 		public string DisplayName { get; set; }
 		public bool IsEnabled { get; set; }
+		/// <summary>When true, first external login may create a local User (F00006-D1). Default false.</summary>
+		public bool AllowJitProvisioning { get; set; }
 		public string Authority { get; set; }
 		public string ClientId { get; set; }
 
