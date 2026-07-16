@@ -79,6 +79,18 @@ Plano: `.ai/WORK/2026-07-16-00006-federacao-google-ldap.md` (**implementado**).
 
 Plano: `.ai/WORK/2026-07-16-00007-consent-authclients.md` (**implementado**).
 
+## Decisões feature 00008 (Claims tipadas)
+
+| ID | Decisão | Status |
+|----|---------|--------|
+| F00008-D1 | Claim tipada no JWT com prefixo **`sso_c_{code}`** (namespacing; evita colisão OIDC/SSO) | **Aceito** |
+| F00008-D2 | Novo claim **`claim_ver`** separado do `perm_ver` (semântica limpa permissões vs claims) | **Aceito** |
+| F00008-D3 | Origem **`UserClaimAssignment` + `RoleClaim`** (usuário e papel) | **Aceito** |
+| F00008-D4 | Value types no MVP = **escalares** (`string`, `int`, `bool`); sem JSON/datetime | **Aceito** |
+| F00008-D5 | Precedência no merge: **`UserClaimAssignment` vence `RoleClaim`** (mesmo ClaimDefinition/contexto) | **Aceito** |
+
+Plano: `.ai/WORK/2026-07-16-00008-claims-tipadas.md` (**pronto p/ implementar**).
+
 ## Decisões feature 00001 (D1–D12)
 
 | ID | Decisão | Status |
