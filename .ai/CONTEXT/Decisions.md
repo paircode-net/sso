@@ -57,6 +57,17 @@ Plano: `.ai/WORK/2026-07-16-00004-sdk-integracao-produtos.md` (**implementado**)
 
 Plano: `.ai/WORK/2026-07-16-00005-revogacao-quente-sessao.md` (**implementado**).
 
+## Decisões feature 00006 (Federação Google + LDAP)
+
+| ID | Decisão | Status |
+|----|---------|--------|
+| F00006-D1 | JIT provisioning **por org/IdP** (default off = pre-provision) | **Aceito** |
+| F00006-D2 | LDAP via **System.DirectoryServices.Protocols** | **Aceito** |
+| F00006-D3 | Auto-link por e-mail se `email_verified` (IdP confiável) | **Aceito** |
+| F00006-D4 | MVP mapeamento **grupo LDAP → Role** no login (config por org) | **Aceito** |
+
+Plano: `.ai/WORK/2026-07-16-00006-federacao-google-ldap.md` (**pronto p/ implementar**).
+
 ## Decisões feature 00001 (D1–D12)
 
 | ID | Decisão | Status |
