@@ -6,9 +6,12 @@ namespace SSO.Core.Domain.Identity.Branches.Validations.DomainValidations
 {
 	public sealed class CreateBranchSpecificationsValidator : DomainValidator<Branch>
 	{
-		public CreateBranchSpecificationsValidator(BranchCodeAlreadyExistsSpecification spec)
+		public CreateBranchSpecificationsValidator(
+			BranchCodeAlreadyExistsSpecification codeSpec,
+			BranchParentWouldCreateCycleSpecification cycleSpec)
 		{
-			Add(nameof(spec), new DomainRule<Branch>(spec.Not(), spec.ToString()));
+			Add(nameof(codeSpec), new DomainRule<Branch>(codeSpec.Not(), codeSpec.ToString()));
+			Add(nameof(cycleSpec), new DomainRule<Branch>(cycleSpec.Not(), cycleSpec.ToString()));
 		}
 	}
 }

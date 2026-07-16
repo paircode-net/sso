@@ -101,7 +101,7 @@ Plano: `.ai/WORK/2026-07-16-00008-claims-tipadas.md` (**implementado**).
 | F00009-D3 | Claims tipadas: herança clássica — valor no branch ativo vence; senão sobe ancestrais `Inheritable` | **Aceito** |
 | F00009-D4 | **ADR-008 aditivo**; ADR-004 permanece como default (superseded parcialmente quando flag On) | **Aceito** |
 
-Plano: `.ai/WORK/2026-07-16-00009-heranca-branch-opt-in.md` (**pronto p/ implementar**). ADR: [ADR-008](adr/ADR-008-branch-authz-inheritance-opt-in.md).
+Plano: `.ai/WORK/2026-07-16-00009-heranca-branch-opt-in.md` (**implementado**). ADR: [ADR-008](adr/ADR-008-branch-authz-inheritance-opt-in.md).
 
 ## Decisões feature 00001 (D1–D12)
 

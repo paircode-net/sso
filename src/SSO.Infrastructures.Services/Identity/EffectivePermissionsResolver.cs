@@ -6,19 +6,21 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using SSO.Core.Domain.Identity._Context.Interfaces.Infrastructures.Data;
 using SSO.Core.Domain.Identity._Context.Interfaces.Services;
+using SSO.Core.Domain.Identity.Branches;
+using SSO.Core.Domain.Identity.Branches.Entity;
 using SSO.Core.Domain.Identity.ClientProductBindings.Entity;
 using SSO.Core.Domain.Identity.Memberships.Entity;
+using SSO.Core.Domain.Identity.Organizations.Entity;
 using SSO.Core.Domain.Identity.Permissions.Entity;
 using SSO.Core.Domain.Identity.RolePermissions.Entity;
 using SSO.Core.Domain.Identity.UserRoleAssignments.Entity;
+using SSO.Shared.Identity;
 
 namespace SSO.Infrastructures.Services.Identity
 {
 	/// <summary>
-	/// Resolves effective permission codes for User × Organization × Branch × Product,
-	/// plus platform-scoped assignments (OrganizationId null — F00002-D2).
-	/// Branch match is exact (ADR-004): no parent→child inheritance.
-	/// Org-wide assignments (BranchId null) apply in every branch of that org+product.
+	/// Resolves effective permission codes for User × Organization × Branch × Product.
+	/// Default: exact branch match (ADR-004). Opt-in ancestor inheritance (ADR-008).
 	/// </summary>
 	public sealed class EffectivePermissionsResolver : IEffectivePermissionsResolver
 	{
@@ -73,20 +75,48 @@ namespace SSO.Infrastructures.Services.Identity
 
 				if (hasMembership)
 				{
-					var tenantRoleIds = await _reader
+					var org = await _reader.Query<Organization>().AsNoTracking()
+						.FirstOrDefaultAsync(x => !x.IsDeleted && x.Id == orgId, cancellationToken);
+					var inheritanceOn = BranchAuthzInheritancePolicies.IsEnabled(org?.BranchAuthzInheritance);
+
+					IReadOnlyList<Guid> ancestorIds = Array.Empty<Guid>();
+					if (inheritanceOn && branchId is Guid activeBranch)
+					{
+						var branches = await _reader.Query<Branch>().AsNoTracking()
+							.Where(x => !x.IsDeleted && x.OrganizationId == orgId)
+							.ToListAsync(cancellationToken);
+						ancestorIds = BranchAncestry.GetAncestorIds(branches, activeBranch);
+					}
+
+					var tenantAssignments = await _reader
 						.Query<UserRoleAssignment>()
 						.AsNoTracking()
 						.Where(x => !x.IsDeleted
 							&& x.UserId == userId
 							&& x.OrganizationId == orgId
-							&& x.ProductId == productId.Value
-							&& (x.BranchId == null || (branchId != null && x.BranchId == branchId.Value)))
-						.Select(x => x.RoleId)
+							&& x.ProductId == productId.Value)
 						.ToListAsync(cancellationToken);
 
-					foreach (var roleId in tenantRoleIds)
+					foreach (var assignment in tenantAssignments)
 					{
-						roleIds.Add(roleId);
+						if (assignment.BranchId == null)
+						{
+							roleIds.Add(assignment.RoleId);
+							continue;
+						}
+
+						if (branchId != null && assignment.BranchId == branchId.Value)
+						{
+							roleIds.Add(assignment.RoleId);
+							continue;
+						}
+
+						if (inheritanceOn
+							&& assignment.Inheritable
+							&& ancestorIds.Contains(assignment.BranchId.Value))
+						{
+							roleIds.Add(assignment.RoleId);
+						}
 					}
 				}
 			}
@@ -96,10 +126,11 @@ namespace SSO.Infrastructures.Services.Identity
 				return Array.Empty<string>();
 			}
 
+			var roleIdList = roleIds.ToList();
 			var permissionIds = await _reader
 				.Query<RolePermission>()
 				.AsNoTracking()
-				.Where(x => !x.IsDeleted && roleIds.Contains(x.RoleId))
+				.Where(x => !x.IsDeleted && roleIdList.Contains(x.RoleId))
 				.Select(x => x.PermissionId)
 				.Distinct()
 				.ToListAsync(cancellationToken);

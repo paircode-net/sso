@@ -15,9 +15,11 @@ namespace SSO.Core.Domain.Identity.UserRoleAssignments.Entity
 		public Guid RoleId { get; set; }
 		/// <summary>Null = platform-scoped (F00002-D2); set = tenant assignment.</summary>
 		public Guid? OrganizationId { get; set; }
-		/// <summary>Null = org-wide baseline; set = only that branch (no parent inheritance).</summary>
+		/// <summary>Null = org-wide baseline; set = that branch (exact, or inheritable to descendants when policy On).</summary>
 		public Guid? BranchId { get; set; }
 		public Guid ProductId { get; set; }
+		/// <summary>When Org inheritance is On, propagate this branch assignment to descendant branches (F00009-D1).</summary>
+		public bool Inheritable { get; set; }
 
 		public UserRoleAssignment()
 		{

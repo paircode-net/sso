@@ -26,6 +26,10 @@ namespace SSO.Infrastructures.Data.Identity.EntityMappings
 				.HasColumnType("NVARCHAR(64)")
 				.HasColumnName("Code")
 				.IsRequired(true);
+			builder.Property(e => e.BranchAuthzInheritance)
+				.HasColumnType("NVARCHAR(32)")
+				.HasColumnName("BranchAuthzInheritance")
+				.IsRequired(true);
 
 			builder.Property(e => e.CreatedAt).HasColumnType("datetime2").IsRequired(true);
 			builder.Property(e => e.UpdatedAt).HasColumnType("datetime2").IsRequired(false);

@@ -52,6 +52,7 @@
 | Signing keys (prod) | Cert path / Key Vault (ops D9); exigido quando não usar DevelopmentCertificates |
 | JWT com permissions / switch-context | Ativo — motor Role→Permission + `perm_ver` dinâmico |
 | Claims tipadas | `sso_c_{code}` + `claim_ver` (00008); User override Role |
+| Herança Branch | Opt-in Org + `Inheritable` (00009 / ADR-008); default Off |
 | UI login/consent | Login + ExternalLogin + Consent + forgot/reset/confirm/2FA Razor (D6 / 00007) |
 | AuthClients admin | `api/identity/auth-clients` + `AuthClientMetadata` (00007) |
 | Menus por permission | `MenuItem` + API effective; contrato em `product-integration.md` |

@@ -6,18 +6,22 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using SSO.Core.Domain.Identity._Context.Interfaces.Infrastructures.Data;
 using SSO.Core.Domain.Identity._Context.Interfaces.Services;
+using SSO.Core.Domain.Identity.Branches;
+using SSO.Core.Domain.Identity.Branches.Entity;
 using SSO.Core.Domain.Identity.ClaimDefinitions.Entity;
 using SSO.Core.Domain.Identity.ClientProductBindings.Entity;
 using SSO.Core.Domain.Identity.Memberships.Entity;
+using SSO.Core.Domain.Identity.Organizations.Entity;
 using SSO.Core.Domain.Identity.RoleClaims.Entity;
 using SSO.Core.Domain.Identity.UserClaimAssignments.Entity;
 using SSO.Core.Domain.Identity.UserRoleAssignments.Entity;
+using SSO.Shared.Identity;
 
 namespace SSO.Infrastructures.Services.Identity
 {
 	/// <summary>
-	/// Resolves typed claims: RoleClaim first, then UserClaimAssignment overrides (F00008-D5).
-	/// Context matching mirrors EffectivePermissionsResolver (ADR-004 exact branch).
+	/// Typed claims: RoleClaim then UserClaimAssignment override (F00008-D5).
+	/// Branch inheritance (ADR-008): active wins; missing codes filled from nearest inheritable ancestor (F00009-D3).
 	/// </summary>
 	public sealed class EffectiveClaimsResolver : IEffectiveClaimsResolver
 	{
@@ -54,128 +58,156 @@ namespace SSO.Infrastructures.Services.Identity
 
 			var definitionById = definitions.ToDictionary(x => x.Id);
 			var definitionIds = definitionById.Keys.ToList();
-
-			var roleIds = await ResolveRoleIdsAsync(userId, organizationId, branchId, productId.Value, cancellationToken);
 			var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-			if (roleIds.Count > 0)
-			{
-				var roleIdList = roleIds.ToList();
-				var roleClaims = await _reader.Query<RoleClaim>().AsNoTracking()
-					.Where(x => !x.IsDeleted
-						&& roleIdList.Contains(x.RoleId)
-						&& definitionIds.Contains(x.ClaimDefinitionId))
-					.ToListAsync(cancellationToken);
-
-				foreach (var rc in roleClaims)
-				{
-					if (definitionById.TryGetValue(rc.ClaimDefinitionId, out var def))
-					{
-						result[def.Code] = rc.Value;
-					}
-				}
-			}
-
-			var userAssignments = await _reader.Query<UserClaimAssignment>().AsNoTracking()
+			// Platform-scoped user claims
+			var platformClaims = await _reader.Query<UserClaimAssignment>().AsNoTracking()
 				.Where(x => !x.IsDeleted
 					&& x.UserId == userId
+					&& x.ProductId == productId.Value
+					&& x.OrganizationId == null
+					&& x.BranchId == null
+					&& definitionIds.Contains(x.ClaimDefinitionId))
+				.ToListAsync(cancellationToken);
+			ApplyUserOverrides(result, definitionById, platformClaims);
+
+			if (organizationId is not Guid orgId)
+			{
+				return Sort(result);
+			}
+
+			var hasMembership = await _reader.Query<Membership>().AsNoTracking()
+				.AnyAsync(x => !x.IsDeleted && x.UserId == userId && x.OrganizationId == orgId, cancellationToken);
+			if (!hasMembership)
+			{
+				return Sort(result);
+			}
+
+			var org = await _reader.Query<Organization>().AsNoTracking()
+				.FirstOrDefaultAsync(x => !x.IsDeleted && x.Id == orgId, cancellationToken);
+			var inheritanceOn = BranchAuthzInheritancePolicies.IsEnabled(org?.BranchAuthzInheritance);
+
+			IReadOnlyList<Guid> ancestorIds = Array.Empty<Guid>();
+			if (inheritanceOn && branchId is Guid activeBranch)
+			{
+				var branches = await _reader.Query<Branch>().AsNoTracking()
+					.Where(x => !x.IsDeleted && x.OrganizationId == orgId)
+					.ToListAsync(cancellationToken);
+				ancestorIds = BranchAncestry.GetAncestorIds(branches, activeBranch);
+			}
+
+			var roleAssignments = await _reader.Query<UserRoleAssignment>().AsNoTracking()
+				.Where(x => !x.IsDeleted
+					&& x.UserId == userId
+					&& x.OrganizationId == orgId
+					&& x.ProductId == productId.Value)
+				.ToListAsync(cancellationToken);
+
+			var userClaims = await _reader.Query<UserClaimAssignment>().AsNoTracking()
+				.Where(x => !x.IsDeleted
+					&& x.UserId == userId
+					&& x.OrganizationId == orgId
 					&& x.ProductId == productId.Value
 					&& definitionIds.Contains(x.ClaimDefinitionId))
 				.ToListAsync(cancellationToken);
 
-			foreach (var assignment in userAssignments)
+			// --- Active layer (org-wide + exact) ---
+			var activeRoleIds = roleAssignments
+				.Where(x => x.BranchId == null || (branchId != null && x.BranchId == branchId.Value))
+				.Select(x => x.RoleId)
+				.Distinct()
+				.ToList();
+
+			await MergeRoleClaimsAsync(result, definitionById, definitionIds, activeRoleIds, overwrite: true, cancellationToken);
+
+			var activeUserClaims = userClaims
+				.Where(x => x.BranchId == null || (branchId != null && x.BranchId == branchId.Value))
+				.ToList();
+			ApplyUserOverrides(result, definitionById, activeUserClaims);
+
+			// --- Ancestor layers (nearest first): fill missing only ---
+			if (inheritanceOn)
 			{
-				if (!definitionById.TryGetValue(assignment.ClaimDefinitionId, out var def))
+				foreach (var ancestorId in ancestorIds)
 				{
-					continue;
-				}
+					var layer = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-				if (assignment.OrganizationId == null)
-				{
-					if (assignment.BranchId == null)
+					var ancestorRoleIds = roleAssignments
+						.Where(x => x.Inheritable && x.BranchId == ancestorId)
+						.Select(x => x.RoleId)
+						.Distinct()
+						.ToList();
+					await MergeRoleClaimsAsync(layer, definitionById, definitionIds, ancestorRoleIds, overwrite: true, cancellationToken);
+
+					var ancestorUserClaims = userClaims
+						.Where(x => x.Inheritable && x.BranchId == ancestorId)
+						.ToList();
+					ApplyUserOverrides(layer, definitionById, ancestorUserClaims);
+
+					foreach (var pair in layer)
 					{
-						result[def.Code] = assignment.Value;
+						if (!result.ContainsKey(pair.Key))
+						{
+							result[pair.Key] = pair.Value;
+						}
 					}
-
-					continue;
-				}
-
-				if (organizationId is not Guid orgId || assignment.OrganizationId != orgId)
-				{
-					continue;
-				}
-
-				var hasMembership = await _reader.Query<Membership>().AsNoTracking()
-					.AnyAsync(
-						x => !x.IsDeleted && x.UserId == userId && x.OrganizationId == orgId,
-						cancellationToken);
-				if (!hasMembership)
-				{
-					continue;
-				}
-
-				if (assignment.BranchId == null
-					|| (branchId != null && assignment.BranchId == branchId.Value))
-				{
-					result[def.Code] = assignment.Value;
 				}
 			}
 
-			return result
-				.OrderBy(x => x.Key)
-				.ToDictionary(x => x.Key, x => x.Value, StringComparer.OrdinalIgnoreCase);
+			return Sort(result);
 		}
 
-		private async Task<HashSet<Guid>> ResolveRoleIdsAsync(
-			Guid userId,
-			Guid? organizationId,
-			Guid? branchId,
-			Guid productId,
+		private async Task MergeRoleClaimsAsync(
+			Dictionary<string, string> target,
+			Dictionary<Guid, ClaimDefinition> definitionById,
+			List<Guid> definitionIds,
+			List<Guid> roleIds,
+			bool overwrite,
 			CancellationToken cancellationToken)
 		{
-			var roleIds = new HashSet<Guid>();
+			if (roleIds.Count == 0)
+			{
+				return;
+			}
 
-			var platformRoleIds = await _reader.Query<UserRoleAssignment>().AsNoTracking()
+			var roleClaims = await _reader.Query<RoleClaim>().AsNoTracking()
 				.Where(x => !x.IsDeleted
-					&& x.UserId == userId
-					&& x.OrganizationId == null
-					&& x.ProductId == productId
-					&& x.BranchId == null)
-				.Select(x => x.RoleId)
+					&& roleIds.Contains(x.RoleId)
+					&& definitionIds.Contains(x.ClaimDefinitionId))
 				.ToListAsync(cancellationToken);
 
-			foreach (var id in platformRoleIds)
+			foreach (var rc in roleClaims)
 			{
-				roleIds.Add(id);
-			}
-
-			if (organizationId is Guid orgId)
-			{
-				var hasMembership = await _reader.Query<Membership>().AsNoTracking()
-					.AnyAsync(
-						x => !x.IsDeleted && x.UserId == userId && x.OrganizationId == orgId,
-						cancellationToken);
-
-				if (hasMembership)
+				if (!definitionById.TryGetValue(rc.ClaimDefinitionId, out var def))
 				{
-					var tenantRoleIds = await _reader.Query<UserRoleAssignment>().AsNoTracking()
-						.Where(x => !x.IsDeleted
-							&& x.UserId == userId
-							&& x.OrganizationId == orgId
-							&& x.ProductId == productId
-							&& (x.BranchId == null || (branchId != null && x.BranchId == branchId.Value)))
-						.Select(x => x.RoleId)
-						.ToListAsync(cancellationToken);
+					continue;
+				}
 
-					foreach (var id in tenantRoleIds)
-					{
-						roleIds.Add(id);
-					}
+				if (overwrite || !target.ContainsKey(def.Code))
+				{
+					target[def.Code] = rc.Value;
 				}
 			}
-
-			return roleIds;
 		}
+
+		private static void ApplyUserOverrides(
+			Dictionary<string, string> target,
+			Dictionary<Guid, ClaimDefinition> definitionById,
+			IEnumerable<UserClaimAssignment> assignments)
+		{
+			foreach (var assignment in assignments)
+			{
+				if (definitionById.TryGetValue(assignment.ClaimDefinitionId, out var def))
+				{
+					target[def.Code] = assignment.Value;
+				}
+			}
+		}
+
+		private static IReadOnlyDictionary<string, string> Sort(Dictionary<string, string> result)
+			=> result
+				.OrderBy(x => x.Key)
+				.ToDictionary(x => x.Key, x => x.Value, StringComparer.OrdinalIgnoreCase);
 
 		private async Task<Guid?> ResolveProductIdAsync(string? clientId, CancellationToken cancellationToken)
 		{

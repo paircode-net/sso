@@ -52,7 +52,8 @@ namespace SSO.Web.Api.Resources.IdentityDb
 					x.Value,
 					organization_id = x.OrganizationId,
 					branch_id = x.BranchId,
-					product_id = x.ProductId
+					product_id = x.ProductId,
+					inheritable = x.Inheritable
 				})
 				.ToListAsync(cancellationToken);
 
@@ -71,6 +72,7 @@ namespace SSO.Web.Api.Resources.IdentityDb
 			public Guid ProductId { get; set; }
 			public Guid? OrganizationId { get; set; }
 			public Guid? BranchId { get; set; }
+			public bool Inheritable { get; set; }
 		}
 
 		[HttpPost]
@@ -107,7 +109,8 @@ namespace SSO.Web.Api.Resources.IdentityDb
 				request.Value,
 				request.ProductId,
 				request.OrganizationId,
-				request.BranchId);
+				request.BranchId,
+				request.Inheritable);
 			_db.UserClaimAssignments.Add(entity);
 			await _db.SaveChangesAsync(cancellationToken);
 

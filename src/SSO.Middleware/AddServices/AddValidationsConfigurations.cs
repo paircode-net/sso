@@ -48,6 +48,7 @@ namespace SSO.Middleware.AddServices
 			services.AddTransient<MembershipUserOrganizationAlreadyExistsSpecification>();
 			services.AddTransient<UserEmailAlreadyExistsSpecification>();
 			services.AddTransient<BranchCodeAlreadyExistsSpecification>();
+			services.AddTransient<BranchParentWouldCreateCycleSpecification>();
 			services.AddTransient<PermissionCodeAlreadyExistsSpecification>();
 			services.AddTransient<RoleCodeAlreadyExistsSpecification>();
 			services.AddTransient<ClientProductBindingClientIdAlreadyExistsSpecification>();

@@ -37,6 +37,10 @@ namespace SSO.Infrastructures.Data.Identity.EntityMappings
 				.HasColumnType("UNIQUEIDENTIFIER")
 				.HasColumnName("ProductId")
 				.IsRequired(true);
+			builder.Property(e => e.Inheritable)
+				.HasColumnType("bit")
+				.HasColumnName("Inheritable")
+				.IsRequired(true);
 
 			builder.Property(e => e.CreatedAt).HasColumnType("datetime2").IsRequired(true);
 			builder.Property(e => e.UpdatedAt).HasColumnType("datetime2").IsRequired(false);

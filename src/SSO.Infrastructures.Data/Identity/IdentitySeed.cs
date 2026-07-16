@@ -78,7 +78,8 @@ namespace SSO.Infrastructures.Data.Identity
 				{
 					Id = DevOrganizationId,
 					Name = "Dev Organization",
-					Code = "dev-org"
+					Code = "dev-org",
+					BranchAuthzInheritance = BranchAuthzInheritancePolicies.Off
 				};
 				organization.MarkCreated();
 				context.Organizations.Add(organization);
@@ -462,7 +463,8 @@ namespace SSO.Infrastructures.Data.Identity
 				RoleId = roleId,
 				OrganizationId = organizationId,
 				BranchId = branchId,
-				ProductId = productId
+				ProductId = productId,
+				Inheritable = false
 			};
 			assignment.MarkCreated();
 			context.UserRoleAssignments.Add(assignment);

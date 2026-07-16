@@ -61,7 +61,7 @@
 
 ### Pendente (pós-épico)
 
-SMTP real, ProductEnablement avançado, herança Branch (00009), observabilidade/CI (00010).
+SMTP real, ProductEnablement avançado, observabilidade/CI (00010).
 
 ## Serviços de infraestrutura transversais
 

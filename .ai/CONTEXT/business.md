@@ -45,7 +45,7 @@ Fonte: `.ai/WORK/2026-07-14-00001-plataforma-sso.md` e `.ai/CONTEXT/adr/`.
 | Contexto ativo via switch-context | Claims `organization_id` / `branch_id` no token; header **não** é fonte de verdade |
 | Permissions no JWT | Conjunto efetivo do contexto ativo embutido no access token (ADR-005) |
 | Frescor | TTL curto; re-resolução em login, refresh e switch-context |
-| Branch hierárquica | Estrutura opcional; **sem** herança authz pai→filho no MVP |
+| Branch hierárquica | Estrutura opcional; default **sem** herança authz (ADR-004); opt-in pai→filho via ADR-008 / 00009 |
 | Herança Role → Permission | Permitida |
 | Product ≠ AuthClient | Conceitos distintos |
 | Admin UI rica | Fora do MVP (API-only + Razor login/consent) |

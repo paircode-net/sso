@@ -93,7 +93,7 @@ Arquivo central: `src/SSO.Middleware/Configurations.cs`
 | Flows | Authorization Code+PKCE, Refresh, Client Credentials, `switch_context` |
 | Controllers `/connect/*` | `AuthorizationController` + revoke |
 | Claims JWT | `organization_id` / `branch_id` / `permissions` / `perm_ver` via `TokenClaimsFactory` |
-| Permissions resolver | Ativo — Role→Permission + UserRoleAssignment (ADR-004, sem herança Branch) |
+| Permissions resolver | Ativo — Role→Permission + UserRoleAssignment; herança Branch **opt-in** (ADR-008) |
 | Conta / e-mail / 2FA | Ativo — Razor + `RequireConfirmedAccount` + TOTP |
 | Sessões | Revogação em massa via OpenIddict tokens (`IUserSessionService`) |
 | Auditoria AuthN/AuthZ | `AuthAuditEvents` + `GET /api/identity/auth-audit-events` |

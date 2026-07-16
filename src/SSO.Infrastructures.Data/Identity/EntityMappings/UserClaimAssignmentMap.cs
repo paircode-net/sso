@@ -23,6 +23,7 @@ namespace SSO.Infrastructures.Data.Identity.EntityMappings
 			builder.Property(e => e.OrganizationId).HasColumnType("UNIQUEIDENTIFIER").IsRequired(false);
 			builder.Property(e => e.BranchId).HasColumnType("UNIQUEIDENTIFIER").IsRequired(false);
 			builder.Property(e => e.ProductId).HasColumnType("UNIQUEIDENTIFIER").IsRequired(true);
+			builder.Property(e => e.Inheritable).HasColumnType("bit").IsRequired(true);
 
 			builder.Property(e => e.CreatedAt).HasColumnType("datetime2").IsRequired(true);
 			builder.Property(e => e.UpdatedAt).HasColumnType("datetime2").IsRequired(false);

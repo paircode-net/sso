@@ -15,7 +15,7 @@ Products authorize **locally** from the access token. Effective permissions are 
 | `sub` | 1 | User id (Guid) |
 | `email` / `name` / `preferred_username` | 0..1 | OIDC profile |
 | `organization_id` | 0..1 | Active org after switch-context |
-| `branch_id` | 0..1 | Active branch (exact match; no parent inheritance — ADR-004) |
+| `branch_id` | 0..1 | Active branch. **Default:** exact match (ADR-004). **Opt-in:** ancestor inheritance when Org `BranchAuthzInheritance=InheritFromAncestors` **and** assignment `Inheritable=true` (ADR-008 / 00009). |
 | `permissions` | 0..N | One claim value per permission **code** (e.g. `hq.reports`) — **primary route gate** |
 | `perm_ver` | 1 | Opaque policy etag (UTC ticks max of Permission / RolePermission / UserRoleAssignment stamps). |
 | `sso_c_{code}` | 0..N | Typed domain attributes (feature 00008). Ex.: `sso_c_department=finance`. **Not** for route authz. |
@@ -170,3 +170,17 @@ Register a new product client: create Product → create AuthClient (SPA PKCE or
 | SDK | `GetTypedClaim("department")` / `GetTypedClaim<bool>("mfa_required")` / `GetClaimVersion()` |
 
 Seed examples: `department` (string), `mfa_required` (bool), `can_export` (bool).
+
+## Branch authz inheritance (feature 00009 / ADR-008)
+
+| Topic | Detail |
+|-------|--------|
+| Default | **Off** — exact branch match (ADR-004) |
+| Org flag | `Organization.BranchAuthzInheritance` = `Off` \| `InheritFromAncestors` |
+| Assignment flag | `UserRoleAssignment.Inheritable` / `UserClaimAssignment.Inheritable` |
+| Rule | Inheritance only when **both** Org On and assignment Inheritable |
+| Permissions | Union of org-wide + exact + inheritable ancestors |
+| Typed claims | Active value wins; missing codes filled from nearest inheritable ancestor |
+| Cycles | `ParentBranchId` that would cycle is rejected |
+
+API: update org via `PUT /api/identity/organizations/{id}` with `branchAuthzInheritance`; set `inheritable` on role/claim assignments.
