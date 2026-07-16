@@ -27,6 +27,8 @@ using SSO.Core.Domain.Identity.Roles.Validations.DomainValidations;
 using SSO.Core.Domain.Identity.Roles.Validations.EntityValidations;
 using SSO.Core.Domain.Identity.MenuItems.Validations.DomainValidations;
 using SSO.Core.Domain.Identity.MenuItems.Validations.EntityValidations;
+using SSO.Core.Domain.Identity.OrganizationInvites.Validations.DomainValidations;
+using SSO.Core.Domain.Identity.OrganizationInvites.Validations.EntityValidations;
 using SSO.Core.Domain.Identity.UserRoleAssignments.Validations.DomainValidations;
 using SSO.Core.Domain.Identity.UserRoleAssignments.Validations.EntityValidations;
 using SSO.Core.Domain.Identity.Users.Specifications;
@@ -68,6 +70,7 @@ namespace SSO.Middleware.AddServices
 			services.AddTransient<UserRoleAssignmentValidator>();
 			services.AddTransient<ClientProductBindingValidator>();
 			services.AddTransient<MenuItemValidator>();
+			services.AddTransient<OrganizationInviteValidator>();
 
 			return services;
 		}
@@ -119,6 +122,9 @@ namespace SSO.Middleware.AddServices
 			services.AddTransient<CreateMenuItemSpecificationsValidator>();
 			services.AddTransient<UpdateMenuItemSpecificationsValidator>();
 			services.AddTransient<DeleteMenuItemSpecificationsValidator>();
+
+			services.AddTransient<CreateOrganizationInviteSpecificationsValidator>();
+			services.AddTransient<CancelOrganizationInviteSpecificationsValidator>();
 
 			return services;
 		}

@@ -72,6 +72,7 @@ namespace SSO.Middleware
 
 			app.UseRequestLocalization(localizationOptions);
 
+			app.UseSession();
 			app.UseAuthentication();
 			app.UseAuthorization();
 
@@ -143,6 +144,8 @@ namespace SSO.Middleware
 				.AddSupportedUICultures(supportedCultures);
 
 			app.UseRequestLocalization(localizationOptions);
+
+			app.UseSession();
 
 			return app;
 		}

@@ -15,7 +15,7 @@ O Authorization Server usa **OpenIddict** + **ASP.NET Identity**, com APIs de ge
 | Multi-produto | Bindings client → product; menus efetivos por permission |
 | IdPs externos | Microsoft Entra ID (OIDC, homologável); Google OIDC e LDAP (stubs) |
 | Hardening | CORS allowlist, rate limiting, lockout, signing Dev/Prod, migrations controladas em Production |
-| Admin MVP | API `api/identity/*` com AuthZ (`sso.admin.*`) — ver [admin-api-authz.md](.ai/CONTEXT/admin-api-authz.md) |
+| Admin MVP | Portal Razor `/Admin` + API `api/identity/*` (`sso.admin.*`) — [admin-api-authz.md](.ai/CONTEXT/admin-api-authz.md) |
 | Auditoria | Eventos AuthN/AuthZ (`AuthAuditEvents`) |
 
 Contrato para produtos consumidores: [`.ai/CONTEXT/product-integration.md`](.ai/CONTEXT/product-integration.md) · IdPs e hardening: [`.ai/CONTEXT/phase6-hardening.md`](.ai/CONTEXT/phase6-hardening.md).

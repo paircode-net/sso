@@ -2,7 +2,7 @@
 
 > Arquivo: `.ai/WORK/2026-07-16-00003-portal-admin-por-papel.md`  
 > Template: `.ai/TEMPLATES/feature-plan.md`  
-> Status: **Pronto para implementação** (D-00003-1..3 aceitas)  
+> Status: **Implementado** (2026-07-16)  
 > Data: 2026-07-16  
 > Depende de: **00002** (AuthZ APIs admin) — entregue  
 > Relaciona: 00007 (gestão AuthClients na UI)

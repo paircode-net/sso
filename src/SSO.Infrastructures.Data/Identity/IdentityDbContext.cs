@@ -7,6 +7,7 @@ using SSO.Core.Domain.Identity.ClientProductBindings.Entity;
 using SSO.Core.Domain.Identity.ExternalIdentityProviders.Entity;
 using SSO.Core.Domain.Identity.Memberships.Entity;
 using SSO.Core.Domain.Identity.MenuItems.Entity;
+using SSO.Core.Domain.Identity.OrganizationInvites.Entity;
 using SSO.Core.Domain.Identity.Organizations.Entity;
 using SSO.Core.Domain.Identity.Permissions.Entity;
 using SSO.Core.Domain.Identity.Products.Entity;
@@ -34,6 +35,7 @@ namespace SSO.Infrastructures.Data.Identity
 		public DbSet<AuthAuditEvent> AuthAuditEvents { get; set; }
 		public DbSet<MenuItem> MenuItems { get; set; }
 		public DbSet<ExternalIdentityProvider> ExternalIdentityProviders { get; set; }
+		public DbSet<OrganizationInvite> OrganizationInvites { get; set; }
 
 		public IdentityDbContext()
 		{
@@ -71,6 +73,7 @@ namespace SSO.Infrastructures.Data.Identity
 			builder.ApplyConfiguration(new AuthAuditEventMap());
 			builder.ApplyConfiguration(new MenuItemMap());
 			builder.ApplyConfiguration(new ExternalIdentityProviderMap());
+			builder.ApplyConfiguration(new OrganizationInviteMap());
 		}
 	}
 }

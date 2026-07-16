@@ -1,0 +1,44 @@
+@page
+@model SSO.Web.Api.Areas.Admin.Pages.InvitesModel
+@{
+	ViewData["Title"] = "Convites";
+}
+<h1>Convites</h1>
+<p class="meta">Membership só é criada após o aceite do convidado.</p>
+@if (!string.IsNullOrEmpty(Model.Message)) { <div class="flash">@Model.Message</div> }
+@if (!string.IsNullOrEmpty(Model.Error)) { <div class="flash error">@Model.Error</div> }
+@if (Model.Portal.OrganizationId is not null)
+{
+	<div class="card">
+		<h2>Enviar convite</h2>
+		<form method="post" asp-page-handler="Send">
+			<label>E-mail</label>
+			<input asp-for="Email" type="email" required />
+			<p style="margin-top:1rem"><button type="submit">Convidar</button></p>
+		</form>
+	</div>
+	<div class="card">
+		<table>
+			<thead><tr><th>E-mail</th><th>Status</th><th>Expira</th><th></th></tr></thead>
+			<tbody>
+			@foreach (var i in Model.Items)
+			{
+				<tr>
+					<td>@i.Email</td>
+					<td>@i.Status</td>
+					<td>@i.ExpiresAt.ToString("u")</td>
+					<td>
+						@if (i.Status == "Pending")
+						{
+							<form method="post" asp-page-handler="Cancel" style="display:inline">
+								<input type="hidden" name="id" value="@i.Id" />
+								<button type="submit" class="btn-secondary">Cancelar</button>
+							</form>
+						}
+					</td>
+				</tr>
+			}
+			</tbody>
+		</table>
+	</div>
+}

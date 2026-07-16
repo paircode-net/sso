@@ -37,8 +37,17 @@ namespace SSO.Middleware.AddServices
 
 			services.AddHttpContextAccessor();
 			services.AddScoped<ICurrentAdminContext, CurrentAdminContext>();
+			services.AddScoped<IAdminPortalContextService, AdminPortalContextService>();
+			services.AddScoped<AdminPortalPageFilter>();
 			services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
 			services.AddAuthorization();
+			services.AddDistributedMemoryCache();
+			services.AddSession(options =>
+			{
+				options.Cookie.Name = ".SSO.AdminSession";
+				options.Cookie.HttpOnly = true;
+				options.Cookie.IsEssential = true;
+			});
 
 			services
 				.AddIdentity<User, IdentityRole<Guid>>(options =>

@@ -1,0 +1,63 @@
+@page
+@model SSO.Web.Api.Pages.Account.AcceptInviteModel
+@{
+	Layout = null;
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+	<meta charset="utf-8" />
+	<title>Aceitar convite — SSO</title>
+	<style>
+		body { font-family: Segoe UI, sans-serif; max-width: 480px; margin: 3rem auto; padding: 0 1rem; color: #1a1a1a; }
+		.card { border: 1px solid #ddd; border-radius: 8px; padding: 1.25rem; }
+		.error { color: #b00020; }
+		.ok { color: #0a7a3e; }
+		label { display:block; margin-top: .75rem; }
+		input, button { width: 100%; padding: .5rem; margin-top: .25rem; }
+		button { margin-top: 1rem; cursor: pointer; }
+	</style>
+</head>
+<body>
+	<h1>Convite para organização</h1>
+	@if (!string.IsNullOrEmpty(Model.Message))
+	{
+		<p class="ok">@Model.Message</p>
+		<p><a href="/Admin">Ir para o portal admin</a> · <a href="/">Início</a></p>
+	}
+	else if (Model.Invite is not null)
+	{
+		<div class="card">
+			<p>Organização: <strong>@(Model.OrganizationName ?? Model.Invite.OrganizationId.ToString("D"))</strong></p>
+			<p>E-mail convidado: <strong>@Model.Invite.Email</strong></p>
+			@if (!string.IsNullOrEmpty(Model.Error)) { <p class="error">@Model.Error</p> }
+			@if (Model.NeedsLogin)
+			{
+				<p>Faça <a href="/Account/Login?returnUrl=@Uri.EscapeDataString(Request.Path + Request.QueryString)">login</a> com este e-mail para aceitar.</p>
+			}
+			else
+			{
+				<form method="post" asp-page-handler="Accept">
+					<input type="hidden" asp-for="Token" />
+					@if (Model.NeedsRegistration)
+					{
+						<label>Crie uma senha</label>
+						<input asp-for="Input.Password" type="password" required />
+						<label>Confirme a senha</label>
+						<input asp-for="Input.ConfirmPassword" type="password" required />
+					}
+					<button type="submit">Aceitar convite</button>
+				</form>
+				<form method="post" asp-page-handler="Decline" style="margin-top:.5rem">
+					<input type="hidden" asp-for="Token" />
+					<button type="submit">Recusar</button>
+				</form>
+			}
+		</div>
+	}
+	else
+	{
+		<p class="error">@(Model.Error ?? "Convite inválido.")</p>
+	}
+</body>
+</html>

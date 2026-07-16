@@ -1,0 +1,44 @@
+@page
+@model SSO.Web.Api.Areas.Admin.Pages.BranchesModel
+@{
+	ViewData["Title"] = "Filiais";
+}
+<h1>Filiais</h1>
+@if (!string.IsNullOrEmpty(Model.Message)) { <div class="flash">@Model.Message</div> }
+@if (!string.IsNullOrEmpty(Model.Error)) { <div class="flash error">@Model.Error</div> }
+@if (Model.Portal.OrganizationId is not null)
+{
+	<div class="card">
+		<h2>Nova filial</h2>
+		<form method="post">
+			<label>Nome</label>
+			<input asp-for="Name" required />
+			<label>Código</label>
+			<input asp-for="Code" required />
+			<label>Filial pai (opcional)</label>
+			<select asp-for="ParentBranchId">
+				<option value="">(nenhuma)</option>
+				@foreach (var b in Model.Items)
+				{
+					<option value="@b.Id">@b.Name</option>
+				}
+			</select>
+			<p style="margin-top:1rem"><button type="submit">Criar</button></p>
+		</form>
+	</div>
+	<div class="card">
+		<table>
+			<thead><tr><th>Nome</th><th>Código</th><th>Pai</th></tr></thead>
+			<tbody>
+			@foreach (var b in Model.Items)
+			{
+				<tr>
+					<td>@b.Name</td>
+					<td>@b.Code</td>
+					<td>@(b.ParentBranchId?.ToString("D") ?? "—")</td>
+				</tr>
+			}
+			</tbody>
+		</table>
+	</div>
+}

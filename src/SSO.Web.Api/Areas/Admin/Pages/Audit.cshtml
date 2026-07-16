@@ -1,0 +1,22 @@
+@page
+@model SSO.Web.Api.Areas.Admin.Pages.AuditModel
+@{
+	ViewData["Title"] = "Auditoria";
+}
+<h1>Eventos de auditoria</h1>
+<div class="card">
+	<table>
+		<thead><tr><th>Quando</th><th>Evento</th><th>Outcome</th><th>E-mail</th></tr></thead>
+		<tbody>
+		@foreach (var e in Model.Items)
+		{
+			<tr>
+				<td>@e.CreatedAt.ToString("u")</td>
+				<td>@e.EventType</td>
+				<td>@e.Outcome</td>
+				<td>@(e.Email ?? "—")</td>
+			</tr>
+		}
+		</tbody>
+	</table>
+</div>

@@ -49,7 +49,7 @@ Plano: `.ai/WORK/2026-07-16-00003-portal-admin-por-papel.md`.
 | F00001-D8 | Manter Sample até Fase 2 estável | Aceito |
 | F00001-D9 | Dev: key/cert local; Prod: Key Vault + rotação | Aceito (ADR-001) |
 | F00001-D10 | `Product` ≠ `AuthClient` | Aceito |
-| F00001-D11 | Admin MVP = API-only | Aceito |
+| F00001-D11 | Admin MVP = API-only | **Superado parcialmente** por 00003 (portal Razor `/Admin`) |
 | F00001-D12 | Soft-delete + auditoria nas entidades Identity | Aceito (P-008 parcial) |
 
 ## Decisões observadas no código (implícitas)

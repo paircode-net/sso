@@ -1,0 +1,20 @@
+@page
+@model SSO.Web.Api.Areas.Admin.Pages.IndexModel
+@{
+	ViewData["Title"] = "Início";
+}
+<h1>Portal administrativo</h1>
+<p class="meta">
+	Org ativa: @(Model.Portal.OrganizationId?.ToString("D") ?? "(nenhuma)")
+	· Branch: @(Model.Portal.BranchId?.ToString("D") ?? "(nenhuma)")
+</p>
+<div class="card">
+	<p>Use <strong>Contexto</strong> para definir organização/filial via switch (sessão = resultado do switch_context).</p>
+	<p>Convites são obrigatórios para vincular usuários à organização (aceite do convidado).</p>
+	<ul>
+		@foreach (var p in Model.Portal.Permissions)
+		{
+			<li><code>@p</code></li>
+		}
+	</ul>
+</div>

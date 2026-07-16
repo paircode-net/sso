@@ -42,7 +42,15 @@ namespace SSO.Tests
 			services.AddControllersWithViews()
 				.AddApplicationPart(typeof(SamplesController).Assembly);
 
-			services.AddRazorPages()
+			services.AddRazorPages(options =>
+			{
+				options.Conventions.AddAreaFolderApplicationModelConvention(
+					"Admin",
+					"/",
+					model => model.Filters.Add(
+						new Microsoft.AspNetCore.Mvc.ServiceFilterAttribute(
+							typeof(SSO.Middleware.Identity.AdminPortalPageFilter))));
+			})
 				.AddApplicationPart(typeof(SamplesController).Assembly);
 
 			services.ConfigureApplicationCookie(options =>

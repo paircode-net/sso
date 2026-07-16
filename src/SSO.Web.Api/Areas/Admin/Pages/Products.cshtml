@@ -1,0 +1,17 @@
+@page
+@model SSO.Web.Api.Areas.Admin.Pages.ProductsModel
+@{
+	ViewData["Title"] = "Produtos";
+}
+<h1>Produtos</h1>
+<div class="card">
+	<table>
+		<thead><tr><th>Nome</th><th>Código</th></tr></thead>
+		<tbody>
+		@foreach (var p in Model.Items)
+		{
+			<tr><td>@p.Name</td><td>@p.Code</td></tr>
+		}
+		</tbody>
+	</table>
+</div>
