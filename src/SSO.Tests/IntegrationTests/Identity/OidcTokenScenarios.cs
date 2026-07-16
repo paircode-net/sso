@@ -95,6 +95,7 @@ namespace SSO.Tests.IntegrationTests.Identity
 
 			Assert.AreEqual(IdentitySeed.DevOrganizationId.ToString("D"), principal.FindFirst(SsoClaimTypes.OrganizationId)?.Value);
 			Assert.IsTrue(principal.FindAll(SsoClaimTypes.Permissions).Any(c => c.Value == "sso.access"));
+			Assert.IsFalse(string.IsNullOrWhiteSpace(principal.FindFirst(SsoClaimTypes.SessionId)?.Value));
 		}
 
 		[TestMethod]

@@ -1,3 +1,4 @@
+using System;
 using SSO.Core.Domain.Interfaces.Infrastructures.Services;
 using SSO.Core.Domain.Identity._Context.Interfaces.Services;
 using SSO.Infrastructures.Services;
@@ -14,6 +15,11 @@ namespace SSO.Middleware.AddServices
 			services.AddSingleton<IMailService, MailService>();
 			services.AddScoped<IAuthAuditService, AuthAuditService>();
 			services.AddScoped<IUserSessionService, UserSessionService>();
+			services.AddHttpClient("sso-webhooks", client =>
+			{
+				client.Timeout = TimeSpan.FromSeconds(10);
+			});
+			services.AddHostedService<WebhookOutboxSenderHostedService>();
 
 			return services;
 		}

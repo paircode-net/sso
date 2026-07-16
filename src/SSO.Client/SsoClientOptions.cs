@@ -19,5 +19,26 @@ namespace SSO.Client
 
 		/// <summary>Map inbound JWT claim types (keeps short names like permissions).</summary>
 		public bool MapInboundClaims { get; set; } = false;
+
+		/// <summary>Hot revocation check against AS (feature 00005). On by default; opt-out disables SLA.</summary>
+		public SsoRevocationCheckOptions RevocationCheck { get; set; } = new();
+	}
+
+	public sealed class SsoRevocationCheckOptions
+	{
+		/// <summary>When true (default), JwtBearer OnTokenValidated queries session status.</summary>
+		public bool Enabled { get; set; } = true;
+
+		/// <summary>Local cache TTL for sid status. Keep ≤ 60s to meet SLA (default 30s).</summary>
+		public int CacheSeconds { get; set; } = 30;
+
+		/// <summary>Relative path on the authority for status checks.</summary>
+		public string StatusPath { get; set; } = "api/identity/sessions/{sid}/status";
+
+		/// <summary>
+		/// When the status endpoint is unreachable: true = fail closed (reject), false = fail open (allow).
+		/// Default fail-open for availability; set true for high-security.
+		/// </summary>
+		public bool FailClosed { get; set; } = false;
 	}
 }

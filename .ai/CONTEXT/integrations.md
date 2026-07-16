@@ -21,12 +21,22 @@ Ver **[product-integration.md](product-integration.md)** — claim names, TTL, `
 
 | Artefato | Caminho | Uso |
 |----------|---------|-----|
-| `SSO.Client` (.NET 0.1.0) | `src/SSO.Client/` | JwtBearer, `RequiresPermission`, claim helpers, `SsoTokenClient` |
+| `SSO.Client` (.NET 0.1.0) | `src/SSO.Client/` | JwtBearer, `RequiresPermission`, claim helpers, `SsoTokenClient`, **hot revoke check** (00005) |
 | `@sso/client` (JS/TS 0.1.0) | `clients/js/` | Parse claims + `requirePermission` (sem verificar assinatura) |
 | Sample product API | `samples/product-api/` | Aceite do SDK .NET |
 | Sample BFF | `samples/sso-bff/` | Cookie/session + refresh + `switch_context` |
 
 Pack local: `dotnet pack src/SSO.Client` · JS: `cd clients/js && npm run build`.
+
+## Hot revocation (feature 00005)
+
+| Artefato | Nota |
+|----------|------|
+| Claim `sid` | Access token; ADR-007 |
+| Deny-list | `IdentityDb.RevokedSessions` |
+| Status | `GET /api/identity/sessions/{sid}/status` |
+| Webhook | Outbox + `X-SSO-Signature: sha256=…` (`ClientWebhookEndpoints`) |
+| SLA | ≤ 60s com SDK default-on |
 
 ## Hardening / IdPs
 

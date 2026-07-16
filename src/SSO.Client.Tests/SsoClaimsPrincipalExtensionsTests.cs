@@ -17,7 +17,8 @@ namespace SSO.Client.Tests
 				new Claim(SsoClaimTypes.Permissions, "sso.access"),
 				new Claim(SsoClaimTypes.Permissions, "hq.reports"),
 				new Claim(SsoClaimTypes.PermissionVersion, "123"),
-				new Claim(SsoClaimTypes.OrganizationId, IdentitySeedOrg)
+				new Claim(SsoClaimTypes.OrganizationId, IdentitySeedOrg),
+				new Claim(SsoClaimTypes.SessionId, IdentitySeedOrg)
 			}, "test"));
 
 			CollectionAssert.AreEquivalent(
@@ -25,6 +26,7 @@ namespace SSO.Client.Tests
 				user.GetPermissions().ToList());
 			Assert.AreEqual("123", user.GetPermissionVersion());
 			Assert.AreEqual(Guid.Parse(IdentitySeedOrg), user.GetOrganizationId());
+			Assert.AreEqual(Guid.Parse(IdentitySeedOrg), user.GetSessionId());
 			Assert.IsTrue(user.HasPermission("hq.reports"));
 			Assert.IsFalse(user.HasPermission("missing"));
 		}

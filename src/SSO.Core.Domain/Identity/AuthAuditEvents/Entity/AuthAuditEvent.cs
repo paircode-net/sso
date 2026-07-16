@@ -58,6 +58,7 @@ namespace SSO.Core.Domain.Identity.AuthAuditEvents.Entity
 		public const string TwoFactorEnabled = "2fa.enabled";
 		public const string Logout = "logout";
 		public const string TokensRevoked = "tokens.revoked";
+		public const string SessionRevoked = "session.revoked";
 	}
 
 	public static class AuthAuditOutcomes

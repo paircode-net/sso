@@ -4,6 +4,7 @@ export const SsoClaimTypes = {
   branchId: "branch_id",
   permissions: "permissions",
   permissionVersion: "perm_ver",
+  sessionId: "sid",
 } as const;
 
 export type SsoJwtPayload = {
@@ -12,6 +13,7 @@ export type SsoJwtPayload = {
   branch_id?: string;
   permissions?: string | string[];
   perm_ver?: string;
+  sid?: string;
   [key: string]: unknown;
 };
 
@@ -54,6 +56,11 @@ export function requirePermission(
 
   const granted = new Set(getPermissions(payload).map((p) => p.toLowerCase()));
   return permissionCodes.some((code) => granted.has(code.toLowerCase()));
+}
+
+export function getSessionId(payload: SsoJwtPayload): string | undefined {
+  const value = payload.sid ?? payload[SsoClaimTypes.sessionId];
+  return value == null ? undefined : String(value);
 }
 
 export function getOrganizationId(payload: SsoJwtPayload): string | undefined {

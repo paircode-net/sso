@@ -6,6 +6,8 @@ namespace SSO.Shared.Identity
 		public const string BranchId = "branch_id";
 		public const string Permissions = "permissions";
 		public const string PermissionVersion = "perm_ver";
+		/// <summary>Stable session id for hot revocation (feature 00005).</summary>
+		public const string SessionId = "sid";
 	}
 
 	public static class SsoGrantTypes

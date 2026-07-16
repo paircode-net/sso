@@ -5,6 +5,13 @@ namespace SSO.Client
 {
 	public static class SsoClaimsPrincipalExtensions
 	{
+		public static Guid? GetSessionId(this ClaimsPrincipal user)
+		{
+			var value = user.FindFirst(SsoClaimTypes.SessionId)?.Value
+				?? user.FindFirst("sid")?.Value;
+			return Guid.TryParse(value, out var id) ? id : null;
+		}
+
 		public static Guid? GetOrganizationId(this ClaimsPrincipal user)
 		{
 			var value = user.FindFirst(SsoClaimTypes.OrganizationId)?.Value

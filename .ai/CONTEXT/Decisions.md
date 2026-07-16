@@ -12,6 +12,7 @@ Registro leve de decisões observáveis ou pendentes. Para decisões novas forma
 | ADR-004 | AuthZ contextual sem herança Branch no MVP | [adr/ADR-004-contextual-authz-no-branch-inheritance.md](adr/ADR-004-contextual-authz-no-branch-inheritance.md) |
 | ADR-005 | Permissões efetivas no JWT | [adr/ADR-005-permissions-in-jwt.md](adr/ADR-005-permissions-in-jwt.md) |
 | ADR-006 | Bounded context Identity / IdentityDb | [adr/ADR-006-identity-bounded-context.md](adr/ADR-006-identity-bounded-context.md) |
+| ADR-007 | Claim `sid` + deny-list SQL (hot revoke) | [adr/ADR-007-sid-hot-revocation.md](adr/ADR-007-sid-hot-revocation.md) |
 
 Plano: `.ai/WORK/2026-07-14-00001-plataforma-sso.md`.
 
@@ -54,7 +55,7 @@ Plano: `.ai/WORK/2026-07-16-00004-sdk-integracao-produtos.md` (**implementado**)
 | F00005-D3 | SLA de revoke **≤ 60 s** (cache SDK 30–60s; configurável p/ 15s em high-security) | **Aceito** |
 | F00005-D4 | Incluir MVP de notificações: outbox + webhook HMAC `session.revoked` por AuthClient | **Aceito** |
 
-Plano: `.ai/WORK/2026-07-16-00005-revogacao-quente-sessao.md` (**pronto p/ implementar**).
+Plano: `.ai/WORK/2026-07-16-00005-revogacao-quente-sessao.md` (**implementado**).
 
 ## Decisões feature 00001 (D1–D12)
 

@@ -18,15 +18,18 @@ namespace SSO.Middleware.Identity
 		private readonly UserManager<User> _userManager;
 		private readonly IEffectivePermissionsResolver _permissionsResolver;
 		private readonly IPermissionPolicyVersionProvider _policyVersionProvider;
+		private readonly IUserSessionService _sessionService;
 
 		public TokenClaimsFactory(
 			UserManager<User> userManager,
 			IEffectivePermissionsResolver permissionsResolver,
-			IPermissionPolicyVersionProvider policyVersionProvider)
+			IPermissionPolicyVersionProvider policyVersionProvider,
+			IUserSessionService sessionService)
 		{
 			_userManager = userManager;
 			_permissionsResolver = permissionsResolver;
 			_policyVersionProvider = policyVersionProvider;
+			_sessionService = sessionService;
 		}
 
 		public async Task<ClaimsPrincipal> CreateUserPrincipalAsync(
@@ -35,6 +38,7 @@ namespace SSO.Middleware.Identity
 			string? clientId,
 			Guid? organizationId,
 			Guid? branchId,
+			Guid? existingSessionId = null,
 			CancellationToken cancellationToken = default)
 		{
 			var identity = new ClaimsIdentity(
@@ -56,6 +60,15 @@ namespace SSO.Middleware.Identity
 			{
 				identity.SetClaim(SsoClaimTypes.BranchId, branch.ToString("D"));
 			}
+
+			var session = await _sessionService.EnsureSessionAsync(
+				user.Id,
+				clientId,
+				organizationId,
+				branchId,
+				existingSessionId,
+				cancellationToken);
+			identity.SetClaim(SsoClaimTypes.SessionId, session.Id.ToString("D"));
 
 			var permissions = await _permissionsResolver.ResolveAsync(
 				user.Id,
@@ -111,7 +124,8 @@ namespace SSO.Middleware.Identity
 					=> new[] { Destinations.AccessToken, Destinations.IdentityToken },
 				Claims.Email
 					=> new[] { Destinations.AccessToken, Destinations.IdentityToken },
-				SsoClaimTypes.OrganizationId or SsoClaimTypes.BranchId or SsoClaimTypes.Permissions or SsoClaimTypes.PermissionVersion
+				SsoClaimTypes.OrganizationId or SsoClaimTypes.BranchId or SsoClaimTypes.Permissions
+					or SsoClaimTypes.PermissionVersion or SsoClaimTypes.SessionId
 					=> new[] { Destinations.AccessToken },
 				_ => new[] { Destinations.AccessToken }
 			};

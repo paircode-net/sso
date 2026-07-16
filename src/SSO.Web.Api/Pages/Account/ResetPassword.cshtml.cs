@@ -18,11 +18,16 @@ namespace SSO.Web.Api.Pages.Account
 	{
 		private readonly UserManager<User> _userManager;
 		private readonly IAuthAuditService _auditService;
+		private readonly IUserSessionService _sessionService;
 
-		public ResetPasswordModel(UserManager<User> userManager, IAuthAuditService auditService)
+		public ResetPasswordModel(
+			UserManager<User> userManager,
+			IAuthAuditService auditService,
+			IUserSessionService sessionService)
 		{
 			_userManager = userManager;
 			_auditService = auditService;
+			_sessionService = sessionService;
 		}
 
 		[BindProperty]
@@ -84,6 +89,8 @@ namespace SSO.Web.Api.Pages.Account
 				ErrorMessage = string.Join(" ", result.Errors.Select(e => e.Description));
 				return Page();
 			}
+
+			await _sessionService.RevokeAllForUserAsync(user.Id, "password.reset");
 
 			await _auditService.WriteAsync(AuthAuditEvent.Create(
 				AuthAuditEventTypes.PasswordResetCompleted,

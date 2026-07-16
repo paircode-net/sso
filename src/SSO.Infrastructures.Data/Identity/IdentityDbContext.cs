@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SSO.Core.Domain.Identity.AuthAuditEvents.Entity;
 using SSO.Core.Domain.Identity.Branches.Entity;
 using SSO.Core.Domain.Identity.ClientProductBindings.Entity;
+using SSO.Core.Domain.Identity.ClientWebhooks.Entity;
 using SSO.Core.Domain.Identity.ExternalIdentityProviders.Entity;
 using SSO.Core.Domain.Identity.Memberships.Entity;
 using SSO.Core.Domain.Identity.MenuItems.Entity;
@@ -11,10 +12,13 @@ using SSO.Core.Domain.Identity.OrganizationInvites.Entity;
 using SSO.Core.Domain.Identity.Organizations.Entity;
 using SSO.Core.Domain.Identity.Permissions.Entity;
 using SSO.Core.Domain.Identity.Products.Entity;
+using SSO.Core.Domain.Identity.RevokedSessions.Entity;
 using SSO.Core.Domain.Identity.RolePermissions.Entity;
 using SSO.Core.Domain.Identity.Roles.Entity;
 using SSO.Core.Domain.Identity.UserRoleAssignments.Entity;
+using SSO.Core.Domain.Identity.UserSessions.Entity;
 using SSO.Core.Domain.Identity.Users.Entity;
+using SSO.Core.Domain.Identity.WebhookOutbox.Entity;
 using SSO.Infrastructures.Data.Identity.EntityMappings;
 
 namespace SSO.Infrastructures.Data.Identity
@@ -36,6 +40,10 @@ namespace SSO.Infrastructures.Data.Identity
 		public DbSet<MenuItem> MenuItems { get; set; }
 		public DbSet<ExternalIdentityProvider> ExternalIdentityProviders { get; set; }
 		public DbSet<OrganizationInvite> OrganizationInvites { get; set; }
+		public DbSet<UserSession> UserSessions { get; set; }
+		public DbSet<RevokedSession> RevokedSessions { get; set; }
+		public DbSet<WebhookOutboxMessage> WebhookOutbox { get; set; }
+		public DbSet<ClientWebhookEndpoint> ClientWebhookEndpoints { get; set; }
 
 		public IdentityDbContext()
 		{
@@ -74,6 +82,10 @@ namespace SSO.Infrastructures.Data.Identity
 			builder.ApplyConfiguration(new MenuItemMap());
 			builder.ApplyConfiguration(new ExternalIdentityProviderMap());
 			builder.ApplyConfiguration(new OrganizationInviteMap());
+			builder.ApplyConfiguration(new UserSessionMap());
+			builder.ApplyConfiguration(new RevokedSessionMap());
+			builder.ApplyConfiguration(new WebhookOutboxMessageMap());
+			builder.ApplyConfiguration(new ClientWebhookEndpointMap());
 		}
 	}
 }

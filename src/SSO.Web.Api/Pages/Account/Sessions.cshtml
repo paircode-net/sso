@@ -1,0 +1,40 @@
+@page
+@model SSO.Web.Api.Pages.Account.SessionsModel
+@{
+	ViewData["Title"] = "Sessões ativas";
+}
+<h1>Sessões ativas</h1>
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+	<p class="text-success">@Model.Message</p>
+}
+<table class="table">
+	<thead>
+		<tr>
+			<th>Client</th>
+			<th>Org</th>
+			<th>Último uso</th>
+			<th>Status</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+	@foreach (var s in Model.Sessions)
+	{
+		<tr>
+			<td>@s.ClientId</td>
+			<td>@(s.OrganizationId?.ToString("D") ?? "—")</td>
+			<td>@s.LastSeenAt.ToString("u")</td>
+			<td>@(s.IsActive ? "ativa" : "revogada")</td>
+			<td>
+				@if (s.IsActive)
+				{
+					<form method="post" asp-page-handler="Revoke" asp-route-sessionId="@s.Id">
+						<button type="submit" class="btn btn-sm btn-outline-danger">Revogar</button>
+					</form>
+				}
+			</td>
+		</tr>
+	}
+	</tbody>
+</table>

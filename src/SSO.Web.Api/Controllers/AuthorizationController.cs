@@ -115,7 +115,8 @@ namespace SSO.Web.Api.Controllers
 				request.GetScopes(),
 				request.ClientId,
 				organizationId,
-				branchId: null);
+				branchId: null,
+				existingSessionId: null);
 
 			var resources = new List<string>();
 			await foreach (var resource in _scopeManager.ListResourcesAsync(principal.GetScopes()))
@@ -189,13 +190,28 @@ namespace SSO.Web.Api.Controllers
 				Guid? organizationId = TryParseGuid(result.Principal?.GetClaim(SsoClaimTypes.OrganizationId))
 					?? await ResolveDefaultOrganizationIdAsync(user.Id);
 				Guid? branchId = TryParseGuid(result.Principal?.GetClaim(SsoClaimTypes.BranchId));
+				var existingSessionId = TryParseGuid(result.Principal?.GetClaim(SsoClaimTypes.SessionId));
+
+				if (existingSessionId is Guid sid
+					&& await _sessionService.IsSessionRevokedAsync(sid))
+				{
+					return Forbid(
+						authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+						properties: new AuthenticationProperties(new Dictionary<string, string?>
+						{
+							[OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
+							[OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+								"The session has been revoked."
+						}));
+				}
 
 				var principal = await _tokenClaimsFactory.CreateUserPrincipalAsync(
 					user,
 					request.GetScopes().Any() ? request.GetScopes() : result.Principal!.GetScopes(),
 					request.ClientId,
 					organizationId,
-					branchId);
+					branchId,
+					existingSessionId);
 
 				principal.SetDestinations(GetDestinations);
 				return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
@@ -384,12 +400,27 @@ namespace SSO.Web.Api.Controllers
 				? request.GetScopes()
 				: result.Principal!.GetScopes();
 
+			var existingSessionId = TryParseGuid(result.Principal?.GetClaim(SsoClaimTypes.SessionId));
+			if (existingSessionId is Guid sid
+				&& await _sessionService.IsSessionRevokedAsync(sid))
+			{
+				return Forbid(
+					authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+					properties: new AuthenticationProperties(new Dictionary<string, string?>
+					{
+						[OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
+						[OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+							"The session has been revoked."
+					}));
+			}
+
 			var principal = await _tokenClaimsFactory.CreateUserPrincipalAsync(
 				user,
 				scopes,
 				request.ClientId ?? result.Principal!.GetClaim(Claims.ClientId) ?? result.Principal.GetClaim("client_id"),
 				organizationId,
-				branchId);
+				branchId,
+				existingSessionId);
 
 			principal.SetDestinations(GetDestinations);
 			return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);

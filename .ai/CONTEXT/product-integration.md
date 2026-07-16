@@ -18,6 +18,7 @@ Products authorize **locally** from the access token. Effective permissions are 
 | `branch_id` | 0..1 | Active branch (exact match; no parent inheritance — ADR-004) |
 | `permissions` | 0..N | One claim value per permission **code** (e.g. `hq.reports`) |
 | `perm_ver` | 1 | Opaque policy etag (UTC ticks max of Permission / RolePermission / UserRoleAssignment stamps). Changes when catalog or assignments change. |
+| `sid` | 1 | Stable session id (Guid). Used for hot revocation (feature 00005 / ADR-007). |
 
 Constants: `SSO.Shared.Identity.SsoClaimTypes`.
 
@@ -29,6 +30,24 @@ Constants: `SSO.Shared.Identity.SsoClaimTypes`.
 | Refresh | **14 days** |
 
 Stale window: permission changes are visible only after refresh, switch-context, or access expiry + re-login. Use short TTL + `perm_ver` for local cache invalidation.
+
+## Hot revocation (feature 00005)
+
+SLA: after a session is revoked, products using `SSO.Client` reject the access token within **≤ 60 seconds** (default cache 30s).
+
+| Mechanism | Detail |
+|-----------|--------|
+| Claim `sid` | Emitted on every user access token |
+| Deny-list | SQL `RevokedSessions` on the Authorization Server |
+| Status API | `GET /api/identity/sessions/{sid}/status` → `{ session_id, revoked }` |
+| SDK | `AddSsoAuthentication` enables check **by default**; opt-out: `SsoClient:RevocationCheck:Enabled=false` |
+| Cache | `SsoClient:RevocationCheck:CacheSeconds` (1–60, default 30) |
+| Fail mode | `FailClosed=false` (default: allow if AS unreachable); set `true` for high-security |
+| Webhook | `session.revoked` via outbox + HMAC header `X-SSO-Signature: sha256=…` (AuthClient URL in `ClientWebhookEndpoints`) |
+
+Without the SDK check (opt-out), access tokens remain valid until expiry (~15 min) even after revoke. Refresh / switch_context with a revoked `sid` returns `invalid_grant`.
+
+Session APIs: `GET /api/identity/sessions/me`, `POST .../me/{id}/revoke`, admin list/revoke under `sso.admin.sessions.revoke`. UI: `/Account/Sessions`.
 
 ## Flows that re-resolve permissions
 
