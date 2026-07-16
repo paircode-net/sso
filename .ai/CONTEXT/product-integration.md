@@ -16,20 +16,17 @@ Products authorize **locally** from the access token. Effective permissions are 
 | `email` / `name` / `preferred_username` | 0..1 | OIDC profile |
 | `organization_id` | 0..1 | Active org after switch-context |
 | `branch_id` | 0..1 | Active branch (exact match; no parent inheritance — ADR-004) |
-| `permissions` | 0..N | One claim value per permission **code** (e.g. `hq.reports`) |
-| `perm_ver` | 1 | Opaque policy etag (UTC ticks max of Permission / RolePermission / UserRoleAssignment stamps). Changes when catalog or assignments change. |
+| `permissions` | 0..N | One claim value per permission **code** (e.g. `hq.reports`) — **primary route gate** |
+| `perm_ver` | 1 | Opaque policy etag (UTC ticks max of Permission / RolePermission / UserRoleAssignment stamps). |
+| `sso_c_{code}` | 0..N | Typed domain attributes (feature 00008). Ex.: `sso_c_department=finance`. **Not** for route authz. |
+| `claim_ver` | 1 | Opaque etag for ClaimDefinition / RoleClaim / UserClaimAssignment (separate from `perm_ver`). |
 | `sid` | 1 | Stable session id (Guid). Used for hot revocation (feature 00005 / ADR-007). |
 
-Constants: `SSO.Shared.Identity.SsoClaimTypes`.
+Constants: `SSO.Shared.Identity.SsoClaimTypes` (+ `TypedClaimNames` for the `sso_c_` prefix).
 
-## Token lifetimes
+**Permission vs typed claim:** use `permissions` / `RequirePermission` for gates. Use typed claims for attributes (`department`, flags). Do not gate routes on `sso_c_*`.
 
-| Token | TTL |
-|-------|-----|
-| Access / ID | **15 minutes** |
-| Refresh | **14 days** |
-
-Stale window: permission changes are visible only after refresh, switch-context, or access expiry + re-login. Use short TTL + `perm_ver` for local cache invalidation.
+Stale window: permission changes → refresh/`perm_ver`; typed claim changes → refresh/`claim_ver`.
 
 ## Hot revocation (feature 00005)
 
@@ -160,3 +157,16 @@ Dev user: `admin@sso.local` / `ChangeMe!123` (see `IdentitySeed`).
 | Binding | `ClientProductBindings` still maps `client_id` → Product |
 
 Register a new product client: create Product → create AuthClient (SPA PKCE or confidential) → bind `productId` → add `{code}.{feature}` scopes → configure redirect URIs (HTTPS in Production).
+
+## Typed claims (feature 00008)
+
+| Topic | Detail |
+|-------|--------|
+| Catalog | `api/identity/claim-definitions` — code, value type (`string`\|`int`\|`bool`), optional `productId` |
+| Role claims | `api/identity/role-claims` — value inherited when user has the role in context |
+| User assignments | `api/identity/user-claim-assignments` — org/branch/product context (exact branch; ADR-004) |
+| Precedence | User assignment **overrides** role claim for the same code |
+| JWT | `sso_c_{code}` + `claim_ver` (separate from `perm_ver`) |
+| SDK | `GetTypedClaim("department")` / `GetTypedClaim<bool>("mfa_required")` / `GetClaimVersion()` |
+
+Seed examples: `department` (string), `mfa_required` (bool), `can_export` (bool).

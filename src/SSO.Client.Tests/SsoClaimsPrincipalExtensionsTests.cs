@@ -29,6 +29,19 @@ namespace SSO.Client.Tests
 			Assert.AreEqual(Guid.Parse(IdentitySeedOrg), user.GetSessionId());
 			Assert.IsTrue(user.HasPermission("hq.reports"));
 			Assert.IsFalse(user.HasPermission("missing"));
+			Assert.AreEqual("finance", new ClaimsPrincipal(new ClaimsIdentity(new[]
+			{
+				new Claim(TypedClaimNames.ToJwtType("department"), "finance"),
+				new Claim(SsoClaimTypes.ClaimVersion, "999")
+			}, "test")).GetTypedClaim("department"));
+			Assert.AreEqual(true, new ClaimsPrincipal(new ClaimsIdentity(new[]
+			{
+				new Claim(TypedClaimNames.ToJwtType("mfa_required"), "true")
+			}, "test")).GetTypedClaim<bool>("mfa_required"));
+			Assert.AreEqual("999", new ClaimsPrincipal(new ClaimsIdentity(new[]
+			{
+				new Claim(SsoClaimTypes.ClaimVersion, "999")
+			}, "test")).GetClaimVersion());
 		}
 
 		private const string IdentitySeedOrg = "11111111-1111-1111-1111-111111111111";

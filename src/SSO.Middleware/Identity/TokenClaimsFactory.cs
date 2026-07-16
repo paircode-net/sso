@@ -18,17 +18,23 @@ namespace SSO.Middleware.Identity
 		private readonly UserManager<User> _userManager;
 		private readonly IEffectivePermissionsResolver _permissionsResolver;
 		private readonly IPermissionPolicyVersionProvider _policyVersionProvider;
+		private readonly IEffectiveClaimsResolver _claimsResolver;
+		private readonly IClaimPolicyVersionProvider _claimVersionProvider;
 		private readonly IUserSessionService _sessionService;
 
 		public TokenClaimsFactory(
 			UserManager<User> userManager,
 			IEffectivePermissionsResolver permissionsResolver,
 			IPermissionPolicyVersionProvider policyVersionProvider,
+			IEffectiveClaimsResolver claimsResolver,
+			IClaimPolicyVersionProvider claimVersionProvider,
 			IUserSessionService sessionService)
 		{
 			_userManager = userManager;
 			_permissionsResolver = permissionsResolver;
 			_policyVersionProvider = policyVersionProvider;
+			_claimsResolver = claimsResolver;
+			_claimVersionProvider = claimVersionProvider;
 			_sessionService = sessionService;
 		}
 
@@ -85,6 +91,21 @@ namespace SSO.Middleware.Identity
 			var permVer = await _policyVersionProvider.GetVersionAsync(cancellationToken);
 			identity.SetClaim(SsoClaimTypes.PermissionVersion, permVer);
 
+			var typedClaims = await _claimsResolver.ResolveAsync(
+				user.Id,
+				organizationId,
+				branchId,
+				clientId,
+				cancellationToken);
+
+			foreach (var pair in typedClaims)
+			{
+				identity.SetClaim(TypedClaimNames.ToJwtType(pair.Key), pair.Value);
+			}
+
+			var claimVer = await _claimVersionProvider.GetVersionAsync(cancellationToken);
+			identity.SetClaim(SsoClaimTypes.ClaimVersion, claimVer);
+
 			identity.SetScopes(scopes);
 			identity.SetAudiences(ResolveAudiences(clientId));
 			identity.SetDestinations(GetDestinations);
@@ -118,6 +139,11 @@ namespace SSO.Middleware.Identity
 
 		private static IEnumerable<string> GetDestinations(Claim claim)
 		{
+			if (claim.Type.StartsWith(TypedClaimNames.Prefix, StringComparison.OrdinalIgnoreCase))
+			{
+				return new[] { Destinations.AccessToken };
+			}
+
 			return claim.Type switch
 			{
 				Claims.Name or Claims.PreferredUsername
@@ -125,7 +151,7 @@ namespace SSO.Middleware.Identity
 				Claims.Email
 					=> new[] { Destinations.AccessToken, Destinations.IdentityToken },
 				SsoClaimTypes.OrganizationId or SsoClaimTypes.BranchId or SsoClaimTypes.Permissions
-					or SsoClaimTypes.PermissionVersion or SsoClaimTypes.SessionId
+					or SsoClaimTypes.PermissionVersion or SsoClaimTypes.ClaimVersion or SsoClaimTypes.SessionId
 					=> new[] { Destinations.AccessToken },
 				_ => new[] { Destinations.AccessToken }
 			};

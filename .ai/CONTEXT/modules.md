@@ -61,7 +61,7 @@
 
 ### Pendente (pós-épico)
 
-`ClaimDefinition`, `UserClaimAssignment`, AuthClient/Scope como domínio completo, SMTP real, authZ nas APIs admin, ProductEnablement, Google/LDAP production-ready.
+SMTP real, ProductEnablement avançado, herança Branch (00009), observabilidade/CI (00010).
 
 ## Serviços de infraestrutura transversais
 
@@ -69,6 +69,7 @@
 |---------|-----------|---------------|--------|
 | Mail | `IMailService` | `MailService` (+ `CapturingMailService` em testes) | Ativo (logger MVP) |
 | Permissions efetivas | `IEffectivePermissionsResolver` | `EffectivePermissionsResolver` | Ativo (Fase 3) |
+| Claims tipadas | `IEffectiveClaimsResolver` / `IClaimPolicyVersionProvider` | `EffectiveClaimsResolver` / `ClaimPolicyVersionProvider` | Ativo (00008) |
 | Auditoria | `IAuthAuditService` | `AuthAuditService` | Ativo (Fase 4) |
 | Sessões | `IUserSessionService` | `UserSessionService` | Ativo (Fase 4) |
 

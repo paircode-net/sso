@@ -54,6 +54,15 @@ Ver **[external-idps.md](external-idps.md)** e **[phase6-hardening.md](phase6-ha
 
 Detalhe: **[product-integration.md](product-integration.md)** § AuthClients + consent.
 
+## Typed claims (feature 00008)
+
+| Artefato | Nota |
+|----------|------|
+| Catálogo | `ClaimDefinitions` + `api/identity/claim-definitions` |
+| Atribuições | `UserClaimAssignments`, `AuthRoleClaims` |
+| JWT | `sso_c_{code}` + `claim_ver` |
+| Merge | User override Role |
+
 ## Integrações não presentes
 
 - Message bus / cache distribuído / APM cloud — não no MVP

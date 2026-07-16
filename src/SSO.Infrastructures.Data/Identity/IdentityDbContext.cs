@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SSO.Core.Domain.Identity.AuthClientMetadata.Entity;
 using SSO.Core.Domain.Identity.AuthAuditEvents.Entity;
 using SSO.Core.Domain.Identity.Branches.Entity;
+using SSO.Core.Domain.Identity.ClaimDefinitions.Entity;
 using SSO.Core.Domain.Identity.ClientProductBindings.Entity;
 using SSO.Core.Domain.Identity.ClientWebhooks.Entity;
 using SSO.Core.Domain.Identity.ExternalIdentityProviders.Entity;
@@ -15,8 +16,10 @@ using SSO.Core.Domain.Identity.Permissions.Entity;
 using SSO.Core.Domain.Identity.Products.Entity;
 using SSO.Core.Domain.Identity.LdapGroupRoleMaps.Entity;
 using SSO.Core.Domain.Identity.RevokedSessions.Entity;
+using SSO.Core.Domain.Identity.RoleClaims.Entity;
 using SSO.Core.Domain.Identity.RolePermissions.Entity;
 using SSO.Core.Domain.Identity.Roles.Entity;
+using SSO.Core.Domain.Identity.UserClaimAssignments.Entity;
 using SSO.Core.Domain.Identity.UserRoleAssignments.Entity;
 using SSO.Core.Domain.Identity.UserSessions.Entity;
 using SSO.Core.Domain.Identity.Users.Entity;
@@ -48,6 +51,9 @@ namespace SSO.Infrastructures.Data.Identity
 		public DbSet<ClientWebhookEndpoint> ClientWebhookEndpoints { get; set; }
 		public DbSet<LdapGroupRoleMap> LdapGroupRoleMaps { get; set; }
 		public DbSet<AuthClientMetadataEntity> AuthClientMetadata { get; set; }
+		public DbSet<ClaimDefinition> ClaimDefinitions { get; set; }
+		public DbSet<UserClaimAssignment> UserClaimAssignments { get; set; }
+		public DbSet<RoleClaim> AuthRoleClaims { get; set; }
 
 		public IdentityDbContext()
 		{
@@ -92,6 +98,9 @@ namespace SSO.Infrastructures.Data.Identity
 			builder.ApplyConfiguration(new ClientWebhookEndpointMap());
 			builder.ApplyConfiguration(new LdapGroupRoleMapMap());
 			builder.ApplyConfiguration(new AuthClientMetadataMap());
+			builder.ApplyConfiguration(new ClaimDefinitionMap());
+			builder.ApplyConfiguration(new UserClaimAssignmentMap());
+			builder.ApplyConfiguration(new RoleClaimMap());
 		}
 	}
 }

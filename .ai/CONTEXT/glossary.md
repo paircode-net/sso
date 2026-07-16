@@ -25,7 +25,9 @@
 | **AuthClient** | Cliente OAuth/OIDC registrado, ligado a um Product (≠ Product) |
 | **Membership** | Vínculo usuário ↔ organização (e opcionalmente branch) |
 | **Permission** | Capacidade autorizável dinâmica |
+| **Claim tipada** | Atributo de domínio (`ClaimDefinition` → JWT `sso_c_{code}`); não substitui Permission para gate de rota |
 | **Effective permissions** | Conjunto resolvido no contexto User×Org×Branch×Product; embutido no access token (ADR-005) |
+| **claim_ver** | Etag opaco do catálogo/atribuições de claims tipadas (00008); separado de `perm_ver` |
 | **User** | Entidade de identidade do domínio SSO (estende ASP.NET Identity; não usar o nome `ApplicationUser`) |
 | **switch-context** | Fluxo que define org/branch ativos e emite token com `organization_id`/`branch_id` e permissions efetivas |
 | **organization_id** | Claim JWT do tenant ativo (não usar `org_id`) |

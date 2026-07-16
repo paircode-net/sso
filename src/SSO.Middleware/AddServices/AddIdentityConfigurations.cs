@@ -69,6 +69,8 @@ namespace SSO.Middleware.AddServices
 
 			services.AddScoped<IEffectivePermissionsResolver, EffectivePermissionsResolver>();
 			services.AddScoped<IPermissionPolicyVersionProvider, PermissionPolicyVersionProvider>();
+			services.AddScoped<IEffectiveClaimsResolver, EffectiveClaimsResolver>();
+			services.AddScoped<IClaimPolicyVersionProvider, ClaimPolicyVersionProvider>();
 			services.AddScoped<IEffectiveMenusResolver, EffectiveMenusResolver>();
 			services.AddScoped<TokenClaimsFactory>();
 

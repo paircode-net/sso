@@ -30,6 +30,62 @@ namespace SSO.Client
 			=> user.FindFirst(SsoClaimTypes.PermissionVersion)?.Value
 				?? user.FindFirst("perm_ver")?.Value;
 
+		public static string? GetClaimVersion(this ClaimsPrincipal user)
+			=> user.FindFirst(SsoClaimTypes.ClaimVersion)?.Value
+				?? user.FindFirst("claim_ver")?.Value;
+
+		/// <summary>
+		/// Reads a typed claim by catalog code (JWT type is sso_c_{code}).
+		/// Prefer permissions for route gates — typed claims are attributes.
+		/// </summary>
+		public static string? GetTypedClaim(this ClaimsPrincipal user, string code)
+		{
+			if (string.IsNullOrWhiteSpace(code))
+			{
+				return null;
+			}
+
+			var jwtType = TypedClaimNames.ToJwtType(code);
+			return user.FindFirst(jwtType)?.Value;
+		}
+
+		public static T? GetTypedClaim<T>(this ClaimsPrincipal user, string code)
+		{
+			var raw = user.GetTypedClaim(code);
+			if (raw is null)
+			{
+				return default;
+			}
+
+			var target = typeof(T);
+			if (target == typeof(string))
+			{
+				return (T)(object)raw;
+			}
+
+			if (target == typeof(bool) || target == typeof(bool?))
+			{
+				if (bool.TryParse(raw, out var b))
+				{
+					return (T)(object)b;
+				}
+
+				return default;
+			}
+
+			if (target == typeof(int) || target == typeof(int?))
+			{
+				if (int.TryParse(raw, out var i))
+				{
+					return (T)(object)i;
+				}
+
+				return default;
+			}
+
+			throw new NotSupportedException($"GetTypedClaim<{target.Name}> is not supported; use string/int/bool.");
+		}
+
 		public static IReadOnlyList<string> GetPermissions(this ClaimsPrincipal user)
 			=> user.FindAll(SsoClaimTypes.Permissions)
 				.Concat(user.FindAll("permissions"))

@@ -4,7 +4,9 @@ export const SsoClaimTypes = {
   branchId: "branch_id",
   permissions: "permissions",
   permissionVersion: "perm_ver",
+  claimVersion: "claim_ver",
   sessionId: "sid",
+  typedClaimPrefix: "sso_c_",
 } as const;
 
 export type SsoJwtPayload = {
@@ -43,6 +45,25 @@ export function getPermissions(payload: SsoJwtPayload): string[] {
 
 export function getPermissionVersion(payload: SsoJwtPayload): string | undefined {
   const value = payload.perm_ver ?? payload[SsoClaimTypes.permissionVersion];
+  return value == null ? undefined : String(value);
+}
+
+export function getClaimVersion(payload: SsoJwtPayload): string | undefined {
+  const value = payload.claim_ver ?? payload[SsoClaimTypes.claimVersion];
+  return value == null ? undefined : String(value);
+}
+
+/** Reads typed claim sso_c_{code}. Attributes only — use requirePermission for route gates. */
+export function getTypedClaim(
+  payload: SsoJwtPayload,
+  code: string
+): string | undefined {
+  if (!code) {
+    return undefined;
+  }
+
+  const key = `${SsoClaimTypes.typedClaimPrefix}${code.trim().toLowerCase()}`;
+  const value = payload[key];
   return value == null ? undefined : String(value);
 }
 

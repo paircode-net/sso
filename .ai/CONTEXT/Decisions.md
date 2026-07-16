@@ -89,7 +89,7 @@ Plano: `.ai/WORK/2026-07-16-00007-consent-authclients.md` (**implementado**).
 | F00008-D4 | Value types no MVP = **escalares** (`string`, `int`, `bool`); sem JSON/datetime | **Aceito** |
 | F00008-D5 | Precedência no merge: **`UserClaimAssignment` vence `RoleClaim`** (mesmo ClaimDefinition/contexto) | **Aceito** |
 
-Plano: `.ai/WORK/2026-07-16-00008-claims-tipadas.md` (**pronto p/ implementar**).
+Plano: `.ai/WORK/2026-07-16-00008-claims-tipadas.md` (**implementado**).
 
 ## Decisões feature 00001 (D1–D12)
 

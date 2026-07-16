@@ -6,6 +6,8 @@ namespace SSO.Shared.Identity
 		public const string BranchId = "branch_id";
 		public const string Permissions = "permissions";
 		public const string PermissionVersion = "perm_ver";
+		/// <summary>Opaque etag for typed claim catalog/assignments (feature 00008 / F00008-D2).</summary>
+		public const string ClaimVersion = "claim_ver";
 		/// <summary>Stable session id for hot revocation (feature 00005).</summary>
 		public const string SessionId = "sid";
 	}

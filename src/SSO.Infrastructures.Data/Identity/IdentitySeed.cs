@@ -7,14 +7,17 @@ using OpenIddict.Abstractions;
 using SSO.Core.Domain.Identity.AuthClientMetadata.Entity;
 using SSO.Core.Domain.Identity.ExternalIdentityProviders.Entity;
 using SSO.Core.Domain.Identity.Branches.Entity;
+using SSO.Core.Domain.Identity.ClaimDefinitions.Entity;
 using SSO.Core.Domain.Identity.ClientProductBindings.Entity;
 using SSO.Core.Domain.Identity.Memberships.Entity;
 using SSO.Core.Domain.Identity.MenuItems.Entity;
 using SSO.Core.Domain.Identity.Organizations.Entity;
 using SSO.Core.Domain.Identity.Permissions.Entity;
 using SSO.Core.Domain.Identity.Products.Entity;
+using SSO.Core.Domain.Identity.RoleClaims.Entity;
 using SSO.Core.Domain.Identity.RolePermissions.Entity;
 using SSO.Core.Domain.Identity.Roles.Entity;
+using SSO.Core.Domain.Identity.UserClaimAssignments.Entity;
 using SSO.Core.Domain.Identity.UserRoleAssignments.Entity;
 using SSO.Core.Domain.Identity.Users.Entity;
 using SSO.Shared.Identity;
@@ -50,12 +53,18 @@ namespace SSO.Infrastructures.Data.Identity
 		public static readonly Guid DevEntraIdpId = Guid.Parse("a1111111-1111-1111-1111-111111111111");
 		public static readonly Guid DevGoogleIdpId = Guid.Parse("a2222222-2222-2222-2222-222222222222");
 		public static readonly Guid DevLdapIdpId = Guid.Parse("a3333333-3333-3333-3333-333333333333");
+		public static readonly Guid DevClaimDepartmentId = Guid.Parse("b1111111-1111-1111-1111-111111111111");
+		public static readonly Guid DevClaimMfaRequiredId = Guid.Parse("b2222222-2222-2222-2222-222222222222");
+		public static readonly Guid DevClaimCanExportId = Guid.Parse("b3333333-3333-3333-3333-333333333333");
 
 		public const string DevUserEmail = "admin@sso.local";
 		public const string DevUserPassword = "ChangeMe!123";
 		public const string PermissionAccess = "sso.access";
 		public const string PermissionHqReports = "hq.reports";
 		public const string PermissionFilialOps = "filial.ops";
+		public const string ClaimDepartment = "department";
+		public const string ClaimMfaRequired = "mfa_required";
+		public const string ClaimCanExport = "can_export";
 		public const string AdminClientId = SsoClients.AdminApiClientId;
 		public const string AdminClientSecret = SsoClients.AdminApiClientSecret;
 
@@ -137,6 +146,7 @@ namespace SSO.Infrastructures.Data.Identity
 
 			await EnsureBranchesAsync(context);
 			await EnsureAuthzCatalogAsync(context);
+			await EnsureTypedClaimsCatalogAsync(context);
 			await EnsureOpenIddictClientsAsync(services);
 			await EnsureAuthClientMetadataAsync(context);
 		}
@@ -248,6 +258,146 @@ namespace SSO.Infrastructures.Data.Identity
 				clientId: null);
 
 			await context.SaveChangesAsync();
+		}
+
+		private static async Task EnsureTypedClaimsCatalogAsync(IdentityDbContext context)
+		{
+			await EnsureClaimDefinitionAsync(
+				context,
+				DevClaimDepartmentId,
+				ClaimDepartment,
+				"Department",
+				ClaimValueTypes.String,
+				DevProductId,
+				"Business department attribute");
+			await EnsureClaimDefinitionAsync(
+				context,
+				DevClaimMfaRequiredId,
+				ClaimMfaRequired,
+				"MFA Required",
+				ClaimValueTypes.Bool,
+				productId: null,
+				"Flag: stronger MFA expected for this principal");
+			await EnsureClaimDefinitionAsync(
+				context,
+				DevClaimCanExportId,
+				ClaimCanExport,
+				"Can Export",
+				ClaimValueTypes.Bool,
+				DevProductId,
+				"Export capability attribute (not a route gate)");
+
+			// RoleClaim: org-member → department=operations (baseline)
+			await EnsureRoleClaimAsync(context, DevRoleOrgMemberId, DevClaimDepartmentId, "operations");
+			// RoleClaim: hq-manager → can_export=true
+			await EnsureRoleClaimAsync(context, DevRoleHqManagerId, DevClaimCanExportId, "true");
+
+			// User override: department=finance at org-wide (wins over RoleClaim)
+			await EnsureUserClaimAssignmentAsync(
+				context,
+				DevUserId,
+				DevClaimDepartmentId,
+				"finance",
+				DevProductId,
+				DevOrganizationId,
+				branchId: null);
+
+			// Branch-specific: mfa_required=true only at HQ
+			await EnsureUserClaimAssignmentAsync(
+				context,
+				DevUserId,
+				DevClaimMfaRequiredId,
+				"true",
+				DevProductId,
+				DevOrganizationId,
+				DevBranchHqId);
+
+			await context.SaveChangesAsync();
+		}
+
+		private static async Task EnsureClaimDefinitionAsync(
+			IdentityDbContext context,
+			Guid id,
+			string code,
+			string name,
+			string valueType,
+			Guid? productId,
+			string? description)
+		{
+			if (await context.ClaimDefinitions.AnyAsync(x => x.Id == id || (!x.IsDeleted && x.Code == code)))
+			{
+				return;
+			}
+
+			var entity = new ClaimDefinition
+			{
+				Id = id,
+				Code = code,
+				Name = name,
+				Description = description,
+				ValueType = valueType,
+				ProductId = productId,
+				IsEnabled = true
+			};
+			entity.MarkCreated();
+			context.ClaimDefinitions.Add(entity);
+		}
+
+		private static async Task EnsureRoleClaimAsync(
+			IdentityDbContext context,
+			Guid roleId,
+			Guid claimDefinitionId,
+			string value)
+		{
+			if (await context.AuthRoleClaims.AnyAsync(x =>
+				!x.IsDeleted && x.RoleId == roleId && x.ClaimDefinitionId == claimDefinitionId))
+			{
+				return;
+			}
+
+			var entity = new RoleClaim
+			{
+				Id = Guid.NewGuid(),
+				RoleId = roleId,
+				ClaimDefinitionId = claimDefinitionId,
+				Value = value
+			};
+			entity.MarkCreated();
+			context.AuthRoleClaims.Add(entity);
+		}
+
+		private static async Task EnsureUserClaimAssignmentAsync(
+			IdentityDbContext context,
+			Guid userId,
+			Guid claimDefinitionId,
+			string value,
+			Guid productId,
+			Guid? organizationId,
+			Guid? branchId)
+		{
+			if (await context.UserClaimAssignments.AnyAsync(x =>
+				!x.IsDeleted
+				&& x.UserId == userId
+				&& x.ClaimDefinitionId == claimDefinitionId
+				&& x.OrganizationId == organizationId
+				&& x.BranchId == branchId
+				&& x.ProductId == productId))
+			{
+				return;
+			}
+
+			var entity = new UserClaimAssignment
+			{
+				Id = Guid.NewGuid(),
+				UserId = userId,
+				ClaimDefinitionId = claimDefinitionId,
+				Value = value,
+				OrganizationId = organizationId,
+				BranchId = branchId,
+				ProductId = productId
+			};
+			entity.MarkCreated();
+			context.UserClaimAssignments.Add(entity);
 		}
 
 		private static async Task EnsurePermissionAsync(IdentityDbContext context, Guid id, string code, string name)
