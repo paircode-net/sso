@@ -45,6 +45,17 @@ Plano: `.ai/WORK/2026-07-16-00003-portal-admin-por-papel.md`.
 
 Plano: `.ai/WORK/2026-07-16-00004-sdk-integracao-produtos.md` (**implementado**).
 
+## Decisões feature 00005 (Revogação quente + sessão)
+
+| ID | Decisão | Status |
+|----|---------|--------|
+| F00005-D1 | Deny-list em **SQL** + claim `sid` no access token (cache curto no SDK); Redis depois se escala exigir | **Aceito** |
+| F00005-D2 | Hot check no SDK **ligado por padrão**, com opt-out explícito (`SsoClient:RevocationCheck`) | **Aceito** |
+| F00005-D3 | SLA de revoke **≤ 60 s** (cache SDK 30–60s; configurável p/ 15s em high-security) | **Aceito** |
+| F00005-D4 | Incluir MVP de notificações: outbox + webhook HMAC `session.revoked` por AuthClient | **Aceito** |
+
+Plano: `.ai/WORK/2026-07-16-00005-revogacao-quente-sessao.md` (**pronto p/ implementar**).
+
 ## Decisões feature 00001 (D1–D12)
 
 | ID | Decisão | Status |
