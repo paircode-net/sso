@@ -13,6 +13,7 @@ Registro leve de decisões observáveis ou pendentes. Para decisões novas forma
 | ADR-005 | Permissões efetivas no JWT | [adr/ADR-005-permissions-in-jwt.md](adr/ADR-005-permissions-in-jwt.md) |
 | ADR-006 | Bounded context Identity / IdentityDb | [adr/ADR-006-identity-bounded-context.md](adr/ADR-006-identity-bounded-context.md) |
 | ADR-007 | Claim `sid` + deny-list SQL (hot revoke) | [adr/ADR-007-sid-hot-revocation.md](adr/ADR-007-sid-hot-revocation.md) |
+| ADR-008 | Herança opt-in Branch (pai→filhos) | [adr/ADR-008-branch-authz-inheritance-opt-in.md](adr/ADR-008-branch-authz-inheritance-opt-in.md) |
 
 Plano: `.ai/WORK/2026-07-14-00001-plataforma-sso.md`.
 
@@ -90,6 +91,17 @@ Plano: `.ai/WORK/2026-07-16-00007-consent-authclients.md` (**implementado**).
 | F00008-D5 | Precedência no merge: **`UserClaimAssignment` vence `RoleClaim`** (mesmo ClaimDefinition/contexto) | **Aceito** |
 
 Plano: `.ai/WORK/2026-07-16-00008-claims-tipadas.md` (**implementado**).
+
+## Decisões feature 00009 (Herança Branch opt-in)
+
+| ID | Decisão | Status |
+|----|---------|--------|
+| F00009-D1 | Opt-in **em duas camadas**: flag Organization (`Off`\|`InheritFromAncestors`) **+** `Inheritable` no assignment; herança só se ambos permitirem | **Aceito** |
+| F00009-D2 | Claims tipadas (00008) usam a **mesma política** de herança que permissions | **Aceito** |
+| F00009-D3 | Claims tipadas: herança clássica — valor no branch ativo vence; senão sobe ancestrais `Inheritable` | **Aceito** |
+| F00009-D4 | **ADR-008 aditivo**; ADR-004 permanece como default (superseded parcialmente quando flag On) | **Aceito** |
+
+Plano: `.ai/WORK/2026-07-16-00009-heranca-branch-opt-in.md` (**pronto p/ implementar**). ADR: [ADR-008](adr/ADR-008-branch-authz-inheritance-opt-in.md).
 
 ## Decisões feature 00001 (D1–D12)
 
