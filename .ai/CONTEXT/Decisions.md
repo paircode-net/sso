@@ -52,8 +52,8 @@ Plano: `.ai/WORK/2026-07-14-00001-plataforma-sso.md`.
 | ID | Tema | Status |
 |----|------|--------|
 | P-001 | Modelo de autenticação/autorização do SSO | **Definido** (ADRs 001–005); implementação pendente (Fases 0+) |
-| P-002 | Stack de observabilidade | Pendente de definição |
-| P-003 | CI/CD e estratégia de deploy | Pendente de definição |
+| P-002 | Stack de observabilidade | Pendente de definição — refinamento [00010](../WORK/2026-07-16-00010-observabilidade-cicd.md) |
+| P-003 | CI/CD e estratégia de deploy | Pendente de definição — refinamento [00010](../WORK/2026-07-16-00010-observabilidade-cicd.md) |
 | P-004 | Estratégia de migrations em produção (auto vs pipeline) | **Aceito** — Production: `Sso:Database:AutoMigrate=false` por default; aplicar via pipeline (`dotnet ef database update`). Ver `phase6-hardening.md` |
 | P-005 | Analyzers / EditorConfig / Nullable uniforme | Pendente de definição |
 | P-006 | Domínio de negócio real além de Sample | **Definido (planejamento)** — Identity context + aggregates 00001; código pendente |

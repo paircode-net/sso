@@ -108,5 +108,6 @@ Detalhe: feature plan `.ai/WORK/2026-07-14-00001-plataforma-sso.md`; `phase6-har
 ## A definir
 
 - Papel futuro de `SSO.Shared`
-- Observabilidade e CI/CD (P-002, P-003)
-- AuthZ nas APIs admin sensíveis (audit/menus/revoke)
+- Observabilidade e CI/CD (P-002, P-003) — plano [00010](../WORK/2026-07-16-00010-observabilidade-cicd.md)
+- AuthZ nas APIs admin sensíveis — plano [00002](../WORK/2026-07-16-00002-authz-apis-admin.md)
+- Backlog pós-MVP completo: [2026-07-16-backlog-pos-mvp.md](../WORK/2026-07-16-backlog-pos-mvp.md)

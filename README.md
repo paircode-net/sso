@@ -2,7 +2,7 @@
 
 Plataforma centralizada de **Single Sign-On** para o ecossistema de produtos: identidade única, autenticação OAuth 2.1 / OpenID Connect e autorização contextual (organização, filial e produto).
 
-O Authorization Server usa **OpenIddict** + **ASP.NET Identity**, com APIs de gestão em Clean Architecture (.NET 10 / CQRS). Documentação de domínio e decisões: [`.ai/CONTEXT/`](.ai/CONTEXT/) · plano do épico: [`.ai/WORK/2026-07-14-00001-plataforma-sso.md`](.ai/WORK/2026-07-14-00001-plataforma-sso.md).
+O Authorization Server usa **OpenIddict** + **ASP.NET Identity**, com APIs de gestão em Clean Architecture (.NET 10 / CQRS). Documentação de domínio e decisões: [`.ai/CONTEXT/`](.ai/CONTEXT/) · plano do épico: [`.ai/WORK/2026-07-14-00001-plataforma-sso.md`](.ai/WORK/2026-07-14-00001-plataforma-sso.md) · backlog pós-MVP: [`.ai/WORK/2026-07-16-backlog-pos-mvp.md`](.ai/WORK/2026-07-16-backlog-pos-mvp.md).
 
 ## Funcionalidades
 
