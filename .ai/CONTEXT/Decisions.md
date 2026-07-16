@@ -35,6 +35,16 @@ Plano: `.ai/WORK/2026-07-16-00002-authz-apis-admin.md`.
 
 Plano: `.ai/WORK/2026-07-16-00003-portal-admin-por-papel.md`.
 
+## Decisões feature 00004 (SDK integração)
+
+| ID | Decisão | Status |
+|----|---------|--------|
+| F00004-D1 | Pacote `SSO.Client` no monorepo (`src/SSO.Client/`) | **Aceito** |
+| F00004-D2 | Mesmo épico: .NET + JS/TS (`requirePermission` + claims) | **Aceito** |
+| F00004-D3 | Sample BFF entregável em `samples/sso-bff` (+ `samples/product-api`) | **Aceito** |
+
+Plano: `.ai/WORK/2026-07-16-00004-sdk-integracao-produtos.md`.
+
 ## Decisões feature 00001 (D1–D12)
 
 | ID | Decisão | Status |

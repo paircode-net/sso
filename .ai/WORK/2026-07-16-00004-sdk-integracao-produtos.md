@@ -2,115 +2,117 @@
 
 > Arquivo: `.ai/WORK/2026-07-16-00004-sdk-integracao-produtos.md`  
 > Template: `.ai/TEMPLATES/feature-plan.md`  
-> Status: **Refinamento**  
+> Status: **Pronto para implementação** (D-00004-1..3 aceitas)  
 > Data: 2026-07-16  
 > Depende de: contrato atual (`product-integration.md`, ADR-003/005)  
 > Relaciona: 00005 (sinais de revogação no cliente)
 
 ## Objetivo
 
-Publicar um **pacote de integração** (.NET primeiro) que padronize validação de JWT, leitura de claims SSO, autorização por permission code, helpers de `switch_context` e (opcional) invalidação local por `perm_ver` — reduzindo atrito e inconsistências entre produtos consumidores.
+Publicar um **pacote de integração** (.NET + JS/TS) que padronize validação de JWT, leitura de claims SSO, autorização por permission code, helpers de `switch_context` / `perm_ver`, com **sample BFF** de referência — reduzindo atrito entre produtos consumidores.
 
 ## Contexto
 
 - Products autorizam localmente a partir do access token (ADR-005).
-- Contrato documentado, mas cada time ainda precisa montar middleware/handlers do zero.
-- Client credentials (`dev-product-service`) e SPA PKCE (`dev-product-spa`) já exemplificam padrões.
+- Contrato documentado; cada time ainda monta middleware do zero.
+- Clients seed: `dev-product-spa`, `dev-product-service`.
+
+## Decisões aceitas
+
+### D-00004-1 — Pacote / local — **Aceito: A**
+
+Monorepo: projeto `src/SSO.Client/` → NuGet **`SSO.Client`**. Claims compartilhadas com `SSO.Shared` (ou reexportadas) para não divergir de `SsoClaimTypes`.
+
+### D-00004-2 — JS/TS — **Aceito: B**
+
+Mesmo épico entrega:
+
+| Pacote | Conteúdo mínimo |
+|--------|-----------------|
+| `SSO.Client` (.NET) | JwtBearer setup, `RequirePermission`, claim helpers, `SsoTokenClient` (refresh / switch_context) |
+| `@sso/client` ou `sso-client` (JS/TS) | Parse claims do JWT, `requirePermission`, helper `perm_ver` / switch_context via BFF |
+
+JS **não** embute client secret; usa BFF ou PKCE public client.
+
+### D-00004-3 — Sample BFF — **Aceito: B**
+
+Entregar **`samples/sso-bff`**: Minimal API que:
+
+- autentica SPA via cookie same-site;
+- guarda refresh token server-side;
+- anexa Bearer às APIs / faz refresh e `switch_context`;
+- usa `SSO.Client` internamente.
+
+Também: `samples/product-api` (Minimal API + `RequirePermission`) como aceite do SDK .NET.
 
 ## Escopo
 
 ### Inclui
 
-**Pacote `SSO.Client` / `Baysoft.Sso.AspNetCore` (nome a definir)**
-
-- Extensões `AddSsoAuthentication(IConfiguration)` — Authority, Audience/ClientId, validação iss/aud/sign.
-- Helpers de claims: `organization_id`, `branch_id`, `permissions`, `perm_ver`, `sub`.
-- `IAuthorizationHandler` / policy factory: `RequirePermission("hq.reports")`.
-- Opção de cache de menu/feature flags keyed por `perm_ver`.
-- Cliente HTTP tipado para:
-  - token endpoint (`refresh`, `switch_context`)
-  - opcional: `menus/effective` (diagnóstico; products preferem JWT)
-- Documentação + sample app mínimo (SPA ou Minimal API) no repo ou pasta `samples/`.
-- Versionamento semver alinhado ao contrato de claims (breaking = major).
-
-**Opcional na mesma feature (fase B)**
-
-- Pacote JS/TS espelho (claims + `requirePermission`) — pode ser feature filha se timing apertar.
+- `SSO.Client` + testes + pack local.
+- Pacote JS/TS (pasta `clients/js` ou `src/SSO.Client.Js`) com build/test mínimos.
+- `samples/product-api` + `samples/sso-bff`.
+- Quickstart em `product-integration.md` + `integrations.md`.
+- Semver: breaking de claims = major.
 
 ### Fora de escopo
 
-- Portal admin (00003).
-- Servir como Authorization Server.
-- SDK gerenciar usuários/roles (isso é API admin).
-- BFF genérico completo com agregação de APIs de negócio — apenas **auth BFF helpers** se necessário (refresh no server, cookie session).
+- Portal admin / AuthZ admin (00002/00003).
+- SDK gerenciar users/roles.
+- Publicação em feed NuGet/npm público (pode ser local/`dotnet pack` até 00010).
+- Revogação quente (00005) — só hooks/`perm_ver` agora.
 
 ## Abordagem
 
-### Fase A — .NET AuthZ library
+### Fases
 
-1. Novo projeto class library + pacote NuGet (local/feed).
-2. Mapear options: `SsoClient:Authority`, `Audience`, `ClientId`, `ClientSecret` (confidential).
-3. Policies baseadas em claim type `permissions` (multi-value).
-4. Testes unitários com tokens JWT sintéticos (signing key de teste).
-
-### Fase B — Token / switch_context client
-
-1. `SsoTokenClient` encapsulando form posts OAuth.
-2. Documentar PKCE no sample SPA (pode ser só README + referência OpenIddict).
-
-### Fase C — Sample + docs
-
-1. Atualizar `product-integration.md` com “Quickstart SDK”.
-2. `integrations.md` aponta para o pacote.
-
-### BFF (quando necessário)
-
-- Pattern documentado: BFF guarda refresh token; browser só cookie same-site; BFF anexa Bearer às APIs.
-- Implementação de referência opcional em `samples/sso-bff` — não obrigatória para fechar a feature se a lib cobrir APIs server-side.
+1. **SSO.Client** — options, JwtBearer, `RequirePermission`, claim extensions, `perm_ver`.
+2. **SsoTokenClient** — refresh + switch_context.
+3. **samples/product-api** — quickstart &lt; 30 linhas de setup.
+4. **JS/TS client** — claims + requirePermission + tipos alinhados a `SsoClaimTypes`.
+5. **samples/sso-bff** — cookie + refresh + proxy pattern.
+6. **Docs** — product-integration quickstart.
 
 ## Arquivos impactados
 
 | Camada | Caminhos previstos |
 |--------|--------------------|
-| Novo projeto | `src/SSO.Client/` ou `src/SSO.AspNetCore.Client/` |
-| Samples | `samples/product-api/` |
-| Tests | `SSO.Client.Tests` |
-| Docs | `product-integration.md`, `integrations.md`, README trecho “Consumindo o SSO” |
-| CI | Pack/push NuGet (pode depender de 00010) |
+| Lib .NET | `src/SSO.Client/` |
+| Lib JS | `clients/js/` (ou equivalente) |
+| Samples | `samples/product-api/`, `samples/sso-bff/` |
+| Tests | `src/SSO.Client.Tests/` (+ testes JS) |
+| Solution | incluir projetos no `.sln` |
+| Docs | `product-integration.md`, `integrations.md`, README |
 
 ## Critérios de aceite
 
-- [ ] Product API de sample valida JWT e bloqueia rota sem permission em &lt; 30 linhas de setup.
+- [ ] Product API sample valida JWT e bloqueia rota sem permission com setup curto.
 - [ ] `RequirePermission` cobre multi-claim `permissions`.
-- [ ] `perm_ver` exposto para invalidar cache local.
-- [ ] `switch_context` helper emite novo access token e documenta claims resultantes.
-- [ ] Docs de quickstart passam “copy-paste” em ambiente Dev.
+- [ ] `perm_ver` exposto no .NET e no JS.
+- [ ] `switch_context` helper (.NET) + BFF sample exercita o fluxo.
+- [ ] Pacote JS: `requirePermission` + parse de claims documentado.
+- [ ] Docs quickstart copy-paste em Dev.
 
 ## Riscos
 
 | Risco | Mitigação |
 |-------|-----------|
-| Nome/claims mudarem e quebrarem products | Semver + changelog; ADR para mudanças de claim |
-| Duplicar OpenIddict validation bugs | Reusar `Microsoft.AspNetCore.Authentication.JwtBearer` |
-| Secret em SPA | SDK documenta: secret só confidential/BFF |
-| Pacote interno vs público | Começar feed interno; API estável antes de publicar |
+| Drift claims Shared vs Client | Referenciar `SSO.Shared` ou gerar constantes compartilhadas |
+| Secret em SPA | JS só public/PKCE ou via BFF |
+| Escopo JS + BFF estoura | MVP JS = claims + requirePermission; BFF mínimo cookie/refresh |
+| Dois packages sem CI pack | `dotnet pack` + npm script local até 00010 |
 
 ## Estratégia de testes
 
-- [ ] Unit: parse claims, policy handler
-- [ ] Integração: TestServer product + TestServer SSO (ou JWT assinado local)
-- [ ] Contrato: snapshot dos claim names vs `SsoClaimTypes`
-
-## Decisões abertas
-
-- [ ] **D-00004-1:** Nome do pacote e se vive neste monorepo ou repo `sso-client`.
-- [ ] **D-00004-2:** Incluir JS/TS no mesmo épico ou feature separada?
-- [ ] **D-00004-3:** Sample BFF é entregável ou só documentação do pattern?
+- [ ] Unit .NET: claims, permission handler
+- [ ] Unit JS: requirePermission / claim parse
+- [ ] Sample product-api sobe e retorna 401/403
+- [ ] Contrato: claim names = `SsoClaimTypes`
 
 ## Checklist
 
-- [ ] Alinhado a ADR-003/005 e product-integration
-- [ ] Sem vazar secrets em samples
-- [ ] Versionamento definido
-- [ ] CONTEXT/integrations atualizado
-- [ ] Pronto para implementação (após D-00004-1)
+- [x] D-00004-1..3 aceitas
+- [x] Alinhado a ADR-003/005
+- [ ] Versionamento (0.1.0 inicial)
+- [ ] CONTEXT/integrations na implementação
+- [x] Pronto para implementação
