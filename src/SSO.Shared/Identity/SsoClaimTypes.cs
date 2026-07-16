@@ -18,5 +18,7 @@ namespace SSO.Shared.Identity
 		public const string DevSpaClientId = "dev-product-spa";
 		public const string DevServiceClientId = "dev-product-service";
 		public const string DevServiceClientSecret = "dev-service-secret-change-me";
+		public const string AdminApiClientId = "sso-admin-api";
+		public const string AdminApiClientSecret = "sso-admin-secret-change-me";
 	}
 }

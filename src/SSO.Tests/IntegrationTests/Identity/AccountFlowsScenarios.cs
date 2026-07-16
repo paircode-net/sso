@@ -158,7 +158,8 @@ namespace SSO.Tests.IntegrationTests.Identity
 		[TestMethod]
 		public async Task AuthAudit_Should_Be_Queryable_After_Login()
 		{
-			using var client = ServerHelper.Create().CreateClient();
+			using var server = ServerHelper.Create();
+			using var client = AdminAuthTestHelper.CreatePlatformAdminClient(server);
 
 			await client.PostAsync("/Account/Login?returnUrl=%2F", new FormUrlEncodedContent(new Dictionary<string, string>
 			{
@@ -175,7 +176,8 @@ namespace SSO.Tests.IntegrationTests.Identity
 		[TestMethod]
 		public async Task RevokeSessions_Should_Write_Audit_Event()
 		{
-			using var client = ServerHelper.Create().CreateClient();
+			using var server = ServerHelper.Create();
+			using var client = AdminAuthTestHelper.CreatePlatformAdminClient(server);
 
 			var response = await client.PostAsync(
 				$"/api/identity/account/sessions/{IdentitySeed.DevUserId}/revoke",

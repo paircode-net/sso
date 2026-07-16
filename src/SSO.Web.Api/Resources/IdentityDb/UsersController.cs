@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using ModelWrapper;
 using SSO.Core.Application.Identity.Users.Commands;
 using SSO.Core.Application.Identity.Users.Queries;
+using SSO.Middleware.Identity.Authorization;
+using SSO.Shared.Identity;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,6 +14,7 @@ namespace SSO.Web.Api.Identity
 	[ApiController]
 	[Produces("application/json")]
 	[Route("api/identity/users")]
+	[RequiresPermission(SsoAdminPermissions.Platform, SsoAdminPermissions.Org)]
 	public sealed class UsersController : ControllerBase
 	{
 		private readonly IMediator _mediator;
@@ -26,6 +29,7 @@ namespace SSO.Web.Api.Identity
 			=> Wrap(await _mediator.Send(request, cancellationToken));
 
 		[HttpPost]
+		[RequiresPermission(SsoAdminPermissions.Platform)]
 		public async Task<ActionResult<PostUserCommandResponse>> Post(PostUserCommand request, CancellationToken cancellationToken = default)
 			=> Wrap(await _mediator.Send(request, cancellationToken));
 

@@ -14,6 +14,8 @@ using SSO.Core.Domain.Identity.AuthAuditEvents.Entity;
 using SSO.Core.Domain.Identity.Users.Entity;
 using SSO.Core.Domain.Interfaces.Infrastructures.Services;
 using SSO.Infrastructures.Data.Identity;
+using SSO.Middleware.Identity.Authorization;
+using SSO.Shared.Identity;
 
 namespace SSO.Web.Api.Resources.IdentityDb
 {
@@ -88,7 +90,7 @@ namespace SSO.Web.Api.Resources.IdentityDb
 		}
 
 		[HttpGet("~/api/identity/auth-audit-events")]
-		[AllowAnonymous]
+		[RequiresPermission(SsoAdminPermissions.AuditRead)]
 		public async Task<IActionResult> GetAuditEvents(
 			[FromQuery] Guid? userId,
 			[FromQuery] string? eventType,
@@ -129,7 +131,7 @@ namespace SSO.Web.Api.Resources.IdentityDb
 		}
 
 		[HttpPost("sessions/{userId:guid}/revoke")]
-		[AllowAnonymous]
+		[RequiresPermission(SsoAdminPermissions.SessionsRevoke)]
 		public async Task<IActionResult> RevokeSessions(Guid userId, CancellationToken cancellationToken)
 		{
 			var count = await _sessionService.RevokeAllForUserAsync(userId, "api.bulk_revoke", cancellationToken);

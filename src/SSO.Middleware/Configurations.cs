@@ -105,6 +105,9 @@ namespace SSO.Middleware
 
 			services.AddIdentityFoundation(configuration, environment: null, disableTransportSecurityRequirement: true);
 
+			// Integration tests authenticate admin APIs via X-Test-Permissions (never enable in Production).
+			services.Configure<SsoTestingOptions>(options => options.EnableTestAuth = true);
+
 			var hardening = configuration.GetSection(SsoHardeningOptions.SectionName).Get<SsoHardeningOptions>()
 				?? new SsoHardeningOptions
 				{

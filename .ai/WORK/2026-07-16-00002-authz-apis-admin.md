@@ -2,7 +2,7 @@
 
 > Arquivo: `.ai/WORK/2026-07-16-00002-authz-apis-admin.md`  
 > Template: `.ai/TEMPLATES/feature-plan.md`  
-> Status: **Pronto para implementação** (decisões D-00002-1..3 aceitas)  
+> Status: **Implementado** (2026-07-16)  
 > Data: 2026-07-16  
 > Depende de: 00001 (entregue)  
 > Bloqueia: 00003 (portal), exposição pública segura de `api/identity/*`

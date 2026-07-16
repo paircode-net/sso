@@ -23,7 +23,7 @@ namespace SSO.Tests.IntegrationTests.Identity
 			};
 
 			using var server = ServerHelper.Create();
-			using var client = server.CreateClient();
+			using var client = AdminAuthTestHelper.CreatePlatformAdminClient(server);
 
 			var response = await client.PostAsync(
 				"/api/identity/users",
@@ -50,7 +50,8 @@ namespace SSO.Tests.IntegrationTests.Identity
 				password = "ChangeMe!123"
 			};
 
-			using var client = ServerHelper.Create().CreateClient();
+			using var server = ServerHelper.Create();
+			using var client = AdminAuthTestHelper.CreatePlatformAdminClient(server);
 
 			var response = await client.PostAsync(
 				"/api/identity/users",

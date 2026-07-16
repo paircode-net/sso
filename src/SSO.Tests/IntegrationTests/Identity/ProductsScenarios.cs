@@ -14,7 +14,8 @@ namespace SSO.Tests.IntegrationTests.Identity
 		{
 			var product = new Product { Name = "HR", Code = "hr" };
 
-			using var client = ServerHelper.Create().CreateClient();
+			using var server = ServerHelper.Create();
+			using var client = AdminAuthTestHelper.CreatePlatformAdminClient(server);
 
 			var response = await client.PostAsync(
 				"/api/identity/products",

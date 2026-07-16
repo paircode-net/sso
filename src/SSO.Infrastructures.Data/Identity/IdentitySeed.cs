@@ -25,6 +25,7 @@ namespace SSO.Infrastructures.Data.Identity
 	{
 		public static readonly Guid DevOrganizationId = Guid.Parse("11111111-1111-1111-1111-111111111111");
 		public static readonly Guid DevProductId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+		public static readonly Guid DevPlatformProductId = Guid.Parse("22222222-2222-2222-2222-222222222221");
 		public static readonly Guid DevUserId = Guid.Parse("33333333-3333-3333-3333-333333333333");
 		public static readonly Guid DevMembershipId = Guid.Parse("44444444-4444-4444-4444-444444444444");
 		public static readonly Guid DevBranchHqId = Guid.Parse("55555555-5555-5555-5555-555555555555");
@@ -32,9 +33,16 @@ namespace SSO.Infrastructures.Data.Identity
 		public static readonly Guid DevPermissionAccessId = Guid.Parse("71111111-1111-1111-1111-111111111111");
 		public static readonly Guid DevPermissionHqReportsId = Guid.Parse("72222222-2222-2222-2222-222222222222");
 		public static readonly Guid DevPermissionFilialOpsId = Guid.Parse("73333333-3333-3333-3333-333333333333");
+		public static readonly Guid DevPermissionAdminPlatformId = Guid.Parse("74111111-1111-1111-1111-111111111111");
+		public static readonly Guid DevPermissionAdminOrgId = Guid.Parse("74222222-2222-2222-2222-222222222222");
+		public static readonly Guid DevPermissionAdminAuditId = Guid.Parse("74333333-3333-3333-3333-333333333333");
+		public static readonly Guid DevPermissionAdminSessionsId = Guid.Parse("74444444-4444-4444-4444-444444444444");
+		public static readonly Guid DevPermissionAdminMenusId = Guid.Parse("74555555-5555-5555-5555-555555555555");
 		public static readonly Guid DevRoleOrgMemberId = Guid.Parse("81111111-1111-1111-1111-111111111111");
 		public static readonly Guid DevRoleHqManagerId = Guid.Parse("82222222-2222-2222-2222-222222222222");
 		public static readonly Guid DevRoleFilialStaffId = Guid.Parse("83333333-3333-3333-3333-333333333333");
+		public static readonly Guid DevRolePlatformAdminId = Guid.Parse("84444444-4444-4444-4444-444444444444");
+		public static readonly Guid DevRoleOrgAdminId = Guid.Parse("85555555-5555-5555-5555-555555555555");
 		public static readonly Guid DevMenuHomeId = Guid.Parse("91111111-1111-1111-1111-111111111111");
 		public static readonly Guid DevMenuHqReportsId = Guid.Parse("92222222-2222-2222-2222-222222222222");
 		public static readonly Guid DevMenuFilialOpsId = Guid.Parse("93333333-3333-3333-3333-333333333333");
@@ -47,6 +55,8 @@ namespace SSO.Infrastructures.Data.Identity
 		public const string PermissionAccess = "sso.access";
 		public const string PermissionHqReports = "hq.reports";
 		public const string PermissionFilialOps = "filial.ops";
+		public const string AdminClientId = SsoClients.AdminApiClientId;
+		public const string AdminClientSecret = SsoClients.AdminApiClientSecret;
 
 		public static async Task EnsureAsync(IServiceProvider services)
 		{
@@ -74,6 +84,18 @@ namespace SSO.Infrastructures.Data.Identity
 				};
 				product.MarkCreated();
 				context.Products.Add(product);
+			}
+
+			if (!await context.Products.AnyAsync(x => x.Id == DevPlatformProductId))
+			{
+				var platformProduct = new Product
+				{
+					Id = DevPlatformProductId,
+					Name = "SSO Platform",
+					Code = "sso-platform"
+				};
+				platformProduct.MarkCreated();
+				context.Products.Add(platformProduct);
 			}
 
 			await context.SaveChangesAsync();
@@ -155,21 +177,38 @@ namespace SSO.Infrastructures.Data.Identity
 			await EnsurePermissionAsync(context, DevPermissionAccessId, PermissionAccess, "SSO Access");
 			await EnsurePermissionAsync(context, DevPermissionHqReportsId, PermissionHqReports, "HQ Reports");
 			await EnsurePermissionAsync(context, DevPermissionFilialOpsId, PermissionFilialOps, "Filial Operations");
+			await EnsurePermissionAsync(context, DevPermissionAdminPlatformId, SsoAdminPermissions.Platform, "SSO Platform Admin");
+			await EnsurePermissionAsync(context, DevPermissionAdminOrgId, SsoAdminPermissions.Org, "SSO Org Admin");
+			await EnsurePermissionAsync(context, DevPermissionAdminAuditId, SsoAdminPermissions.AuditRead, "SSO Audit Read");
+			await EnsurePermissionAsync(context, DevPermissionAdminSessionsId, SsoAdminPermissions.SessionsRevoke, "SSO Sessions Revoke");
+			await EnsurePermissionAsync(context, DevPermissionAdminMenusId, SsoAdminPermissions.Menus, "SSO Menus Admin");
 
 			await EnsureRoleAsync(context, DevRoleOrgMemberId, "org-member", "Organization Member");
 			await EnsureRoleAsync(context, DevRoleHqManagerId, "hq-manager", "HQ Manager");
 			await EnsureRoleAsync(context, DevRoleFilialStaffId, "filial-staff", "Filial Staff");
+			await EnsureRoleAsync(context, DevRolePlatformAdminId, "platform-admin", "Platform Admin");
+			await EnsureRoleAsync(context, DevRoleOrgAdminId, "org-admin", "Organization Admin");
 
 			await EnsureRolePermissionAsync(context, DevRoleOrgMemberId, DevPermissionAccessId);
 			await EnsureRolePermissionAsync(context, DevRoleHqManagerId, DevPermissionHqReportsId);
 			await EnsureRolePermissionAsync(context, DevRoleFilialStaffId, DevPermissionFilialOpsId);
+			await EnsureRolePermissionAsync(context, DevRolePlatformAdminId, DevPermissionAdminPlatformId);
+			await EnsureRolePermissionAsync(context, DevRolePlatformAdminId, DevPermissionAdminOrgId);
+			await EnsureRolePermissionAsync(context, DevRolePlatformAdminId, DevPermissionAdminAuditId);
+			await EnsureRolePermissionAsync(context, DevRolePlatformAdminId, DevPermissionAdminSessionsId);
+			await EnsureRolePermissionAsync(context, DevRolePlatformAdminId, DevPermissionAdminMenusId);
+			await EnsureRolePermissionAsync(context, DevRoleOrgAdminId, DevPermissionAdminOrgId);
+			await EnsureRolePermissionAsync(context, DevRoleOrgAdminId, DevPermissionAdminSessionsId);
 
 			await EnsureAssignmentAsync(context, DevUserId, DevRoleOrgMemberId, DevOrganizationId, null, DevProductId);
 			await EnsureAssignmentAsync(context, DevUserId, DevRoleHqManagerId, DevOrganizationId, DevBranchHqId, DevProductId);
 			await EnsureAssignmentAsync(context, DevUserId, DevRoleFilialStaffId, DevOrganizationId, DevBranchFilialId, DevProductId);
+			await EnsureAssignmentAsync(context, DevUserId, DevRolePlatformAdminId, organizationId: null, branchId: null, DevPlatformProductId);
+			await EnsureAssignmentAsync(context, DevUserId, DevRoleOrgAdminId, DevOrganizationId, null, DevPlatformProductId);
 
 			await EnsureClientBindingAsync(context, SsoClients.DevSpaClientId, DevProductId);
 			await EnsureClientBindingAsync(context, SsoClients.DevServiceClientId, DevProductId);
+			await EnsureClientBindingAsync(context, AdminClientId, DevPlatformProductId);
 
 			await EnsureMenuAsync(context, DevMenuHomeId, DevProductId, "home", "Home", "/app", PermissionAccess, 10);
 			await EnsureMenuAsync(context, DevMenuHqReportsId, DevProductId, "hq-reports", "HQ Reports", "/app/hq/reports", PermissionHqReports, 20);
@@ -247,7 +286,7 @@ namespace SSO.Infrastructures.Data.Identity
 			IdentityDbContext context,
 			Guid userId,
 			Guid roleId,
-			Guid organizationId,
+			Guid? organizationId,
 			Guid? branchId,
 			Guid productId)
 		{
@@ -421,6 +460,37 @@ namespace SSO.Infrastructures.Data.Identity
 						Permissions.Endpoints.Revocation,
 						Permissions.GrantTypes.ClientCredentials,
 						Permissions.Prefixes.Scope + Scopes.OpenId
+					}
+				});
+			}
+
+			if (await applicationManager.FindByClientIdAsync(AdminClientId) is null)
+			{
+				await applicationManager.CreateAsync(new OpenIddictApplicationDescriptor
+				{
+					ClientId = AdminClientId,
+					ClientSecret = AdminClientSecret,
+					DisplayName = "SSO Admin API",
+					ClientType = ClientTypes.Confidential,
+					ConsentType = ConsentTypes.Implicit,
+					Permissions =
+					{
+						Permissions.Endpoints.Authorization,
+						Permissions.Endpoints.Token,
+						Permissions.Endpoints.Revocation,
+						Permissions.GrantTypes.AuthorizationCode,
+						Permissions.GrantTypes.RefreshToken,
+						Permissions.GrantTypes.ClientCredentials,
+						Permissions.Prefixes.GrantType + SsoGrantTypes.SwitchContext,
+						Permissions.ResponseTypes.Code,
+						Permissions.Scopes.Email,
+						Permissions.Scopes.Profile,
+						Permissions.Scopes.Roles,
+						Permissions.Prefixes.Scope + Scopes.OfflineAccess
+					},
+					Requirements =
+					{
+						Requirements.Features.ProofKeyForCodeExchange
 					}
 				});
 			}

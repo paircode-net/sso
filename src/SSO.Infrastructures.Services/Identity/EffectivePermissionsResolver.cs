@@ -15,7 +15,8 @@ using SSO.Core.Domain.Identity.UserRoleAssignments.Entity;
 namespace SSO.Infrastructures.Services.Identity
 {
 	/// <summary>
-	/// Resolves effective permission codes for User × Organization × Branch × Product.
+	/// Resolves effective permission codes for User × Organization × Branch × Product,
+	/// plus platform-scoped assignments (OrganizationId null — F00002-D2).
 	/// Branch match is exact (ADR-004): no parent→child inheritance.
 	/// Org-wide assignments (BranchId null) apply in every branch of that org+product.
 	/// </summary>
@@ -35,42 +36,60 @@ namespace SSO.Infrastructures.Services.Identity
 			string? clientId,
 			CancellationToken cancellationToken = default)
 		{
-			if (organizationId is null)
-			{
-				return Array.Empty<string>();
-			}
-
-			var hasMembership = await _reader
-				.Query<Membership>()
-				.AsNoTracking()
-				.AnyAsync(
-					x => !x.IsDeleted
-						&& x.UserId == userId
-						&& x.OrganizationId == organizationId.Value,
-					cancellationToken);
-
-			if (!hasMembership)
-			{
-				return Array.Empty<string>();
-			}
-
 			var productId = await ResolveProductIdAsync(clientId, cancellationToken);
 			if (productId is null)
 			{
 				return Array.Empty<string>();
 			}
 
-			var roleIds = await _reader
+			var roleIds = new HashSet<Guid>();
+
+			var platformRoleIds = await _reader
 				.Query<UserRoleAssignment>()
 				.AsNoTracking()
 				.Where(x => !x.IsDeleted
 					&& x.UserId == userId
-					&& x.OrganizationId == organizationId.Value
+					&& x.OrganizationId == null
 					&& x.ProductId == productId.Value
-					&& (x.BranchId == null || (branchId != null && x.BranchId == branchId.Value)))
+					&& x.BranchId == null)
 				.Select(x => x.RoleId)
-				.Distinct()
 				.ToListAsync(cancellationToken);
+
+			foreach (var roleId in platformRoleIds)
+			{
+				roleIds.Add(roleId);
+			}
+
+			if (organizationId is Guid orgId)
+			{
+				var hasMembership = await _reader
+					.Query<Membership>()
+					.AsNoTracking()
+					.AnyAsync(
+						x => !x.IsDeleted
+							&& x.UserId == userId
+							&& x.OrganizationId == orgId,
+						cancellationToken);
+
+				if (hasMembership)
+				{
+					var tenantRoleIds = await _reader
+						.Query<UserRoleAssignment>()
+						.AsNoTracking()
+						.Where(x => !x.IsDeleted
+							&& x.UserId == userId
+							&& x.OrganizationId == orgId
+							&& x.ProductId == productId.Value
+							&& (x.BranchId == null || (branchId != null && x.BranchId == branchId.Value)))
+						.Select(x => x.RoleId)
+						.ToListAsync(cancellationToken);
+
+					foreach (var roleId in tenantRoleIds)
+					{
+						roleIds.Add(roleId);
+					}
+				}
+			}
 
 			if (roleIds.Count == 0)
 			{

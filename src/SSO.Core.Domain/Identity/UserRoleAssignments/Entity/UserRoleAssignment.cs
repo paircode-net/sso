@@ -13,7 +13,8 @@ namespace SSO.Core.Domain.Identity.UserRoleAssignments.Entity
 	{
 		public Guid UserId { get; set; }
 		public Guid RoleId { get; set; }
-		public Guid OrganizationId { get; set; }
+		/// <summary>Null = platform-scoped (F00002-D2); set = tenant assignment.</summary>
+		public Guid? OrganizationId { get; set; }
 		/// <summary>Null = org-wide baseline; set = only that branch (no parent inheritance).</summary>
 		public Guid? BranchId { get; set; }
 		public Guid ProductId { get; set; }

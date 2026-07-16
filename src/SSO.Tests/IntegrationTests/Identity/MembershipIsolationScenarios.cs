@@ -42,7 +42,7 @@ namespace SSO.Tests.IntegrationTests.Identity
 				await context.SaveChangesAsync();
 			}
 
-			using var client = server.CreateClient();
+			using var client = AdminAuthTestHelper.CreateOrgAdminClient(server, orgA.Id);
 			var response = await client.GetAsync($"/api/identity/memberships?organizationId={orgA.Id}");
 
 			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);

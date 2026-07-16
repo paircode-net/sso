@@ -28,7 +28,7 @@ namespace SSO.Infrastructures.Data.Identity.EntityMappings
 			builder.Property(e => e.OrganizationId)
 				.HasColumnType("UNIQUEIDENTIFIER")
 				.HasColumnName("OrganizationId")
-				.IsRequired(true);
+				.IsRequired(false);
 			builder.Property(e => e.BranchId)
 				.HasColumnType("UNIQUEIDENTIFIER")
 				.HasColumnName("BranchId")

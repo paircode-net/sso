@@ -80,7 +80,8 @@ namespace SSO.Tests.IntegrationTests.Identity
 		[TestMethod]
 		public async Task Effective_Menus_Should_Filter_By_Branch_Permissions()
 		{
-			using var client = ServerHelper.Create().CreateClient();
+			using var server = ServerHelper.Create();
+			using var client = AdminAuthTestHelper.CreateAuthenticatedClient(server, SsoAdminPermissions.Menus);
 
 			var hq = await client.GetAsync(
 				$"/api/identity/menus/effective" +

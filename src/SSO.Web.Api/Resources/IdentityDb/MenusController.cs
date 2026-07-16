@@ -1,15 +1,16 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SSO.Core.Domain.Identity._Context.Interfaces.Services;
+using SSO.Middleware.Identity.Authorization;
+using SSO.Shared.Identity;
 
 namespace SSO.Web.Api.Resources.IdentityDb
 {
 	[ApiController]
 	[Route("api/identity/menus")]
-	[AllowAnonymous]
+	[RequiresPermission(SsoAdminPermissions.Menus)]
 	public sealed class MenusController : ControllerBase
 	{
 		private readonly IEffectiveMenusResolver _menusResolver;

@@ -14,6 +14,24 @@ namespace SSO.Tests.IntegrationTests.Identity
 	public class EffectivePermissionsScenarios
 	{
 		[TestMethod]
+		public async Task Platform_Scoped_Assignment_Should_Resolve_Without_Organization()
+		{
+			using var server = ServerHelper.Create();
+			using var scope = server.Services.CreateScope();
+			var resolver = scope.ServiceProvider.GetRequiredService<IEffectivePermissionsResolver>();
+
+			var permissions = await resolver.ResolveAsync(
+				IdentitySeed.DevUserId,
+				organizationId: null,
+				branchId: null,
+				IdentitySeed.AdminClientId);
+
+			CollectionAssert.Contains(permissions.ToList(), SsoAdminPermissions.Platform);
+			CollectionAssert.Contains(permissions.ToList(), SsoAdminPermissions.AuditRead);
+			CollectionAssert.DoesNotContain(permissions.ToList(), IdentitySeed.PermissionAccess);
+		}
+
+		[TestMethod]
 		public async Task Org_Context_Should_Return_Only_OrgWide_Permissions()
 		{
 			using var server = ServerHelper.Create();

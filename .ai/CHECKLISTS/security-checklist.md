@@ -13,7 +13,7 @@
 - [x] AuthN: ASP.NET Identity + OpenIddict `/connect/*`
 - [x] `UseAuthentication` / `UseAuthorization` ativos
 - [x] Permissions efetivas no JWT; products autorizam localmente (ADR-005)
-- [ ] `[Authorize]` em todas as APIs admin sensíveis (audit/menus/revoke) — hardening residual
+- [x] `[Authorize]` / `[RequiresPermission]` em APIs admin sensíveis (audit/menus/revoke + CRUD Identity) — feature 00002
 - [x] IdP Entra OIDC pronto para homologação (`Sso:ExternalAuth:Entra`); Google/LDAP stub (D7)
 
 ## Segredos e configuração

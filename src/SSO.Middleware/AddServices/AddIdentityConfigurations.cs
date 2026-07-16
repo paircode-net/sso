@@ -1,4 +1,6 @@
 using System;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +11,7 @@ using SSO.Core.Domain.Identity.Users.Entity;
 using SSO.Infrastructures.Data.Identity;
 using SSO.Infrastructures.Services.Identity;
 using SSO.Middleware.Identity;
+using SSO.Middleware.Identity.Authorization;
 using SSO.Shared.Identity;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
@@ -25,6 +28,18 @@ namespace SSO.Middleware.AddServices
 			var hardening = configuration?.GetSection(SsoHardeningOptions.SectionName).Get<SsoHardeningOptions>()
 				?? new SsoHardeningOptions();
 
+			var testing = configuration?.GetSection(SsoTestingOptions.SectionName).Get<SsoTestingOptions>()
+				?? new SsoTestingOptions();
+			services.Configure<SsoTestingOptions>(options =>
+			{
+				options.EnableTestAuth = testing.EnableTestAuth;
+			});
+
+			services.AddHttpContextAccessor();
+			services.AddScoped<ICurrentAdminContext, CurrentAdminContext>();
+			services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
+			services.AddAuthorization();
+
 			services
 				.AddIdentity<User, IdentityRole<Guid>>(options =>
 				{
@@ -37,6 +52,11 @@ namespace SSO.Middleware.AddServices
 				})
 				.AddEntityFrameworkStores<IdentityDbContext>()
 				.AddDefaultTokenProviders();
+
+			services.AddAuthentication()
+				.AddScheme<AuthenticationSchemeOptions, TestPermissionsAuthHandler>(
+					SsoTestingAuthDefaults.SchemeName,
+					_ => { });
 
 			services.AddScoped<IEffectivePermissionsResolver, EffectivePermissionsResolver>();
 			services.AddScoped<IPermissionPolicyVersionProvider, PermissionPolicyVersionProvider>();
