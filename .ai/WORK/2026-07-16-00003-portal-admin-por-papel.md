@@ -2,9 +2,9 @@
 
 > Arquivo: `.ai/WORK/2026-07-16-00003-portal-admin-por-papel.md`  
 > Template: `.ai/TEMPLATES/feature-plan.md`  
-> Status: **Refinamento**  
+> Status: **Pronto para implementação** (D-00003-1..3 aceitas)  
 > Data: 2026-07-16  
-> Depende de: **00002** (AuthZ APIs admin)  
+> Depende de: **00002** (AuthZ APIs admin) — entregue  
 > Relaciona: 00007 (gestão AuthClients na UI)
 
 ## Objetivo
@@ -14,108 +14,113 @@ Entregar um **portal administrativo** (UI) com experiências distintas para **Ad
 ## Contexto
 
 - D11: Admin MVP = API-only; login/consent Razor já existem em `SSO.Web.Api`.
-- Atores em `business.md`: Platform Admin vs Org Admin.
-- Sem UI, onboarding de tenants e operação de roles/memberships não escala.
+- 00003 introduz UI admin (supersede parcial de D11 para operação humana).
+- 00002 protege `api/identity/*` com `sso.admin.*`.
+- Atores: Platform Admin vs Org Admin (`business.md`, `admin-api-authz.md`).
+
+## Decisões aceitas
+
+### D-00003-1 — Stack — **Aceito: A**
+
+**Razor Pages / Area `/Admin`** no host `SSO.Web.Api` (mesmo processo do login). Sem SPA/Blazor Server no v1.
+
+### D-00003-2 — Vínculo usuário ↔ organização — **Aceito: convite + aceite**
+
+A organização **não** cria `Membership` diretamente sem consentimento do usuário.
+
+| Etapa | Comportamento |
+|-------|----------------|
+| Admin | Envia **convite** (e-mail) para um endereço |
+| Sistema | Persiste convite `Pending` (org, e-mail, expiração, token) |
+| Usuário | Aceita ou recusa via link (autenticado ou fluxo Account) |
+| Só após aceite | Cria/atualiza User se necessário + **Membership** |
+
+Fora do v1 deste fluxo: vincular user existente “no silêncio”; create+membership sem aceite.
+
+### D-00003-3 — Contexto org/branch no portal — **Aceito: A**
+
+Reusa o grant **`switch_context`** (ADR-003). Claims `organization_id` / `branch_id` no access token são a fonte de verdade. Cookie Identity só autentica a sessão do portal; após troca de contexto, o portal obtém novo access token (ex.: confidential/BFF no server Razor chamando `/connect/token` com o refresh + switch_context, ou fluxo equivalente server-side).
+
+**Não** usar cookie `AdminOrganizationId` como fonte de verdade para APIs.
 
 ## Escopo
 
-### Inclui
+### Inclui (v1)
 
-**MVP do portal (v1)**
-
-- Shell autenticado (OIDC Authorization Code + PKCE contra o próprio AS, client `sso-admin-spa` ou Razor Area).
-- Navegação por papel (esconder menus sem permission `sso.admin.*`).
-- **Org Admin**
-  - Listar/criar/editar Branches da org ativa
-  - Memberships (convidar/vincular usuário ↔ org/branch)
-  - Atribuir roles (UserRoleAssignment) no contexto org/branch/product habilitado
-  - Ver sessões do usuário e revogar (via API já existente)
-  - Troca de contexto (org/branch) na UI
-- **Platform Admin**
-  - Organizations / Products / ProductEnablement
-  - Permissions / Roles / RolePermissions (catálogo)
-  - AuthClients e bindings client→product (CRUD mínimo; detalhe fino em 00007)
-  - External IdPs (enable/config flags; secrets via config/KV, não na UI em texto claro)
-  - Consulta de audit events (filtro por user/data)
-- UX pt-BR; responsivo básico (desktop-first aceitável no v1).
-- Integração apenas via APIs `api/identity/*` (sem bypass de Domain).
+- Area `/Admin` autenticada (cookie Identity + chamada às APIs com Bearer obtido server-side / sessão admin).
+- Navegação por `sso.admin.*` (esconder + gate; APIs já protegidas).
+- **Org Admin:** branches; **convites** (listar/enviar/reenviar/cancelar); assignments após membership ativo; sessões/revoke; UI de switch org/branch via `switch_context`.
+- **Platform Admin:** orgs, products, catálogo permission/role, audit read-only; AuthClients CRUD mínimo (detalhe em 00007); IdPs flags (sem secrets em claro).
+- Aggregate/API de **OrganizationInvite** (novo) + páginas Accept/Decline.
+- UX pt-BR; desktop-first.
 
 ### Fora de escopo (v1)
 
-- Design system completo / white-label por org.
-- Self-service de usuário final (perfil além do que Razor Account já faz).
-- Workflows de aprovação (joiner/mover/leaver).
-- Relatórios analíticos avançados.
-- App mobile nativo.
+- SPA / Blazor WASM.
+- Design system / white-label.
+- Self-service de perfil além do Account atual.
+- Joiner/mover/leaver workflows avançados.
+- Playwright obrigatório (opcional).
 
 ## Abordagem
 
-### Opção de stack (decisão aberta)
-
-| Opção | Prós | Contras |
-|-------|------|---------|
-| **A. Razor Pages/Areas** no `SSO.Web.Api` | Zero novo host; alinhado ao login atual | Menos “SPA”; acopla UI ao host AS |
-| **B. SPA (Blazor WASM ou React) + client OIDC** | UX moderna; separação | Novo projeto, CORS, deploy |
-| **C. Blazor Server** no mesmo host | Interatividade; um deploy | Sticky sessions / scaling |
-
-**Recomendação de refinamento:** Opção A para v1 (rápido, consistente com D6), com Area `/Admin`; reavaliar SPA na v2 se a UX exigir.
-
 ### Fases
 
-1. **Shell + auth** — Area Admin, cookie/OIDC session, menu por permission.
-2. **Org Admin flows** — Branches, Memberships, Assignments.
-3. **Platform Admin flows** — Orgs, Products, catálogo Permission/Role, audit read-only.
-4. **Polish** — empty states, erros FluentValidation, confirmações de revoke.
+1. **Shell `/Admin`** — layout, menu por permission, auth gate, obtenção de token admin + switch_context.
+2. **OrganizationInvite** — Domain + API + e-mail + páginas Accept/Decline.
+3. **Org Admin** — Branches, convites, assignments, sessões.
+4. **Platform Admin** — Orgs/Products/catálogo/audit.
+5. **Polish** — empty states, confirmações, docs README `/Admin`.
 
-### Modelo de autorização na UI
+### Auth no Razor Area
 
-- Não confiar só em esconder botões: toda ação chama API já protegida (00002).
-- Menu efetivo pode usar `GET menus/effective` **ou** mapa estático Admin → `sso.admin.*`.
+- Login cookie (já existe).
+- Server-side: client confidential `sso-admin-api` (ou público+PKCE server) para Bearer nas calls `api/identity/*`.
+- Troca de contexto: form POST → `switch_context` → guarda access token na sessão server (não expor refresh ao browser se possível).
 
 ## Arquivos impactados
 
 | Camada | Caminhos previstos |
 |--------|--------------------|
-| Web | `SSO.Web.Api/Areas/Admin/**` (ou novo `SSO.Web.Admin`) |
-| Middleware | CORS/client seed `sso-admin-*`; cookies antiforgery |
-| Data / Seed | AuthClient admin; MenuItems admin opcionais |
-| Tests | Smoke Selenium/Playwright **ou** integração de páginas mínimas; priorizar API (já em 00002) |
-| Docs | `modules.md`, `business.md`, README (como acessar `/Admin`) |
+| Domain | `OrganizationInvites/` |
+| Application | Commands/Queries invites; handlers Accept |
+| Data | Migration invites; seed |
+| Services | Mail templates convite |
+| Web | `Areas/Admin/**`, `Account/AcceptInvite` (ou similar) |
+| Middleware | Session/token store helper; antiforgery |
+| Tests | Invite lifecycle; Area authorize; switch_context no portal |
+| Docs | `modules.md`, `business.md`, README, Decisions |
 
 ## Critérios de aceite
 
-- [ ] OrgAdmin autentica, seleciona org, gerencia branch/membership/role sem Swagger.
-- [ ] PlatformAdmin gerencia org/product/permission sem Swagger.
-- [ ] Usuário sem `sso.admin.*` não acessa Area Admin (redirect/403).
-- [ ] Nenhuma operação de escrita sem CSRF protection adequada (Razor) ou Bearer+PKCE (SPA).
-- [ ] Fluxos cobertos por checklist manual + testes de API.
+- [ ] OrgAdmin autentica, faz switch_context, gerencia branches/convites/assignments sem Swagger.
+- [ ] Membership só nasce após aceite do convite.
+- [ ] PlatformAdmin gerencia org/product/permission/audit sem Swagger.
+- [ ] Usuário sem `sso.admin.*` não acessa `/Admin`.
+- [ ] Escrita protegida com antiforgery.
+- [ ] Contexto ativo do portal = claims do token pós-`switch_context` (ADR-003).
 
 ## Riscos
 
 | Risco | Mitigação |
 |-------|-----------|
-| Escopo de UI explode | Strict v1 checklist; sem “nice to have” |
-| Duplicar lógica de negócio na UI | UI só orquestra commands/queries existentes |
-| Confundir Product Admin com Platform Admin | Permissions e menus separados; copy clara |
-| Deploy do AS com UI pesada | Area mínima; assets leves |
+| Escopo de UI explode | Checklist v1 estrito |
+| Token admin no server mal guardado | Session server-side; sem refresh no JS |
+| Convite account-takeover por e-mail | Token one-time; expiração; e-mail confirmado no aceite |
+| Duplicar lógica de negócio | UI só orquestra APIs |
 
 ## Estratégia de testes
 
-- [ ] Integração API (já 00002) como garantia principal
-- [ ] Testes de autorização de Area (filtro) se Razor
-- [ ] Checklist manual E2E por papel (release checklist)
-- [ ] Opcional: 1–2 Playwright smoke (login admin → list orgs)
-
-## Decisões abertas
-
-- [ ] **D-00003-1:** Razor Area vs SPA vs Blazor Server?
-- [ ] **D-00003-2:** Convite de usuário = create User + e-mail ou só membership de user existente?
-- [ ] **D-00003-3:** Multi-org switch no portal reusa grant `switch_context` ou cookie de sessão admin separado?
+- [ ] Unit/integration invite Pending→Accepted
+- [ ] Negativo: membership sem aceite
+- [ ] Area `/Admin` 401/403 sem permission
+- [ ] Checklist manual E2E por papel
 
 ## Checklist
 
-- [ ] 00002 concluído ou em paralelo com contrato de permissions fechado
-- [ ] Alinhado a architecture / security
-- [ ] Naming / localization pt-BR
-- [ ] CONTEXT + README atualizados
-- [ ] Pronto para implementação (após D-00003-1)
+- [x] D-00003-1..3 aceitas
+- [x] 00002 entregue
+- [x] Alinhado a ADR-003 / security
+- [ ] Naming / localization pt-BR (na implementação)
+- [ ] CONTEXT + README na implementação
+- [x] Pronto para implementação

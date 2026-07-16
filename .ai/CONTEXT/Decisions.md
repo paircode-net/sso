@@ -25,6 +25,16 @@ Plano: `.ai/WORK/2026-07-14-00001-plataforma-sso.md`.
 
 Plano: `.ai/WORK/2026-07-16-00002-authz-apis-admin.md`.
 
+## Decisões feature 00003 (Portal admin)
+
+| ID | Decisão | Status |
+|----|---------|--------|
+| F00003-D1 | Portal v1 = Razor Area `/Admin` no `SSO.Web.Api` (não SPA/Blazor Server) | **Aceito** |
+| F00003-D2 | Vínculo org↔user só via **convite + aceite** do usuário (sem membership silenciosa) | **Aceito** |
+| F00003-D3 | Contexto org/branch no portal via grant **`switch_context`** (ADR-003); cookie não é fonte de verdade | **Aceito** |
+
+Plano: `.ai/WORK/2026-07-16-00003-portal-admin-por-papel.md`.
+
 ## Decisões feature 00001 (D1–D12)
 
 | ID | Decisão | Status |
