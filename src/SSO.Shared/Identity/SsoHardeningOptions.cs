@@ -12,6 +12,7 @@ namespace SSO.Shared.Identity
 		public LockoutOptions Lockout { get; set; } = new();
 		public SigningOptions Signing { get; set; } = new();
 		public ExternalAuthOptions ExternalAuth { get; set; } = new();
+		public SsoObservabilityOptions Observability { get; set; } = new();
 	}
 
 	public sealed class DatabaseOptions
@@ -45,9 +46,13 @@ namespace SSO.Shared.Identity
 	{
 		/// <summary>When true, use OpenIddict development certificates (never for real production).</summary>
 		public bool UseDevelopmentCertificates { get; set; } = true;
-		/// <summary>Optional cert path (PFX) for production signing — prefer Key Vault in real ops.</summary>
+		/// <summary>Optional cert path (PFX) for production signing — prefer Key Vault (D9 / F00010-D5).</summary>
 		public string CertificatePath { get; set; }
 		public string CertificatePassword { get; set; }
+		/// <summary>Azure Key Vault URI, e.g. https://my-vault.vault.azure.net/</summary>
+		public string KeyVaultUri { get; set; }
+		/// <summary>Certificate name in Key Vault (private key required).</summary>
+		public string KeyVaultCertificateName { get; set; }
 	}
 
 	public sealed class ExternalAuthOptions

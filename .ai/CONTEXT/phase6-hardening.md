@@ -9,7 +9,7 @@
 | CORS | `Sso:Cors` | Policy `SsoCors` with allowlist |
 | Rate limit | `Sso:RateLimit` | Fixed window on `/Account/*`, `/connect/token`, `/connect/authorize` |
 | Lockout | `Sso:Lockout` | Identity lockout (default 5 / 5 min) |
-| Signing | `Sso:Signing` | Dev certs by default; Production requires cert path (Key Vault rotation = D9 ops) |
+| Signing | `Sso:Signing` | Dev certs by default; Production: Key Vault (`KeyVaultUri` + `KeyVaultCertificateName`) ou `CertificatePath` (F00010-D5 / D9) |
 | Migrations (P-004) | `Sso:Database:AutoMigrate` | **false** by default in Production; apply via `dotnet ef database update` in pipeline |
 
 ## P-004 decision

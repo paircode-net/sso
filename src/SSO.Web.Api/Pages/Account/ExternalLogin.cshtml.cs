@@ -9,6 +9,7 @@ using SSO.Core.Domain.Identity._Context.Interfaces.Services;
 using SSO.Core.Domain.Identity.AuthAuditEvents.Entity;
 using SSO.Core.Domain.Identity.Users.Entity;
 using SSO.Middleware.Identity;
+using SSO.Shared.Identity;
 
 namespace SSO.Web.Api.Pages.Account
 {
@@ -45,6 +46,7 @@ namespace SSO.Web.Api.Pages.Account
 			if (!string.IsNullOrEmpty(remoteError))
 			{
 				StatusMessage = "External provider error.";
+				SsoAuthMetrics.RecordLoginFailure("remote_error", "external");
 				await _auditService.WriteAsync(AuthAuditEvent.Create(
 					AuthAuditEventTypes.LoginFailed,
 					AuthAuditOutcomes.Failure,
@@ -56,6 +58,7 @@ namespace SSO.Web.Api.Pages.Account
 			if (info is null)
 			{
 				StatusMessage = "Error loading external login information.";
+				SsoAuthMetrics.RecordLoginFailure("missing_external_info", "external");
 				return Page();
 			}
 
@@ -68,6 +71,7 @@ namespace SSO.Web.Api.Pages.Account
 			if (signInResult.Succeeded)
 			{
 				var existing = await _signInManager.UserManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+				SsoAuthMetrics.RecordLoginSuccess("external");
 				await _auditService.WriteAsync(AuthAuditEvent.Create(
 					AuthAuditEventTypes.LoginSucceeded,
 					AuthAuditOutcomes.Success,
@@ -101,6 +105,7 @@ namespace SSO.Web.Api.Pages.Account
 					"email_required" => "External provider did not return an email claim.",
 					_ => "Unable to complete external login."
 				};
+				SsoAuthMetrics.RecordLoginFailure(outcome.Error ?? "external_failed", "external");
 				await _auditService.WriteAsync(AuthAuditEvent.Create(
 					AuthAuditEventTypes.LoginFailed,
 					AuthAuditOutcomes.Failure,
@@ -110,6 +115,7 @@ namespace SSO.Web.Api.Pages.Account
 			}
 
 			await _signInManager.SignInAsync(outcome.User, isPersistent: false);
+			SsoAuthMetrics.RecordLoginSuccess("external");
 			await _auditService.WriteAsync(AuthAuditEvent.Create(
 				AuthAuditEventTypes.LoginSucceeded,
 				AuthAuditOutcomes.Success,

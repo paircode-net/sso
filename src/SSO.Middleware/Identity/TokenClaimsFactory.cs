@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
@@ -109,6 +111,10 @@ namespace SSO.Middleware.Identity
 			identity.SetScopes(scopes);
 			identity.SetAudiences(ResolveAudiences(clientId));
 			identity.SetDestinations(GetDestinations);
+
+			var approximateSize = identity.Claims.Sum(c =>
+				Encoding.UTF8.GetByteCount(c.Type) + Encoding.UTF8.GetByteCount(c.Value ?? string.Empty));
+			SsoAuthMetrics.RecordJwtShape(permissions.Count, approximateSize);
 
 			return new ClaimsPrincipal(identity);
 		}

@@ -19,8 +19,11 @@ Pacotes e referências observadas nos `.csproj` (versões no momento da descober
 
 ### SSO.Web.Api
 
+- `Azure.Extensions.AspNetCore.Configuration.Secrets` 1.4.0
+- `Azure.Identity` 1.17.1
 - `Microsoft.AspNetCore.TestHost` 10.0.2
 - `Microsoft.EntityFrameworkCore.Design` 10.0.2
+- `Serilog.AspNetCore` 9.0.0 (+ Enrichers.Environment, Sinks.OpenTelemetry)
 - `Swashbuckle.AspNetCore` 10.1.1
 
 ### SSO.Core.Domain
@@ -39,10 +42,11 @@ Pacotes e referências observadas nos `.csproj` (versões no momento da descober
 ### SSO.Middleware
 
 - `FrameworkReference` → `Microsoft.AspNetCore.App`
-- `Microsoft.AspNetCore.Localization.Routing` 2.3.9
-- `Microsoft.EntityFrameworkCore.InMemory` 10.0.3
-- DI Abstractions/Extensions 10.0.7
+- `Azure.Identity` / `Azure.Security.KeyVault.Certificates` / `Azure.Monitor.OpenTelemetry.Exporter`
+- `Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore` 10.0.3
+- OpenTelemetry Hosting + AspNetCore/Http/Runtime + Console/OTLP exporters **1.14.0**
 - `OpenIddict.AspNetCore` 7.5.0
+- `System.DirectoryServices.Protocols` 10.0.0
 
 ### SSO.Shared
 
@@ -66,6 +70,8 @@ Pacotes e referências observadas nos `.csproj` (versões no momento da descober
 |------------|-----|
 | `dotnet-ef` | Migrations (documentado no README) |
 | Forge (`.forge`) | Scaffold de entidades/contextos |
+| `scripts/ci/*` | Build / test / migrate agnósticos (00010) |
+| Docker | Imagem oficial (`Dockerfile`) |
 
 ## Observações
 
@@ -77,4 +83,4 @@ Pacotes e referências observadas nos `.csproj` (versões no momento da descober
 
 - Política de versionamento/atualização de pacotes
 - Introduction de package centralization
-- Key Vault / rotação de chaves OpenIddict em produção
+- Host concreto de deploy (Container Apps / K8s / App Service for Containers) — signing via Key Vault já suportado (F00010-D5)

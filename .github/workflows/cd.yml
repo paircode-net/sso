@@ -1,0 +1,99 @@
+# CD: Staging auto after CI on main; Production requires environment approval (F00010-D4).
+# Secrets expected (repo or environment):
+#   IdentityConnection, DefaultConnection (optional)
+#   AZURE_CLIENT_ID / AZURE_TENANT_ID / AZURE_SUBSCRIPTION_ID (OIDC) for Key Vault + registry
+#   SSO_KEY_VAULT_URI, SSO_SIGNING_CERT_NAME
+#   REGISTRY_LOGIN_SERVER, IMAGE_NAME
+name: CD
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        required: true
+        default: staging
+        type: choice
+        options:
+          - staging
+          - production
+
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    outputs:
+      target: ${{ steps.target.outputs.env }}
+    steps:
+      - id: target
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "env=${{ inputs.environment }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "env=staging" >> "$GITHUB_OUTPUT"
+          fi
+
+  migrate-and-deploy:
+    needs: gate
+    runs-on: ubuntu-latest
+    environment: ${{ needs.gate.outputs.target }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Install EF tool
+        run: dotnet tool install --global dotnet-ef || dotnet tool update --global dotnet-ef
+
+      - name: Migrate IdentityDb (P-004)
+        env:
+          IdentityConnection: ${{ secrets.IdentityConnection }}
+          DefaultConnection: ${{ secrets.DefaultConnection }}
+        run: bash scripts/ci/migrate.sh
+
+      - name: Build image
+        run: |
+          NAME="${{ secrets.IMAGE_NAME }}"
+          if [ -z "$NAME" ]; then NAME="sso"; fi
+          IMAGE="${{ secrets.REGISTRY_LOGIN_SERVER }}/${NAME}:${{ github.sha }}"
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+          docker build -t "$IMAGE" .
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Push image
+        run: |
+          az acr login --name "$(echo '${{ secrets.REGISTRY_LOGIN_SERVER }}' | cut -d. -f1)"
+          docker push "$IMAGE"
+
+      - name: Deploy notes
+        run: |
+          echo "Deploy $IMAGE with:"
+          echo "  Sso__Database__AutoMigrate=false"
+          echo "  Sso__Signing__UseDevelopmentCertificates=false"
+          echo "  Sso__Signing__KeyVaultUri=${{ secrets.SSO_KEY_VAULT_URI }}"
+          echo "  Sso__Signing__KeyVaultCertificateName=${{ secrets.SSO_SIGNING_CERT_NAME }}"
+          echo "  Sso__Observability__Exporter=AzureMonitor|Otlp"
+          echo "Wire the image to your Container Apps / K8s / App Service for Containers revision."
+          echo "Production environment must require reviewers (GitHub Environment protection rules)."

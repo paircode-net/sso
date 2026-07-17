@@ -213,6 +213,7 @@ namespace SSO.Web.Api.Controllers
 					await _applicationManager.GetDisplayNameAsync(application),
 					request.GetScopes());
 
+				SsoAuthMetrics.RecordTokenIssued("client_credentials");
 				return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
 			}
 
@@ -272,6 +273,8 @@ namespace SSO.Web.Api.Controllers
 					existingSessionId);
 
 				principal.SetDestinations(GetDestinations);
+				SsoAuthMetrics.RecordTokenIssued(
+					request.IsAuthorizationCodeGrantType() ? "authorization_code" : "refresh_token");
 				return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
 			}
 
@@ -370,6 +373,7 @@ namespace SSO.Web.Api.Controllers
 
 			if (!result.Succeeded)
 			{
+				SsoAuthMetrics.RecordSwitchContextFailure("invalid_token");
 				return Forbid(
 					authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
 					properties: new AuthenticationProperties(new Dictionary<string, string?>
@@ -384,6 +388,7 @@ namespace SSO.Web.Api.Controllers
 			var user = userId is null ? null : await _userManager.FindByIdAsync(userId);
 			if (user is null)
 			{
+				SsoAuthMetrics.RecordSwitchContextFailure("user_not_found");
 				return Forbid(
 					authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
 					properties: new AuthenticationProperties(new Dictionary<string, string?>
@@ -396,6 +401,7 @@ namespace SSO.Web.Api.Controllers
 
 			if (!Guid.TryParse(request.GetParameter(SsoClaimTypes.OrganizationId)?.ToString(), out var organizationId))
 			{
+				SsoAuthMetrics.RecordSwitchContextFailure("missing_organization");
 				return Forbid(
 					authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
 					properties: new AuthenticationProperties(new Dictionary<string, string?>
@@ -412,6 +418,7 @@ namespace SSO.Web.Api.Controllers
 			{
 				if (!Guid.TryParse(branchRaw, out var parsedBranch))
 				{
+					SsoAuthMetrics.RecordSwitchContextFailure("invalid_branch");
 					return Forbid(
 						authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
 						properties: new AuthenticationProperties(new Dictionary<string, string?>
@@ -428,6 +435,7 @@ namespace SSO.Web.Api.Controllers
 					!x.IsDeleted && x.Id == branchId.Value && x.OrganizationId == organizationId);
 				if (!branchOk)
 				{
+					SsoAuthMetrics.RecordSwitchContextFailure("branch_mismatch");
 					return Forbid(
 						authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
 						properties: new AuthenticationProperties(new Dictionary<string, string?>
@@ -444,6 +452,7 @@ namespace SSO.Web.Api.Controllers
 
 			if (!hasMembership)
 			{
+				SsoAuthMetrics.RecordSwitchContextFailure("no_membership");
 				return Forbid(
 					authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
 					properties: new AuthenticationProperties(new Dictionary<string, string?>
@@ -462,6 +471,7 @@ namespace SSO.Web.Api.Controllers
 			if (existingSessionId is Guid sid
 				&& await _sessionService.IsSessionRevokedAsync(sid))
 			{
+				SsoAuthMetrics.RecordSwitchContextFailure("session_revoked");
 				return Forbid(
 					authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
 					properties: new AuthenticationProperties(new Dictionary<string, string?>
@@ -481,6 +491,8 @@ namespace SSO.Web.Api.Controllers
 				existingSessionId);
 
 			principal.SetDestinations(GetDestinations);
+			SsoAuthMetrics.RecordSwitchContextSuccess();
+			SsoAuthMetrics.RecordTokenIssued(SsoGrantTypes.SwitchContext);
 			return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
 		}
 

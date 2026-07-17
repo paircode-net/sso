@@ -1,6 +1,6 @@
 using System;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.RateLimiting;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenIddict.Server;
+using SSO.Middleware.Identity;
 using SSO.Shared.Identity;
 
 namespace SSO.Middleware.AddServices
@@ -64,6 +65,11 @@ namespace SSO.Middleware.AddServices
 				services.AddRateLimiter(rate =>
 				{
 					rate.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+					rate.OnRejected = (context, _) =>
+					{
+						SsoAuthMetrics.RecordRateLimited(context.HttpContext.Request.Path.Value);
+						return ValueTask.CompletedTask;
+					};
 					rate.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
 					{
 						var path = httpContext.Request.Path.Value ?? string.Empty;
@@ -125,24 +131,21 @@ namespace SSO.Middleware.AddServices
 				return;
 			}
 
-			if (string.IsNullOrWhiteSpace(hardening.Signing.CertificatePath))
+			if (!SigningCertificateResolver.TryResolveProductionCertificate(
+				hardening.Signing,
+				logger,
+				out var cert,
+				out var source)
+				|| cert is null)
 			{
 				throw new InvalidOperationException(
-					"Signing:UseDevelopmentCertificates is false but Signing:CertificatePath is empty. " +
-					"Configure a certificate path or integrate Key Vault (D9).");
+					"Signing:UseDevelopmentCertificates is false but no certificate is configured. " +
+					"Set Signing:KeyVaultUri + Signing:KeyVaultCertificateName (F00010-D5) or Signing:CertificatePath.");
 			}
-
-			var cert = string.IsNullOrEmpty(hardening.Signing.CertificatePassword)
-				? X509CertificateLoader.LoadCertificateFromFile(hardening.Signing.CertificatePath)
-				: X509CertificateLoader.LoadPkcs12FromFile(
-					hardening.Signing.CertificatePath,
-					hardening.Signing.CertificatePassword);
 
 			options.AddEncryptionCertificate(cert);
 			options.AddSigningCertificate(cert);
-			logger.LogInformation(
-				"OpenIddict using certificate from {Path} (prefer Key Vault rotation in production — D9).",
-				hardening.Signing.CertificatePath);
+			logger.LogInformation("OpenIddict using certificate from {Source}.", source);
 		}
 	}
 }

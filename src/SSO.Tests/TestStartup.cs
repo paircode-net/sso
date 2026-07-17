@@ -1,6 +1,7 @@
 ﻿using SSO.Infrastructures.Data.Identity;
 using SSO.Infrastructures.Services;
 using SSO.Middleware;
+using SSO.Middleware.AddServices;
 using SSO.Web.Api.Default;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -82,6 +83,7 @@ namespace SSO.Tests
 			{
 				endpoints.MapControllers();
 				endpoints.MapRazorPages();
+				endpoints.MapSsoHealthEndpoints();
 			});
 		}
 	}

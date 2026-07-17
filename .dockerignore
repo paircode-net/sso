@@ -1,0 +1,17 @@
+**/.git
+**/.vs
+**/bin
+**/obj
+**/TestResults
+**/node_modules
+**/*.md
+.ai
+.forge
+.github
+clients
+samples
+tools
+src/SSO.Tests
+src/SSO.Client.Tests
+**/*.user
+**/*.pfx

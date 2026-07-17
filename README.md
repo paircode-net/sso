@@ -15,6 +15,8 @@ O Authorization Server usa **OpenIddict** + **ASP.NET Identity**, com APIs de ge
 | Multi-produto | Bindings client → product; menus efetivos por permission |
 | IdPs externos | Microsoft Entra ID (OIDC); Google OIDC; LDAP/AD (SDS.Protocols) — [external-idps.md](.ai/CONTEXT/external-idps.md) |
 | Hardening | CORS allowlist, rate limiting, lockout, signing Dev/Prod, migrations controladas em Production |
+| Observabilidade | Serilog + OTEL (exporter plugável), `/health/*`, métricas Auth — [runbook](.ai/PLAYBOOK/observability-runbook.md) |
+| CI/CD | Scripts `scripts/ci/*` + GitHub Actions + `Dockerfile` — [cicd.md](.ai/CONTEXT/cicd.md) |
 | Admin MVP | Portal Razor `/Admin` + API `api/identity/*` (`sso.admin.*`) — [admin-api-authz.md](.ai/CONTEXT/admin-api-authz.md) |
 | SDK produtos | `SSO.Client` + `@sso/client` + samples BFF/API — [product-integration.md](.ai/CONTEXT/product-integration.md) |
 | Sessão / hot revoke | Claim `sid`, deny-list SQL, SLA ≤ 60s, webhook `session.revoked` — ADR-007 |
@@ -79,4 +81,4 @@ dotnet ef --startup-project ../SSO.Web.Api migrations add [Nome]DefaultDbContext
 dotnet ef --startup-project ../SSO.Web.Api migrations add [Nome] --context IdentityDbContext -o Identity/Migrations
 ```
 
-Em **Production**, auto-migrate fica desligado por padrão (`Sso:Database:AutoMigrate`); aplique schema via pipeline (`dotnet ef database update`).
+Em **Production**, auto-migrate fica desligado por padrão (`Sso:Database:AutoMigrate`); aplique schema via pipeline (`scripts/ci/migrate.sh` / `dotnet ef database update`). Health: `/health/live`, `/health/ready`.

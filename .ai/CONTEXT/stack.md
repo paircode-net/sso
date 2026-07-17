@@ -36,10 +36,12 @@
 
 | Item | Status |
 |------|--------|
-| `ILogger` / `ILoggerFactory` | Em uso nos handlers |
-| Serilog | Não presente |
-| Application Insights / APM | Não presente |
-| Stack de logs estruturados | **Pendente de definição** |
+| `ILogger` / Serilog | Serilog.AspNetCore + enrichers (Environment, Machine, RequestId) |
+| OpenTelemetry | Metrics + traces; exporter plugável (`Console` / `Otlp` / `AzureMonitor`) — F00010-D1 |
+| Health | `/health/live`, `/health/ready` (Identity DB + signing) |
+| Redaction | Sem Authorization/senhas/tokens nos logs (`LogRedaction`) |
+| Métricas Auth | meter `SSO.Auth` (`sso.auth.*`, `sso.jwt.*`) |
+| Runbook | `.ai/PLAYBOOK/observability-runbook.md` |
 
 ## AuthN / AuthZ
 
@@ -64,11 +66,11 @@
 | Item | Status |
 |------|--------|
 | EditorConfig / StyleCop / analyzers | Não configurados |
-| Pipeline CI/CD | Não presente |
-| Docker | Não presente |
+| Pipeline CI/CD | GitHub Actions + scripts agnósticos `scripts/ci/*` (F00010-D2) — ver `cicd.md` |
+| Docker | `Dockerfile` raiz (artefato oficial host-agnóstico, F00010-D3) |
+| Signing prod | Key Vault certificate (`Sso:Signing:KeyVaultUri` + `KeyVaultCertificateName`, F00010-D5) |
 
 ## A definir
 
-- Observabilidade (Serilog, App Insights, etc.) — P-002
-- CI/CD e containers — P-003
 - Padrão de analyzers / Nullable consistente em todos os projetos — P-005
+- Host concreto de deploy (Container Apps vs K8s vs App Service for Containers) — imagem já oficial

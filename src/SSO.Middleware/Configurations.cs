@@ -1,6 +1,7 @@
 using BAYSOFT.Abstractions.Core.Domain.Entities;
 using BAYSOFT.Abstractions.Crosscutting.InheritStringLocalization;
 using SSO.Middleware.AddServices;
+using SSO.Middleware.Identity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -49,6 +50,7 @@ namespace SSO.Middleware
 			if (environment != null)
 			{
 				services.AddSsoHardening(configuration, environment);
+				services.AddSsoObservability(configuration, environment);
 			}
 
 			return services;
@@ -61,6 +63,7 @@ namespace SSO.Middleware
 			var hardening = app.ApplicationServices.GetService<SsoHardeningOptions>() ?? new SsoHardeningOptions();
 
 			app.UseMigrations(configuration, environment);
+			app.UseSsoObservabilityEnrichment();
 			app.UseSsoHardening(hardening);
 
 			var supportedCultures = new string[] { "pt-BR" };
@@ -125,8 +128,24 @@ namespace SSO.Middleware
 				_.Lockout = hardening.Lockout;
 				_.Signing = hardening.Signing;
 				_.ExternalAuth = hardening.ExternalAuth;
+				_.Observability = hardening.Observability;
 			});
 			services.AddExternalIdentityProviders(hardening);
+
+			services.AddSingleton(new SsoObservabilityOptions
+			{
+				Enabled = false,
+				Exporter = SsoObservabilityExporters.None,
+				SerilogRequestLogging = false
+			});
+			services.AddHealthChecks()
+				.AddDbContextCheck<SSO.Infrastructures.Data.Identity.IdentityDbContext>(
+					"identity_db",
+					tags: new[] { AddObservabilityConfigurations.ReadyTag })
+				.AddCheck<SigningCertificateHealthCheck>(
+					"signing_cert",
+					tags: new[] { AddObservabilityConfigurations.ReadyTag });
+			services.AddSingleton<SigningCertificateHealthCheck>();
 
 			if (hardening.Cors.Enabled)
 			{

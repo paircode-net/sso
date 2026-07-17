@@ -113,7 +113,7 @@ Plano: `.ai/WORK/2026-07-16-00009-heranca-branch-opt-in.md` (**implementado**). 
 | F00010-D4 | **Staging automático** após CI verde; **Production com aprovação manual** de grupo de ops | **Aceito** |
 | F00010-D5 | **Key Vault reference no CD** (fecha D9): signing keys via KV + managed identity | **Aceito** |
 
-Plano: `.ai/WORK/2026-07-16-00010-observabilidade-cicd.md` (**pronto p/ implementar**).
+Plano: `.ai/WORK/2026-07-16-00010-observabilidade-cicd.md` (**implementado**).
 
 ## Decisões feature 00001 (D1–D12)
 
@@ -127,7 +127,7 @@ Plano: `.ai/WORK/2026-07-16-00010-observabilidade-cicd.md` (**pronto p/ implemen
 | F00001-D6 | Login/consent Razor em `SSO.Web.Api` no MVP | Aceito — consent **explícito** por client (00007); seed first-party permanece implícito/`Never` |
 | F00001-D7 | IdPs: Entra ID → Google → LDAP | Aceito — Google/LDAP **implementados** (00006) |
 | F00001-D8 | Manter Sample até Fase 2 estável | Aceito |
-| F00001-D9 | Dev: key/cert local; Prod: Key Vault + rotação | Aceito (ADR-001) |
+| F00001-D9 | Dev: key/cert local; Prod: Key Vault + rotação | Aceito (ADR-001) — **implementado** via F00010-D5 (`SigningCertificateResolver` + CD) |
 | F00001-D10 | `Product` ≠ `AuthClient` | Aceito |
 | F00001-D11 | Admin MVP = API-only | **Superado parcialmente** por 00003 (portal Razor `/Admin`) |
 | F00001-D12 | Soft-delete + auditoria nas entidades Identity | Aceito (P-008 parcial) |

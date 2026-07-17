@@ -76,6 +76,7 @@ namespace SSO.Web.Api.Pages.Account
 			var user = await _userManager.FindByEmailAsync(Input.Email);
 			if (user is null || user.IsDeleted)
 			{
+				SsoAuthMetrics.RecordLoginFailure("user_not_found");
 				await _auditService.WriteAsync(AuthAuditEvent.Create(
 					AuthAuditEventTypes.LoginFailed,
 					AuthAuditOutcomes.Failure,
@@ -94,6 +95,7 @@ namespace SSO.Web.Api.Pages.Account
 
 			if (result.Succeeded)
 			{
+				SsoAuthMetrics.RecordLoginSuccess();
 				await _auditService.WriteAsync(AuthAuditEvent.Create(
 					AuthAuditEventTypes.LoginSucceeded,
 					AuthAuditOutcomes.Success,
@@ -115,6 +117,7 @@ namespace SSO.Web.Api.Pages.Account
 
 			if (result.IsLockedOut)
 			{
+				SsoAuthMetrics.RecordLoginFailure("locked_out");
 				await _auditService.WriteAsync(AuthAuditEvent.Create(
 					AuthAuditEventTypes.LoginLockedOut,
 					AuthAuditOutcomes.Failure,
@@ -126,6 +129,7 @@ namespace SSO.Web.Api.Pages.Account
 
 			if (result.IsNotAllowed)
 			{
+				SsoAuthMetrics.RecordLoginFailure("not_allowed");
 				await _auditService.WriteAsync(AuthAuditEvent.Create(
 					AuthAuditEventTypes.LoginFailed,
 					AuthAuditOutcomes.Failure,
@@ -136,6 +140,7 @@ namespace SSO.Web.Api.Pages.Account
 				return Page();
 			}
 
+			SsoAuthMetrics.RecordLoginFailure("invalid_password");
 			await _auditService.WriteAsync(AuthAuditEvent.Create(
 				AuthAuditEventTypes.LoginFailed,
 				AuthAuditOutcomes.Failure,

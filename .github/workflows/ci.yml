@@ -1,0 +1,45 @@
+# Thin GitHub Actions wrapper over agnostic scripts (F00010-D2).
+name: CI
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Build
+        run: bash scripts/ci/build.sh
+
+      - name: Test
+        run: bash scripts/ci/test.sh
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: artifacts/test-results
+          if-no-files-found: ignore
+
+      - name: Pack SDK (optional)
+        run: bash scripts/ci/pack-sdk.sh "0.0.0-ci.${{ github.run_number }}"
+
+      - name: Upload nupkg
+        uses: actions/upload-artifact@v4
+        with:
+          name: sso-client-nupkg
+          path: artifacts/nupkg
+          if-no-files-found: ignore
