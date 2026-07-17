@@ -2,7 +2,7 @@
 
 > Arquivo: `.ai/WORK/2026-07-16-00010-observabilidade-cicd.md`  
 > Template: `.ai/TEMPLATES/feature-plan.md`  
-> Status: **Refinamento**  
+> Status: **Pronto para implementação**  
 > Data: 2026-07-16  
 > Depende de: P-002 e P-003 hoje **Pendente de definição** em `Decisions.md`  
 > Relaciona: P-004 (migrations via pipeline); release/security checklists
@@ -114,13 +114,13 @@ Fechar **P-002 (observabilidade)** e **P-003 (CI/CD e deploy)** para operar o SS
 - [ ] Smoke pipeline em staging (manual na primeira vez)
 - [ ] Health ready = 503 se connection string inválida (teste opcional com factory)
 
-## Decisões abertas
+## Decisões (fechadas 2026-07-16)
 
-- [ ] **D-00010-1:** App Insights vs OTLP collector?
-- [ ] **D-00010-2:** GitHub Actions vs Azure DevOps?
-- [ ] **D-00010-3:** Container vs App Service vs IIS?
-- [ ] **D-00010-4:** Quem aprova deploy Production (grupo/role)?
-- [ ] **D-00010-5:** Signing keys: Key Vault reference no CD (D9) nesta feature ou ops separado?
+- [x] **D-00010-1:** OpenTelemetry com **exporter plugável por config** — Console em Dev; App Insights **ou** OTLP em Prod (sem travar vendor).
+- [x] **D-00010-2:** CI/CD com **steps agnósticos** (scripts neutros `dotnet` build/test/migrate) + YAML fino conforme host do repo.
+- [x] **D-00010-3:** **Dockerfile como artefato oficial host-agnóstico** (roda em Container Apps / K8s / App Service for Containers).
+- [x] **D-00010-4:** **Staging automático** após CI verde; **Production com aprovação manual** de grupo de ops.
+- [x] **D-00010-5:** **Key Vault reference completo no CD** nesta feature (fecha D9): assinatura via KV + managed identity.
 
 ## Checklist
 

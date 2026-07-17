@@ -103,6 +103,18 @@ Plano: `.ai/WORK/2026-07-16-00008-claims-tipadas.md` (**implementado**).
 
 Plano: `.ai/WORK/2026-07-16-00009-heranca-branch-opt-in.md` (**implementado**). ADR: [ADR-008](adr/ADR-008-branch-authz-inheritance-opt-in.md).
 
+## Decisões feature 00010 (Observabilidade + CI/CD)
+
+| ID | Decisão | Status |
+|----|---------|--------|
+| F00010-D1 | Observabilidade via **OpenTelemetry** com exporter **plugável por config** (Console em Dev; App Insights ou OTLP em Prod) — sem travar vendor | **Aceito** |
+| F00010-D2 | CI/CD com **steps agnósticos** (scripts `dotnet` build/test/migrate) + YAML fino conforme host do repo | **Aceito** |
+| F00010-D3 | **Dockerfile como artefato oficial host-agnóstico** (Container Apps / K8s / App Service for Containers) | **Aceito** |
+| F00010-D4 | **Staging automático** após CI verde; **Production com aprovação manual** de grupo de ops | **Aceito** |
+| F00010-D5 | **Key Vault reference no CD** (fecha D9): signing keys via KV + managed identity | **Aceito** |
+
+Plano: `.ai/WORK/2026-07-16-00010-observabilidade-cicd.md` (**pronto p/ implementar**).
+
 ## Decisões feature 00001 (D1–D12)
 
 | ID | Decisão | Status |
@@ -140,8 +152,8 @@ Plano: `.ai/WORK/2026-07-16-00009-heranca-branch-opt-in.md` (**implementado**). 
 | ID | Tema | Status |
 |----|------|--------|
 | P-001 | Modelo de autenticação/autorização do SSO | **Definido** (ADRs 001–005); implementação pendente (Fases 0+) |
-| P-002 | Stack de observabilidade | Pendente de definição — refinamento [00010](../WORK/2026-07-16-00010-observabilidade-cicd.md) |
-| P-003 | CI/CD e estratégia de deploy | Pendente de definição — refinamento [00010](../WORK/2026-07-16-00010-observabilidade-cicd.md) |
+| P-002 | Stack de observabilidade | **Aceito** — OpenTelemetry + exporter plugável (F00010-D1). Ver [00010](../WORK/2026-07-16-00010-observabilidade-cicd.md) |
+| P-003 | CI/CD e estratégia de deploy | **Aceito** — steps agnósticos + Dockerfile host-agnóstico + gate Prod (F00010-D2..D5). Ver [00010](../WORK/2026-07-16-00010-observabilidade-cicd.md) |
 | P-004 | Estratégia de migrations em produção (auto vs pipeline) | **Aceito** — Production: `Sso:Database:AutoMigrate=false` por default; aplicar via pipeline (`dotnet ef database update`). Ver `phase6-hardening.md` |
 | P-005 | Analyzers / EditorConfig / Nullable uniforme | Pendente de definição |
 | P-006 | Domínio de negócio real além de Sample | **Definido (planejamento)** — Identity context + aggregates 00001; código pendente |
