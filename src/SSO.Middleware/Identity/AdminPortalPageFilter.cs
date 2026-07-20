@@ -67,6 +67,9 @@ namespace SSO.Middleware.Identity
 	{
 		public IAdminPortalContextService Portal { get; }
 
+		public string? Message { get; set; }
+		public string? Error { get; set; }
+
 		protected AdminPageModel(IAdminPortalContextService portal)
 		{
 			Portal = portal;
@@ -83,5 +86,28 @@ namespace SSO.Middleware.Identity
 		}
 
 		protected bool Can(string permission) => Portal.HasPermission(permission);
+
+		protected bool ApplyResponse(ModelWrapper.WrapResponse response, string successMessage)
+		{
+			if (AdminWrap.IsSuccess(response))
+			{
+				Message = successMessage;
+				return true;
+			}
+
+			Error = AdminWrap.ErrorMessage(response);
+			return false;
+		}
+
+		protected bool RequireOrgContext()
+		{
+			if (Portal.OrganizationId is not null)
+			{
+				return true;
+			}
+
+			Error = "Selecione uma organização em Contexto.";
+			return false;
+		}
 	}
 }

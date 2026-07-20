@@ -5,34 +5,34 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SSO.Core.Application.Identity.Products.Commands;
+using SSO.Core.Application.Identity.Roles.Commands;
 using SSO.Core.Domain.Identity._Context.Interfaces.Infrastructures.Data;
-using SSO.Core.Domain.Identity.Products.Entity;
+using SSO.Core.Domain.Identity.Roles.Entity;
 using SSO.Middleware.Identity;
 
 namespace SSO.Web.Api.Areas.Admin.Pages
 {
-	public sealed class ProductsModel : AdminPageModel
+	public sealed class RolesModel : AdminPageModel
 	{
 		private readonly IIdentityDbContextReader _reader;
 		private readonly IMediator _mediator;
 
-		public ProductsModel(IAdminPortalContextService portal, IIdentityDbContextReader reader, IMediator mediator) : base(portal)
+		public RolesModel(IAdminPortalContextService portal, IIdentityDbContextReader reader, IMediator mediator) : base(portal)
 		{
 			_reader = reader;
 			_mediator = mediator;
 		}
 
-		public List<Product> Items { get; set; } = new();
+		public List<Role> Items { get; set; } = new();
 
 		[BindProperty(SupportsGet = true)]
 		public Guid? EditId { get; set; }
 
 		[BindProperty]
-		public string Name { get; set; } = string.Empty;
+		public string Code { get; set; } = string.Empty;
 
 		[BindProperty]
-		public string Code { get; set; } = string.Empty;
+		public string Name { get; set; } = string.Empty;
 
 		public async Task<IActionResult> OnGetAsync()
 		{
@@ -48,8 +48,8 @@ namespace SSO.Web.Api.Areas.Admin.Pages
 				var item = Items.FirstOrDefault(x => x.Id == id);
 				if (item is not null)
 				{
-					Name = item.Name;
 					Code = item.Code;
+					Name = item.Name;
 				}
 			}
 
@@ -63,12 +63,12 @@ namespace SSO.Web.Api.Areas.Admin.Pages
 				return Forbid();
 			}
 
-			var cmd = AdminWrap.FromAnonymous<PostProductCommand>(new { name = Name, code = Code });
+			var cmd = AdminWrap.FromAnonymous<PostRoleCommand>(new { code = Code, name = Name });
 			var response = await _mediator.Send(cmd);
-			if (ApplyResponse(response, "Produto criado."))
+			if (ApplyResponse(response, "Role criada."))
 			{
-				Name = string.Empty;
 				Code = string.Empty;
+				Name = string.Empty;
 			}
 
 			await LoadAsync();
@@ -82,9 +82,9 @@ namespace SSO.Web.Api.Areas.Admin.Pages
 				return Forbid();
 			}
 
-			var cmd = AdminWrap.FromAnonymous<PutProductCommand>(new { id, name = Name, code = Code });
+			var cmd = AdminWrap.FromAnonymous<PutRoleCommand>(new { id, code = Code, name = Name });
 			var response = await _mediator.Send(cmd);
-			ApplyResponse(response, "Produto atualizado.");
+			ApplyResponse(response, "Role atualizada.");
 
 			await LoadAsync();
 			return Page();
@@ -97,9 +97,9 @@ namespace SSO.Web.Api.Areas.Admin.Pages
 				return Forbid();
 			}
 
-			var cmd = AdminWrap.FromAnonymous<DeleteProductCommand>(new { id });
+			var cmd = AdminWrap.FromAnonymous<DeleteRoleCommand>(new { id });
 			var response = await _mediator.Send(cmd);
-			ApplyResponse(response, "Produto removido.");
+			ApplyResponse(response, "Role removida.");
 
 			await LoadAsync();
 			return Page();
@@ -107,9 +107,9 @@ namespace SSO.Web.Api.Areas.Admin.Pages
 
 		private async Task LoadAsync()
 		{
-			Items = await _reader.Query<Product>().AsNoTracking()
+			Items = await _reader.Query<Role>().AsNoTracking()
 				.Where(x => !x.IsDeleted)
-				.OrderBy(x => x.Name)
+				.OrderBy(x => x.Code)
 				.ToListAsync();
 		}
 	}

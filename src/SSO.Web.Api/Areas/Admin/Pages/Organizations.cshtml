@@ -4,13 +4,69 @@
 	ViewData["Title"] = "Organizações";
 }
 <h1>Organizações</h1>
+@if (!string.IsNullOrEmpty(Model.Message)) { <div class="flash">@Model.Message</div> }
+@if (!string.IsNullOrEmpty(Model.Error)) { <div class="flash error">@Model.Error</div> }
+
+@if (Model.EditId is Guid editId)
+{
+	<div class="card">
+		<h2>Editar organização</h2>
+		<form method="post" asp-page-handler="Update">
+			<input type="hidden" name="id" value="@editId" />
+			<label>Nome</label>
+			<input asp-for="Name" required />
+			<label>Código</label>
+			<input asp-for="Code" required />
+			<label>Inheritance de autorização de filiais</label>
+			<select asp-for="BranchAuthzInheritance">
+				<option value="Off">Off</option>
+				<option value="InheritFromAncestors">InheritFromAncestors</option>
+			</select>
+			<p style="margin-top:1rem">
+				<button type="submit">Salvar</button>
+				<a class="btn btn-secondary" style="margin-left:.5rem" asp-page="Organizations">Cancelar</a>
+			</p>
+		</form>
+	</div>
+}
+else
+{
+	<div class="card">
+		<h2>Nova organização</h2>
+		<form method="post">
+			<label>Nome</label>
+			<input asp-for="Name" required />
+			<label>Código</label>
+			<input asp-for="Code" required />
+			<label>Inheritance de autorização de filiais</label>
+			<select asp-for="BranchAuthzInheritance">
+				<option value="Off">Off</option>
+				<option value="InheritFromAncestors">InheritFromAncestors</option>
+			</select>
+			<p style="margin-top:1rem"><button type="submit">Criar</button></p>
+		</form>
+	</div>
+}
+
 <div class="card">
 	<table>
-		<thead><tr><th>Nome</th><th>Código</th><th>Id</th></tr></thead>
+		<thead><tr><th>Nome</th><th>Código</th><th>Inheritance</th><th>Id</th><th></th></tr></thead>
 		<tbody>
 		@foreach (var o in Model.Items)
 		{
-			<tr><td>@o.Name</td><td>@o.Code</td><td><code>@o.Id</code></td></tr>
+			<tr>
+				<td>@o.Name</td>
+				<td>@o.Code</td>
+				<td>@o.BranchAuthzInheritance</td>
+				<td><code>@o.Id</code></td>
+				<td>
+					<a asp-page="Organizations" asp-route-EditId="@o.Id">Editar</a>
+					<form method="post" asp-page-handler="Delete" style="display:inline; margin-left:.5rem">
+						<input type="hidden" name="id" value="@o.Id" />
+						<button type="submit" class="btn-secondary">Excluir</button>
+					</form>
+				</td>
+			</tr>
 		}
 		</tbody>
 	</table>

@@ -1,16 +1,16 @@
 @page
-@model SSO.Web.Api.Areas.Admin.Pages.PermissionsModel
+@model SSO.Web.Api.Areas.Admin.Pages.RolesModel
 @{
-	ViewData["Title"] = "Permissões";
+	ViewData["Title"] = "Roles";
 }
-<h1>Permissões</h1>
+<h1>Roles</h1>
 @if (!string.IsNullOrEmpty(Model.Message)) { <div class="flash">@Model.Message</div> }
 @if (!string.IsNullOrEmpty(Model.Error)) { <div class="flash error">@Model.Error</div> }
 
 @if (Model.EditId is Guid editId)
 {
 	<div class="card">
-		<h2>Editar permissão</h2>
+		<h2>Editar role</h2>
 		<form method="post" asp-page-handler="Update">
 			<input type="hidden" name="id" value="@editId" />
 			<label>Código</label>
@@ -19,7 +19,7 @@
 			<input asp-for="Name" required />
 			<p style="margin-top:1rem">
 				<button type="submit">Salvar</button>
-				<a class="btn btn-secondary" style="margin-left:.5rem" asp-page="Permissions">Cancelar</a>
+				<a class="btn btn-secondary" style="margin-left:.5rem" asp-page="Roles">Cancelar</a>
 			</p>
 		</form>
 	</div>
@@ -27,7 +27,7 @@
 else
 {
 	<div class="card">
-		<h2>Nova permissão</h2>
+		<h2>Nova role</h2>
 		<form method="post">
 			<label>Código</label>
 			<input asp-for="Code" required />
@@ -42,16 +42,16 @@ else
 	<table>
 		<thead><tr><th>Código</th><th>Nome</th><th>Id</th><th></th></tr></thead>
 		<tbody>
-		@foreach (var p in Model.Items)
+		@foreach (var r in Model.Items)
 		{
 			<tr>
-				<td>@p.Code</td>
-				<td>@p.Name</td>
-				<td><code>@p.Id</code></td>
+				<td>@r.Code</td>
+				<td>@r.Name</td>
+				<td><code>@r.Id</code></td>
 				<td>
-					<a asp-page="Permissions" asp-route-EditId="@p.Id">Editar</a>
+					<a asp-page="Roles" asp-route-EditId="@r.Id">Editar</a>
 					<form method="post" asp-page-handler="Delete" style="display:inline; margin-left:.5rem">
-						<input type="hidden" name="id" value="@p.Id" />
+						<input type="hidden" name="id" value="@r.Id" />
 						<button type="submit" class="btn-secondary">Excluir</button>
 					</form>
 				</td>

@@ -37,8 +37,6 @@ namespace SSO.Web.Api.Areas.Admin.Pages
 
 		public List<Organization> Organizations { get; set; } = new();
 		public List<Branch> Branches { get; set; } = new();
-		public string? Error { get; set; }
-		public string? Message { get; set; }
 
 		public async Task OnGetAsync()
 		{

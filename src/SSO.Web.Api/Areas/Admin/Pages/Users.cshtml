@@ -1,0 +1,51 @@
+@page
+@model SSO.Web.Api.Areas.Admin.Pages.UsersModel
+@{
+	ViewData["Title"] = "Usuários";
+}
+<h1>Usuários</h1>
+@if (!string.IsNullOrEmpty(Model.Message)) { <div class="flash">@Model.Message</div> }
+@if (!string.IsNullOrEmpty(Model.Error)) { <div class="flash error">@Model.Error</div> }
+
+@if (Model.Detail is not null)
+{
+	<div class="card">
+		<h2>Detalhe do usuário</h2>
+		<p><strong>Id:</strong> <code>@Model.Detail.Id</code></p>
+		<p><strong>E-mail:</strong> @Model.Detail.Email (confirmado: @Model.Detail.EmailConfirmed)</p>
+		<p><strong>Username:</strong> @Model.Detail.UserName</p>
+		<p><strong>Telefone:</strong> @(Model.Detail.PhoneNumber ?? "—")</p>
+		<p><strong>Criado em:</strong> @Model.Detail.CreatedAt.ToString("u")</p>
+		<p><a asp-page="Users">← Voltar para a lista</a></p>
+	</div>
+}
+
+<div class="card">
+	<h2>Novo usuário</h2>
+	<form method="post">
+		<label>E-mail</label>
+		<input asp-for="Email" type="email" required />
+		<label>Username</label>
+		<input asp-for="UserName" required />
+		<label>Senha</label>
+		<input asp-for="Password" type="password" required />
+		<p style="margin-top:1rem"><button type="submit">Criar</button></p>
+	</form>
+</div>
+
+<div class="card">
+	<table>
+		<thead><tr><th>E-mail</th><th>Username</th><th>Id</th><th></th></tr></thead>
+		<tbody>
+		@foreach (var u in Model.Items)
+		{
+			<tr>
+				<td>@u.Email</td>
+				<td>@u.UserName</td>
+				<td><code>@u.Id</code></td>
+				<td><a asp-page="Users" asp-route-DetailId="@u.Id">Detalhes</a></td>
+			</tr>
+		}
+		</tbody>
+	</table>
+</div>

@@ -1,0 +1,58 @@
+@page
+@model SSO.Web.Api.Areas.Admin.Pages.AuthClientsModel
+@{
+	ViewData["Title"] = "Auth Clients";
+}
+<h1>Auth Clients</h1>
+@if (!string.IsNullOrEmpty(Model.Message)) { <div class="flash">@Model.Message</div> }
+@if (!string.IsNullOrEmpty(Model.Error)) { <div class="flash error">@Model.Error</div> }
+
+<div class="card">
+	<h2>Novo client</h2>
+	<form method="post">
+		<label>Client Id</label>
+		<input asp-for="ClientId" required />
+		<label>Nome de exibição</label>
+		<input asp-for="DisplayName" />
+		<label>Tipo</label>
+		<select asp-for="ClientType">
+			<option value="public">public</option>
+			<option value="confidential">confidential</option>
+		</select>
+		<label>Produto (opcional, para binding)</label>
+		<select asp-for="ProductId">
+			<option value="">(nenhum)</option>
+			@foreach (var p in Model.Products)
+			{
+				<option value="@p.Id">@p.Name</option>
+			}
+		</select>
+		<p style="margin-top:1rem"><button type="submit">Criar</button></p>
+	</form>
+</div>
+
+<div class="card">
+	<table>
+		<thead><tr><th>Client Id</th><th>First party</th><th>Consent</th><th>Habilitado</th><th></th></tr></thead>
+		<tbody>
+		@foreach (var c in Model.Items)
+		{
+			<tr>
+				<td>@c.ClientId</td>
+				<td>@(c.IsFirstParty ? "Sim" : "Não")</td>
+				<td>@c.RequireConsent</td>
+				<td>@(c.IsEnabled ? "Sim" : "Não")</td>
+				<td>
+					@if (c.IsEnabled)
+					{
+						<form method="post" asp-page-handler="Disable" style="display:inline">
+							<input type="hidden" name="clientId" value="@c.ClientId" />
+							<button type="submit" class="btn-secondary">Desabilitar</button>
+						</form>
+					}
+				</td>
+			</tr>
+		}
+		</tbody>
+	</table>
+</div>

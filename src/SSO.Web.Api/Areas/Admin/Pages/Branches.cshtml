@@ -1,4 +1,5 @@
 @page
+@using System.Linq
 @model SSO.Web.Api.Areas.Admin.Pages.BranchesModel
 @{
 	ViewData["Title"] = "Filiais";
@@ -8,27 +9,56 @@
 @if (!string.IsNullOrEmpty(Model.Error)) { <div class="flash error">@Model.Error</div> }
 @if (Model.Portal.OrganizationId is not null)
 {
-	<div class="card">
-		<h2>Nova filial</h2>
-		<form method="post">
-			<label>Nome</label>
-			<input asp-for="Name" required />
-			<label>Código</label>
-			<input asp-for="Code" required />
-			<label>Filial pai (opcional)</label>
-			<select asp-for="ParentBranchId">
-				<option value="">(nenhuma)</option>
-				@foreach (var b in Model.Items)
-				{
-					<option value="@b.Id">@b.Name</option>
-				}
-			</select>
-			<p style="margin-top:1rem"><button type="submit">Criar</button></p>
-		</form>
-	</div>
+	@if (Model.EditId is Guid editId)
+	{
+		<div class="card">
+			<h2>Editar filial</h2>
+			<form method="post" asp-page-handler="Update">
+				<input type="hidden" name="id" value="@editId" />
+				<label>Nome</label>
+				<input asp-for="Name" required />
+				<label>Código</label>
+				<input asp-for="Code" required />
+				<label>Filial pai (opcional)</label>
+				<select asp-for="ParentBranchId">
+					<option value="">(nenhuma)</option>
+					@foreach (var b in Model.Items)
+					{
+						if (b.Id == editId) { continue; }
+						<option value="@b.Id">@b.Name</option>
+					}
+				</select>
+				<p style="margin-top:1rem">
+					<button type="submit">Salvar</button>
+					<a class="btn btn-secondary" style="margin-left:.5rem" asp-page="Branches">Cancelar</a>
+				</p>
+			</form>
+		</div>
+	}
+	else
+	{
+		<div class="card">
+			<h2>Nova filial</h2>
+			<form method="post">
+				<label>Nome</label>
+				<input asp-for="Name" required />
+				<label>Código</label>
+				<input asp-for="Code" required />
+				<label>Filial pai (opcional)</label>
+				<select asp-for="ParentBranchId">
+					<option value="">(nenhuma)</option>
+					@foreach (var b in Model.Items)
+					{
+						<option value="@b.Id">@b.Name</option>
+					}
+				</select>
+				<p style="margin-top:1rem"><button type="submit">Criar</button></p>
+			</form>
+		</div>
+	}
 	<div class="card">
 		<table>
-			<thead><tr><th>Nome</th><th>Código</th><th>Pai</th></tr></thead>
+			<thead><tr><th>Nome</th><th>Código</th><th>Pai</th><th></th></tr></thead>
 			<tbody>
 			@foreach (var b in Model.Items)
 			{
@@ -36,6 +66,13 @@
 					<td>@b.Name</td>
 					<td>@b.Code</td>
 					<td>@(b.ParentBranchId?.ToString("D") ?? "—")</td>
+					<td>
+						<a asp-page="Branches" asp-route-EditId="@b.Id">Editar</a>
+						<form method="post" asp-page-handler="Delete" style="display:inline; margin-left:.5rem">
+							<input type="hidden" name="id" value="@b.Id" />
+							<button type="submit" class="btn-secondary">Excluir</button>
+						</form>
+					</td>
 				</tr>
 			}
 			</tbody>

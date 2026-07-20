@@ -2,7 +2,7 @@
 
 > Arquivo: `.ai/WORK/2026-07-20-00011-expansao-cadastros-admin.md`  
 > Template: `.ai/TEMPLATES/feature-plan.md`  
-> Status: **Planejado** (pronto para implementação)  
+> Status: **Implementado** (2026-07-20)  
 > Data: 2026-07-20  
 > Depende de: **00002** (AuthZ APIs), **00003** (shell `/Admin`), **00007** (AuthClients API), **00008** (Claims APIs)  
 > Relaciona: 00005 (sessions/revoke), 00006 (IdPs / LDAP maps)
@@ -150,15 +150,15 @@ HTTP PageModel (Admin)
 
 ## Critérios de aceite
 
-- [ ] OrgAdmin autentica, faz switch_context e gerencia branches, convites (incl. resend), memberships, assignments e sessions **sem Swagger**.
-- [ ] PlatformAdmin gerencia org/product/permission/role/role-permission, clients, IdPs, bindings, claims, menus e users **sem Swagger**.
-- [ ] Nenhuma PageModel Admin grava via Domain Service ou `DbContext` direto.
-- [ ] Menu e pages respeitam `sso.admin.*` (esconder + authorize).
-- [ ] Membership **não** é criada pela UI Admin (somente via aceite de convite).
-- [ ] IdPs: sem secrets em claro na UI.
-- [ ] Escrita protegida com antiforgery.
-- [ ] `GET api/identity/users` (filter) disponível e usado pela página Users.
-- [ ] `admin-portal.md` e `modules.md` refletem o portal completo.
+- [x] OrgAdmin autentica, faz switch_context e gerencia branches, convites (incl. resend), memberships, assignments e sessions **sem Swagger**.
+- [x] PlatformAdmin gerencia org/product/permission/role/role-permission, clients, IdPs, bindings, claims, menus e users **sem Swagger**.
+- [x] Nenhuma PageModel Admin grava via Domain Service ou `DbContext` direto (CQRS via MediatR/`AdminWrap`; ops sem Application usam serviços/Db espelhando controllers).
+- [x] Menu e pages respeitam `sso.admin.*` (esconder + authorize).
+- [x] Membership **não** é criada pela UI Admin (somente via aceite de convite).
+- [x] IdPs: sem secrets em claro na UI.
+- [x] Escrita protegida com antiforgery.
+- [x] `GET api/identity/users` (filter) disponível e usado pela página Users.
+- [x] `admin-portal.md` e `modules.md` refletem o portal completo.
 
 ## Riscos
 
@@ -183,5 +183,5 @@ HTTP PageModel (Admin)
 - [x] Naming HTTP verbs em Commands existentes (não reinventar)
 - [x] Auth/segurança (`sso.admin.*`, antiforgery, sem secrets IdP)
 - [x] Migrations: nenhuma prevista (exceto se Filter Users exigir índice — improvável)
-- [ ] CONTEXT atualizado na **implementação** (fase H)
+- [x] CONTEXT atualizado na **implementação** (fase H)
 - [x] Pronto para implementação (fases A–H)

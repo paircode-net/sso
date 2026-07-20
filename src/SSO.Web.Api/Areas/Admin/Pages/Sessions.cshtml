@@ -1,0 +1,47 @@
+@page
+@model SSO.Web.Api.Areas.Admin.Pages.SessionsModel
+@{
+	ViewData["Title"] = "Sessões";
+}
+<h1>Sessões</h1>
+@if (!string.IsNullOrEmpty(Model.Message)) { <div class="flash">@Model.Message</div> }
+@if (!string.IsNullOrEmpty(Model.Error)) { <div class="flash error">@Model.Error</div> }
+
+<div class="card">
+	<h2>Buscar sessões de um usuário</h2>
+	<form method="get">
+		<label>Id do usuário</label>
+		<input asp-for="UserId" required />
+		<p style="margin-top:1rem"><button type="submit">Buscar</button></p>
+	</form>
+</div>
+
+@if (Model.UserId is not null)
+{
+	<div class="card">
+		<table>
+			<thead><tr><th>Client</th><th>Criada</th><th>Última atividade</th><th>Status</th><th></th></tr></thead>
+			<tbody>
+			@foreach (var s in Model.Items)
+			{
+				<tr>
+					<td>@s.ClientId</td>
+					<td>@s.CreatedAt.ToString("u")</td>
+					<td>@s.LastSeenAt.ToString("u")</td>
+					<td>@(s.IsActive ? "Ativa" : $"Revogada ({s.RevokeReason})")</td>
+					<td>
+						@if (s.IsActive)
+						{
+							<form method="post" asp-page-handler="Revoke" style="display:inline">
+								<input type="hidden" name="sessionId" value="@s.Id" />
+								<input type="hidden" name="userId" value="@Model.UserId" />
+								<button type="submit" class="btn-secondary">Revogar</button>
+							</form>
+						}
+					</td>
+				</tr>
+			}
+			</tbody>
+		</table>
+	</div>
+}

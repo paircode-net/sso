@@ -1,0 +1,56 @@
+@page
+@using System.Linq
+@model SSO.Web.Api.Areas.Admin.Pages.RoleClaimsModel
+@{
+	ViewData["Title"] = "Claims por Role";
+}
+<h1>Claims por Role</h1>
+@if (!string.IsNullOrEmpty(Model.Message)) { <div class="flash">@Model.Message</div> }
+@if (!string.IsNullOrEmpty(Model.Error)) { <div class="flash error">@Model.Error</div> }
+
+<div class="card">
+	<h2>Vincular claim</h2>
+	<form method="post">
+		<label>Role</label>
+		<select asp-for="RoleId">
+			@foreach (var r in Model.Roles)
+			{
+				<option value="@r.Id">@r.Code</option>
+			}
+		</select>
+		<label>Definição de claim</label>
+		<select asp-for="ClaimDefinitionId">
+			@foreach (var d in Model.Definitions)
+			{
+				<option value="@d.Id">@d.Code (@d.ValueType)</option>
+			}
+		</select>
+		<label>Valor</label>
+		<input asp-for="Value" required />
+		<p style="margin-top:1rem"><button type="submit">Vincular</button></p>
+	</form>
+</div>
+
+<div class="card">
+	<table>
+		<thead><tr><th>Role</th><th>Claim</th><th>Valor</th><th></th></tr></thead>
+		<tbody>
+		@foreach (var rc in Model.Items)
+		{
+			var role = Model.Roles.FirstOrDefault(x => x.Id == rc.RoleId);
+			var def = Model.Definitions.FirstOrDefault(x => x.Id == rc.ClaimDefinitionId);
+			<tr>
+				<td>@(role?.Code ?? rc.RoleId.ToString())</td>
+				<td>@(def?.Code ?? rc.ClaimDefinitionId.ToString())</td>
+				<td>@rc.Value</td>
+				<td>
+					<form method="post" asp-page-handler="Delete" style="display:inline">
+						<input type="hidden" name="id" value="@rc.Id" />
+						<button type="submit" class="btn-secondary">Remover</button>
+					</form>
+				</td>
+			</tr>
+		}
+		</tbody>
+	</table>
+</div>

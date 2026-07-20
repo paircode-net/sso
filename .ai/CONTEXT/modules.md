@@ -37,7 +37,7 @@
 | Organization | `Organizations` | `api/identity/organizations` | Code único |
 | Product | `Products` | `api/identity/products` | Code único |
 | Membership | `Memberships` | `api/identity/memberships` | User×Org |
-| User | AspNetUsers | `api/identity/users` | IdentityUser |
+| User | AspNetUsers | `api/identity/users` | IdentityUser; GET filter + GET id + POST |
 | Branch | `Branches` | `api/identity/branches` | `ParentBranchId` estrutural |
 | Permission | `Permissions` | `api/identity/permissions` | Code único |
 | Role | `AuthRoles` | `api/identity/roles` | Domain role |
@@ -47,6 +47,11 @@
 | AuthAuditEvent | `AuthAuditEvents` | `api/identity/auth-audit-events` | Append-only |
 | MenuItem | `MenuItems` | `api/identity/menuitems` + `api/identity/menus/effective` | PermissionCode → UI |
 | ExternalIdentityProvider | `ExternalIdentityProviders` | `api/identity/external-identity-providers` | Catálogo; só `IsEnabled` |
+| OrganizationInvite | `OrganizationInvites` | `api/identity/organization-invites` | POST + cancel/resend; accept via Account |
+
+### Portal Admin (00011)
+
+Area `/Admin` — cadastros completos por papel. Ver [admin-portal.md](admin-portal.md).
 
 ### Páginas de conta
 

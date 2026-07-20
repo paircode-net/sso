@@ -32,5 +32,11 @@ namespace SSO.Web.Api.Identity
 			PatchCancelOrganizationInviteCommand request,
 			CancellationToken cancellationToken = default)
 			=> await Send(request, cancellationToken);
+
+		[HttpPatch("{id:Guid}/resend")]
+		public async Task<ActionResult<PatchResendOrganizationInviteCommandResponse>> PatchResend(
+			PatchResendOrganizationInviteCommand request,
+			CancellationToken cancellationToken = default)
+			=> await Send(request, cancellationToken);
 	}
 }

@@ -1,0 +1,67 @@
+@page
+@using System.Linq
+@model SSO.Web.Api.Areas.Admin.Pages.LdapMapsModel
+@{
+	ViewData["Title"] = "Mapeamentos LDAP";
+}
+<h1>Mapeamentos de grupo LDAP → Role</h1>
+@if (!string.IsNullOrEmpty(Model.Message)) { <div class="flash">@Model.Message</div> }
+@if (!string.IsNullOrEmpty(Model.Error)) { <div class="flash error">@Model.Error</div> }
+
+<div class="card">
+	<h2>Novo mapeamento</h2>
+	<form method="post">
+		<label>Organização</label>
+		<select asp-for="OrganizationId">
+			@foreach (var o in Model.Organizations)
+			{
+				<option value="@o.Id">@o.Name</option>
+			}
+		</select>
+		<label>Grupo LDAP (DN ou CN)</label>
+		<input asp-for="GroupIdentifier" required />
+		<label>Role</label>
+		<select asp-for="RoleId">
+			@foreach (var r in Model.Roles)
+			{
+				<option value="@r.Id">@r.Code</option>
+			}
+		</select>
+		<label>Produto</label>
+		<select asp-for="ProductId">
+			@foreach (var p in Model.Products)
+			{
+				<option value="@p.Id">@p.Name</option>
+			}
+		</select>
+		<label>Filial (opcional, Guid)</label>
+		<input asp-for="BranchId" />
+		<p style="margin-top:1rem"><button type="submit">Criar</button></p>
+	</form>
+</div>
+
+<div class="card">
+	<table>
+		<thead><tr><th>Organização</th><th>Grupo</th><th>Role</th><th>Produto</th><th></th></tr></thead>
+		<tbody>
+		@foreach (var m in Model.Items)
+		{
+			var org = Model.Organizations.FirstOrDefault(x => x.Id == m.OrganizationId);
+			var role = Model.Roles.FirstOrDefault(x => x.Id == m.RoleId);
+			var product = Model.Products.FirstOrDefault(x => x.Id == m.ProductId);
+			<tr>
+				<td>@(org?.Name ?? m.OrganizationId.ToString())</td>
+				<td>@m.GroupIdentifier</td>
+				<td>@(role?.Code ?? m.RoleId.ToString())</td>
+				<td>@(product?.Name ?? m.ProductId.ToString())</td>
+				<td>
+					<form method="post" asp-page-handler="Delete" style="display:inline">
+						<input type="hidden" name="id" value="@m.Id" />
+						<button type="submit" class="btn-secondary">Excluir</button>
+					</form>
+				</td>
+			</tr>
+		}
+		</tbody>
+	</table>
+</div>

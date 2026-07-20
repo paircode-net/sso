@@ -1,0 +1,31 @@
+@page
+@model SSO.Web.Api.Areas.Admin.Pages.MembershipsModel
+@{
+	ViewData["Title"] = "Memberships";
+}
+<h1>Memberships</h1>
+@if (!string.IsNullOrEmpty(Model.Message)) { <div class="flash">@Model.Message</div> }
+@if (!string.IsNullOrEmpty(Model.Error)) { <div class="flash error">@Model.Error</div> }
+@if (Model.Portal.OrganizationId is not null)
+{
+	<div class="card">
+		<table>
+			<thead><tr><th>Usuário</th><th>Desde</th><th></th></tr></thead>
+			<tbody>
+			@foreach (var m in Model.Items)
+			{
+				<tr>
+					<td>@(Model.UserLabels.GetValueOrDefault(m.UserId, m.UserId.ToString()))</td>
+					<td>@m.CreatedAt.ToString("u")</td>
+					<td>
+						<form method="post" asp-page-handler="Delete" style="display:inline">
+							<input type="hidden" name="id" value="@m.Id" />
+							<button type="submit" class="btn-secondary">Remover</button>
+						</form>
+					</td>
+				</tr>
+			}
+			</tbody>
+		</table>
+	</div>
+}

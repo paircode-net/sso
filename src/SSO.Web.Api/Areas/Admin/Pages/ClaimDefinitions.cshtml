@@ -1,0 +1,58 @@
+@page
+@model SSO.Web.Api.Areas.Admin.Pages.ClaimDefinitionsModel
+@{
+	ViewData["Title"] = "Definições de claim";
+}
+<h1>Definições de claim</h1>
+@if (!string.IsNullOrEmpty(Model.Message)) { <div class="flash">@Model.Message</div> }
+@if (!string.IsNullOrEmpty(Model.Error)) { <div class="flash error">@Model.Error</div> }
+
+<div class="card">
+	<h2>Nova definição</h2>
+	<form method="post">
+		<label>Código</label>
+		<input asp-for="Code" required />
+		<label>Nome</label>
+		<input asp-for="Name" required />
+		<label>Descrição (opcional)</label>
+		<input asp-for="Description" />
+		<label>Tipo de valor</label>
+		<select asp-for="ValueType">
+			<option value="string">string</option>
+			<option value="int">int</option>
+			<option value="bool">bool</option>
+		</select>
+		<label>Produto (opcional; vazio = global)</label>
+		<select asp-for="ProductId">
+			<option value="">(global)</option>
+			@foreach (var p in Model.Products)
+			{
+				<option value="@p.Id">@p.Name</option>
+			}
+		</select>
+		<p style="margin-top:1rem"><button type="submit">Criar</button></p>
+	</form>
+</div>
+
+<div class="card">
+	<table>
+		<thead><tr><th>Código</th><th>Nome</th><th>Tipo</th><th>Produto</th><th></th></tr></thead>
+		<tbody>
+		@foreach (var c in Model.Items)
+		{
+			<tr>
+				<td>@c.Code</td>
+				<td>@c.Name</td>
+				<td>@c.ValueType</td>
+				<td>@(c.ProductId?.ToString() ?? "global")</td>
+				<td>
+					<form method="post" asp-page-handler="Delete" style="display:inline">
+						<input type="hidden" name="id" value="@c.Id" />
+						<button type="submit" class="btn-secondary">Excluir</button>
+					</form>
+				</td>
+			</tr>
+		}
+		</tbody>
+	</table>
+</div>

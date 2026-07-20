@@ -1,0 +1,93 @@
+@page
+@using System.Linq
+@model SSO.Web.Api.Areas.Admin.Pages.MenuItemsModel
+@{
+	ViewData["Title"] = "Itens de menu";
+}
+<h1>Itens de menu</h1>
+@if (!string.IsNullOrEmpty(Model.Message)) { <div class="flash">@Model.Message</div> }
+@if (!string.IsNullOrEmpty(Model.Error)) { <div class="flash error">@Model.Error</div> }
+
+@if (Model.EditId is Guid editId)
+{
+	<div class="card">
+		<h2>Editar item de menu</h2>
+		<form method="post" asp-page-handler="Update">
+			<input type="hidden" name="id" value="@editId" />
+			<label>Produto</label>
+			<select asp-for="ProductId">
+				@foreach (var p in Model.Products)
+				{
+					<option value="@p.Id">@p.Name</option>
+				}
+			</select>
+			<label>Código</label>
+			<input asp-for="Code" required />
+			<label>Título</label>
+			<input asp-for="Title" required />
+			<label>Rota</label>
+			<input asp-for="Route" required />
+			<label>Código de permissão</label>
+			<input asp-for="PermissionCode" />
+			<label>Ordem</label>
+			<input asp-for="SortOrder" type="number" />
+			<p style="margin-top:1rem">
+				<button type="submit">Salvar</button>
+				<a class="btn btn-secondary" style="margin-left:.5rem" asp-page="MenuItems">Cancelar</a>
+			</p>
+		</form>
+	</div>
+}
+else
+{
+	<div class="card">
+		<h2>Novo item de menu</h2>
+		<form method="post">
+			<label>Produto</label>
+			<select asp-for="ProductId">
+				@foreach (var p in Model.Products)
+				{
+					<option value="@p.Id">@p.Name</option>
+				}
+			</select>
+			<label>Código</label>
+			<input asp-for="Code" required />
+			<label>Título</label>
+			<input asp-for="Title" required />
+			<label>Rota</label>
+			<input asp-for="Route" required />
+			<label>Código de permissão</label>
+			<input asp-for="PermissionCode" />
+			<label>Ordem</label>
+			<input asp-for="SortOrder" type="number" />
+			<p style="margin-top:1rem"><button type="submit">Criar</button></p>
+		</form>
+	</div>
+}
+
+<div class="card">
+	<table>
+		<thead><tr><th>Produto</th><th>Código</th><th>Título</th><th>Rota</th><th>Permissão</th><th>Ordem</th><th></th></tr></thead>
+		<tbody>
+		@foreach (var m in Model.Items)
+		{
+			var product = Model.Products.FirstOrDefault(x => x.Id == m.ProductId);
+			<tr>
+				<td>@(product?.Name ?? m.ProductId.ToString())</td>
+				<td>@m.Code</td>
+				<td>@m.Title</td>
+				<td>@m.Route</td>
+				<td>@m.PermissionCode</td>
+				<td>@m.SortOrder</td>
+				<td>
+					<a asp-page="MenuItems" asp-route-EditId="@m.Id">Editar</a>
+					<form method="post" asp-page-handler="Delete" style="display:inline; margin-left:.5rem">
+						<input type="hidden" name="id" value="@m.Id" />
+						<button type="submit" class="btn-secondary">Excluir</button>
+					</form>
+				</td>
+			</tr>
+		}
+		</tbody>
+	</table>
+</div>

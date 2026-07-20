@@ -19,6 +19,14 @@ namespace SSO.Core.Domain.Identity.OrganizationInvites.Validations.DomainValidat
 		}
 	}
 
+	public sealed class ResendOrganizationInviteSpecificationsValidator : DomainValidator<OrganizationInvite>
+	{
+		public ResendOrganizationInviteSpecificationsValidator(OrganizationInviteIsNotPendingSpecification notPending)
+		{
+			Add(nameof(notPending), new DomainRule<OrganizationInvite>(notPending.Not(), "Only pending invites can be resent."));
+		}
+	}
+
 	public sealed class AcceptOrganizationInviteSpecificationsValidator : DomainValidator<OrganizationInvite>
 	{
 		public AcceptOrganizationInviteSpecificationsValidator(

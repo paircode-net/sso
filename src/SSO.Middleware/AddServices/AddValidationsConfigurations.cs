@@ -132,6 +132,7 @@ namespace SSO.Middleware.AddServices
 
 			services.AddTransient<CreateOrganizationInviteSpecificationsValidator>();
 			services.AddTransient<CancelOrganizationInviteSpecificationsValidator>();
+			services.AddTransient<ResendOrganizationInviteSpecificationsValidator>();
 			services.AddTransient<AcceptOrganizationInviteSpecificationsValidator>();
 			services.AddTransient<DeclineOrganizationInviteSpecificationsValidator>();
 

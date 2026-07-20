@@ -1,7 +1,7 @@
 # Admin portal
 
 > Feature 00003 — F00003-D1/D2/D3 (shell MVP)  
-> Feature **00011** — expansão completa dos cadastros (planejado)  
+> Feature **00011** — expansão completa dos cadastros (**implementado**)  
 > Related: [admin-api-authz.md](admin-api-authz.md), ADR-003, [00011](../WORK/2026-07-20-00011-expansao-cadastros-admin.md)
 
 ## Access
@@ -9,24 +9,24 @@
 1. Login em `/Account/Login` (`admin@sso.local` / `ChangeMe!123` no Dev).
 2. Abrir `/Admin`.
 3. Em **Contexto**, selecionar organização (switch_context server-side na sessão).
-4. Org Admin: Filiais, Convites. Platform: Organizações, Produtos, Permissões, Auditoria.
+4. Navegação por `sso.admin.*` (Org vs Platform).
 
-## Estado dos cadastros
+## Cadastros (`/Admin`)
 
-| Estado | Superfície |
-|--------|------------|
-| Entregue (00003 thin) | Branches (list+create), Invites (list/send/cancel), Orgs/Products/Permissions (lista), Audit (read-only), SwitchContext |
-| Dívida / planejado (00011) | CRUD completo nas páginas thin; Roles, RolePermissions, Memberships, UserRoleAssignments, Sessions, AuthClients, IdPs, ClientProductBindings, Claims*, MenuItems, LdapGroupRoleMaps, Users; resend de convite; UI só via API |
+Páginas orquestram Application (MediatR / `AdminWrap`) ou serviços equivalentes; sem Domain Service direto nas PageModels CQRS.
 
-Detalhe do inventário e fases A–H: [2026-07-20-00011-expansao-cadastros-admin.md](../WORK/2026-07-20-00011-expansao-cadastros-admin.md).
+| Papel | Páginas |
+|-------|---------|
+| Org (+ Platform) | Branches, Invites (+ resend/cancel), Memberships (list/remove), UserRoleAssignments, UserClaimAssignments, Sessions (`sessions.revoke`) |
+| Platform | Organizations, Products, Permissions, Roles, RolePermissions, ClientProductBindings, AuthClients, ExternalIdPs, ClaimDefinitions, RoleClaims, Users, LdapMaps, MenuItems (`menus`) |
+| Audit | Audit (`audit.read`) |
 
 ## Convites (F00003-D2)
 
 - Admin envia convite por e-mail (`/Admin/Invites`).
 - Convidado abre `/Account/AcceptInvite?token=...`, aceita ou recusa.
 - **Membership só é criada após aceite.**
-- API: `api/identity/organization-invites` (+ `PATCH …/{id}/cancel`).
-- Resend na UI: previsto na 00011.
+- API: `api/identity/organization-invites` (+ `PATCH …/{id}/cancel`, `PATCH …/{id}/resend`).
 
 ## Contexto (F00003-D3)
 

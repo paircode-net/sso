@@ -43,12 +43,32 @@
 			{
 				<a asp-area="Admin" asp-page="/Branches">Filiais</a>
 				<a asp-area="Admin" asp-page="/Invites">Convites</a>
+				<a asp-area="Admin" asp-page="/Memberships">Memberships</a>
+				<a asp-area="Admin" asp-page="/UserRoleAssignments">Atribuições</a>
+				<a asp-area="Admin" asp-page="/UserClaimAssignments">Claims de usuário</a>
+			}
+			@if (Portal.HasPermission(SSO.Shared.Identity.SsoAdminPermissions.SessionsRevoke))
+			{
+				<a asp-area="Admin" asp-page="/Sessions">Sessões</a>
 			}
 			@if (Portal.IsPlatformAdmin)
 			{
 				<a asp-area="Admin" asp-page="/Organizations">Organizações</a>
 				<a asp-area="Admin" asp-page="/Products">Produtos</a>
 				<a asp-area="Admin" asp-page="/Permissions">Permissões</a>
+				<a asp-area="Admin" asp-page="/Roles">Roles</a>
+				<a asp-area="Admin" asp-page="/RolePermissions">Permissões por role</a>
+				<a asp-area="Admin" asp-page="/ClientProductBindings">Bindings</a>
+				<a asp-area="Admin" asp-page="/AuthClients">Auth Clients</a>
+				<a asp-area="Admin" asp-page="/ExternalIdPs">Provedores externos</a>
+				<a asp-area="Admin" asp-page="/ClaimDefinitions">Definições de claim</a>
+				<a asp-area="Admin" asp-page="/RoleClaims">Claims por role</a>
+				<a asp-area="Admin" asp-page="/Users">Usuários</a>
+				<a asp-area="Admin" asp-page="/LdapMaps">Mapeamentos LDAP</a>
+			}
+			@if (Portal.IsPlatformAdmin || Portal.HasPermission(SSO.Shared.Identity.SsoAdminPermissions.Menus))
+			{
+				<a asp-area="Admin" asp-page="/MenuItems">Itens de menu</a>
 			}
 			@if (Portal.HasPermission(SSO.Shared.Identity.SsoAdminPermissions.AuditRead))
 			{

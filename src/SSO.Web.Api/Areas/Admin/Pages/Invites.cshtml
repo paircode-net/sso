@@ -30,7 +30,11 @@
 					<td>
 						@if (i.Status == "Pending")
 						{
-							<form method="post" asp-page-handler="Cancel" style="display:inline">
+							<form method="post" asp-page-handler="Resend" style="display:inline">
+								<input type="hidden" name="id" value="@i.Id" />
+								<button type="submit" class="btn-secondary">Reenviar</button>
+							</form>
+							<form method="post" asp-page-handler="Cancel" style="display:inline; margin-left:.5rem">
 								<input type="hidden" name="id" value="@i.Id" />
 								<button type="submit" class="btn-secondary">Cancelar</button>
 							</form>

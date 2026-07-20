@@ -4,13 +4,58 @@
 	ViewData["Title"] = "Produtos";
 }
 <h1>Produtos</h1>
+@if (!string.IsNullOrEmpty(Model.Message)) { <div class="flash">@Model.Message</div> }
+@if (!string.IsNullOrEmpty(Model.Error)) { <div class="flash error">@Model.Error</div> }
+
+@if (Model.EditId is Guid editId)
+{
+	<div class="card">
+		<h2>Editar produto</h2>
+		<form method="post" asp-page-handler="Update">
+			<input type="hidden" name="id" value="@editId" />
+			<label>Nome</label>
+			<input asp-for="Name" required />
+			<label>Código</label>
+			<input asp-for="Code" required />
+			<p style="margin-top:1rem">
+				<button type="submit">Salvar</button>
+				<a class="btn btn-secondary" style="margin-left:.5rem" asp-page="Products">Cancelar</a>
+			</p>
+		</form>
+	</div>
+}
+else
+{
+	<div class="card">
+		<h2>Novo produto</h2>
+		<form method="post">
+			<label>Nome</label>
+			<input asp-for="Name" required />
+			<label>Código</label>
+			<input asp-for="Code" required />
+			<p style="margin-top:1rem"><button type="submit">Criar</button></p>
+		</form>
+	</div>
+}
+
 <div class="card">
 	<table>
-		<thead><tr><th>Nome</th><th>Código</th></tr></thead>
+		<thead><tr><th>Nome</th><th>Código</th><th>Id</th><th></th></tr></thead>
 		<tbody>
 		@foreach (var p in Model.Items)
 		{
-			<tr><td>@p.Name</td><td>@p.Code</td></tr>
+			<tr>
+				<td>@p.Name</td>
+				<td>@p.Code</td>
+				<td><code>@p.Id</code></td>
+				<td>
+					<a asp-page="Products" asp-route-EditId="@p.Id">Editar</a>
+					<form method="post" asp-page-handler="Delete" style="display:inline; margin-left:.5rem">
+						<input type="hidden" name="id" value="@p.Id" />
+						<button type="submit" class="btn-secondary">Excluir</button>
+					</form>
+				</td>
+			</tr>
 		}
 		</tbody>
 	</table>

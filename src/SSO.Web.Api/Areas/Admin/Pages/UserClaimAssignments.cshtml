@@ -1,0 +1,66 @@
+@page
+@using System.Linq
+@model SSO.Web.Api.Areas.Admin.Pages.UserClaimAssignmentsModel
+@{
+	ViewData["Title"] = "Claims por usuário";
+}
+<h1>Claims por usuário</h1>
+@if (!string.IsNullOrEmpty(Model.Message)) { <div class="flash">@Model.Message</div> }
+@if (!string.IsNullOrEmpty(Model.Error)) { <div class="flash error">@Model.Error</div> }
+
+<div class="card">
+	<h2>Nova atribuição</h2>
+	<form method="post">
+		<label>Usuário (Id)</label>
+		<input asp-for="UserId" required />
+		<label>Definição de claim</label>
+		<select asp-for="ClaimDefinitionId">
+			@foreach (var d in Model.Definitions)
+			{
+				<option value="@d.Id">@d.Code (@d.ValueType)</option>
+			}
+		</select>
+		<label>Valor</label>
+		<input asp-for="Value" required />
+		<label>Produto</label>
+		<select asp-for="ProductId">
+			@foreach (var p in Model.Products)
+			{
+				<option value="@p.Id">@p.Name</option>
+			}
+		</select>
+		<label>Filial (opcional, Guid)</label>
+		<input asp-for="BranchId" />
+		<label style="display:flex; align-items:center; gap:.5rem">
+			<input asp-for="Inheritable" type="checkbox" style="width:auto" />
+			Herdável para filiais descendentes
+		</label>
+		<p style="margin-top:1rem"><button type="submit">Atribuir</button></p>
+	</form>
+</div>
+
+<div class="card">
+	<table>
+		<thead><tr><th>Usuário</th><th>Claim</th><th>Valor</th><th>Produto</th><th>Org</th><th></th></tr></thead>
+		<tbody>
+		@foreach (var a in Model.Items)
+		{
+			var def = Model.Definitions.FirstOrDefault(x => x.Id == a.ClaimDefinitionId);
+			var product = Model.Products.FirstOrDefault(x => x.Id == a.ProductId);
+			<tr>
+				<td><code>@a.UserId</code></td>
+				<td>@(def?.Code ?? a.ClaimDefinitionId.ToString())</td>
+				<td>@a.Value</td>
+				<td>@(product?.Name ?? a.ProductId.ToString())</td>
+				<td>@(a.OrganizationId?.ToString() ?? "global")</td>
+				<td>
+					<form method="post" asp-page-handler="Delete" style="display:inline">
+						<input type="hidden" name="id" value="@a.Id" />
+						<button type="submit" class="btn-secondary">Remover</button>
+					</form>
+				</td>
+			</tr>
+		}
+		</tbody>
+	</table>
+</div>

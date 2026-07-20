@@ -28,4 +28,16 @@ namespace SSO.Core.Application.Identity.OrganizationInvites.Notifications
 		public Task Handle(PatchCancelOrganizationInviteNotification notification, CancellationToken cancellationToken)
 			=> Task.CompletedTask;
 	}
+
+	public sealed class PatchResendOrganizationInviteNotification : INotification
+	{
+		public OrganizationInvite Payload { get; }
+		public PatchResendOrganizationInviteNotification(OrganizationInvite payload) => Payload = payload;
+	}
+
+	public sealed class PatchResendOrganizationInviteNotificationHandler : INotificationHandler<PatchResendOrganizationInviteNotification>
+	{
+		public Task Handle(PatchResendOrganizationInviteNotification notification, CancellationToken cancellationToken)
+			=> Task.CompletedTask;
+	}
 }

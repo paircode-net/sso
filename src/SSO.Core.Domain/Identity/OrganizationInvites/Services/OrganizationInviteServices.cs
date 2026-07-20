@@ -97,6 +97,48 @@ namespace SSO.Core.Domain.Identity.OrganizationInvites.Services
 		}
 	}
 
+	public sealed class ResendOrganizationInviteServiceRequest : DomainServiceRequest<OrganizationInvite>
+	{
+		public string? IssuedRawToken { get; set; }
+
+		public ResendOrganizationInviteServiceRequest(OrganizationInvite payload) : base(payload) { }
+	}
+
+	public sealed class ResendOrganizationInviteServiceRequestHandler
+		: DomainServiceRequestHandler<OrganizationInvite, ResendOrganizationInviteServiceRequest>
+	{
+		private readonly ICurrentAdminContext _adminContext;
+
+		public ResendOrganizationInviteServiceRequestHandler(
+			ICurrentAdminContext adminContext,
+			IStringLocalizer<OrganizationInvite> localizer,
+			OrganizationInviteValidator entityValidator,
+			ResendOrganizationInviteSpecificationsValidator domainValidator)
+			: base(localizer, entityValidator, domainValidator)
+		{
+			_adminContext = adminContext;
+		}
+
+		public override Task<OrganizationInvite> Handle(
+			ResendOrganizationInviteServiceRequest request,
+			CancellationToken cancellationToken)
+		{
+			_adminContext.EnsureCanAccessOrganization(request.Payload.OrganizationId);
+			ValidateDomain(request.Payload);
+
+			var rawToken = OrganizationInviteToken.CreateRawToken();
+			request.IssuedRawToken = rawToken;
+
+			request.Payload.TokenHash = OrganizationInviteToken.Hash(rawToken);
+			request.Payload.Status = OrganizationInviteStatuses.Pending;
+			request.Payload.ExpiresAt = DateTime.UtcNow.AddDays(7);
+			request.Payload.TouchUpdated();
+
+			ValidateEntity(request.Payload);
+			return Task.FromResult(request.Payload);
+		}
+	}
+
 	public sealed class AcceptOrganizationInviteServiceRequest : DomainServiceRequest<OrganizationInvite>
 	{
 		public Guid AcceptingUserId { get; }

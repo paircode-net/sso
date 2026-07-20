@@ -1,0 +1,53 @@
+@page
+@using System.Linq
+@model SSO.Web.Api.Areas.Admin.Pages.RolePermissionsModel
+@{
+	ViewData["Title"] = "Permissões por Role";
+}
+<h1>Permissões por Role</h1>
+@if (!string.IsNullOrEmpty(Model.Message)) { <div class="flash">@Model.Message</div> }
+@if (!string.IsNullOrEmpty(Model.Error)) { <div class="flash error">@Model.Error</div> }
+
+<div class="card">
+	<h2>Vincular permissão</h2>
+	<form method="post">
+		<label>Role</label>
+		<select asp-for="RoleId">
+			@foreach (var r in Model.Roles)
+			{
+				<option value="@r.Id">@r.Code — @r.Name</option>
+			}
+		</select>
+		<label>Permissão</label>
+		<select asp-for="PermissionId">
+			@foreach (var p in Model.Permissions)
+			{
+				<option value="@p.Id">@p.Code — @p.Name</option>
+			}
+		</select>
+		<p style="margin-top:1rem"><button type="submit">Vincular</button></p>
+	</form>
+</div>
+
+<div class="card">
+	<table>
+		<thead><tr><th>Role</th><th>Permissão</th><th></th></tr></thead>
+		<tbody>
+		@foreach (var rp in Model.Items)
+		{
+			var role = Model.Roles.FirstOrDefault(x => x.Id == rp.RoleId);
+			var permission = Model.Permissions.FirstOrDefault(x => x.Id == rp.PermissionId);
+			<tr>
+				<td>@(role?.Code ?? rp.RoleId.ToString())</td>
+				<td>@(permission?.Code ?? rp.PermissionId.ToString())</td>
+				<td>
+					<form method="post" asp-page-handler="Delete" style="display:inline">
+						<input type="hidden" name="id" value="@rp.Id" />
+						<button type="submit" class="btn-secondary">Remover</button>
+					</form>
+				</td>
+			</tr>
+		}
+		</tbody>
+	</table>
+</div>

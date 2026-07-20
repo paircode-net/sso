@@ -5,10 +5,9 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SSO.Core.Application.Identity.Branches.Commands;
 using SSO.Core.Domain.Identity._Context.Interfaces.Infrastructures.Data;
 using SSO.Core.Domain.Identity.Branches.Entity;
-using SSO.Core.Domain.Identity.Branches.Services;
-using SSO.Infrastructures.Data.Identity;
 using SSO.Middleware.Identity;
 using SSO.Shared.Identity;
 
@@ -16,24 +15,19 @@ namespace SSO.Web.Api.Areas.Admin.Pages
 {
 	public sealed class BranchesModel : AdminPageModel
 	{
-		private readonly IdentityDbContext _db;
+		private readonly IIdentityDbContextReader _reader;
 		private readonly IMediator _mediator;
-		private readonly IIdentityDbContextWriter _writer;
 
-		public BranchesModel(
-			IAdminPortalContextService portal,
-			IdentityDbContext db,
-			IMediator mediator,
-			IIdentityDbContextWriter writer) : base(portal)
+		public BranchesModel(IAdminPortalContextService portal, IIdentityDbContextReader reader, IMediator mediator) : base(portal)
 		{
-			_db = db;
+			_reader = reader;
 			_mediator = mediator;
-			_writer = writer;
 		}
 
 		public List<Branch> Items { get; set; } = new();
-		public string? Error { get; set; }
-		public string? Message { get; set; }
+
+		[BindProperty(SupportsGet = true)]
+		public Guid? EditId { get; set; }
 
 		[BindProperty]
 		public string Name { get; set; } = string.Empty;
@@ -44,26 +38,39 @@ namespace SSO.Web.Api.Areas.Admin.Pages
 		[BindProperty]
 		public Guid? ParentBranchId { get; set; }
 
+		private bool CanManage => Portal.HasPermission(SsoAdminPermissions.Org) || Portal.IsPlatformAdmin;
+
 		public async Task<IActionResult> OnGetAsync()
 		{
-			if (!Portal.HasPermission(SsoAdminPermissions.Org) && !Portal.IsPlatformAdmin)
+			if (!CanManage)
 			{
 				return Forbid();
 			}
 
-			if (Portal.OrganizationId is null)
+			if (!RequireOrgContext())
 			{
-				Error = "Selecione uma organização em Contexto.";
 				return Page();
 			}
 
 			await LoadAsync();
+
+			if (EditId is Guid id)
+			{
+				var item = Items.FirstOrDefault(x => x.Id == id);
+				if (item is not null)
+				{
+					Name = item.Name;
+					Code = item.Code;
+					ParentBranchId = item.ParentBranchId;
+				}
+			}
+
 			return Page();
 		}
 
 		public async Task<IActionResult> OnPostAsync()
 		{
-			if (!Portal.HasPermission(SsoAdminPermissions.Org) && !Portal.IsPlatformAdmin)
+			if (!CanManage)
 			{
 				return Forbid();
 			}
@@ -74,27 +81,63 @@ namespace SSO.Web.Api.Areas.Admin.Pages
 				return Page();
 			}
 
-			try
+			var cmd = AdminWrap.FromAnonymous<PostBranchCommand>(new
 			{
-				var branch = new Branch
-				{
-					OrganizationId = orgId,
-					ParentBranchId = ParentBranchId,
-					Name = Name.Trim(),
-					Code = Code.Trim()
-				};
-				branch.MarkCreated();
-				await _mediator.Send(new CreateBranchServiceRequest(branch));
-				await _writer.CommitAsync();
-				Message = "Filial criada.";
+				organizationId = orgId,
+				parentBranchId = ParentBranchId,
+				name = Name,
+				code = Code
+			});
+			var response = await _mediator.Send(cmd);
+			if (ApplyResponse(response, "Filial criada."))
+			{
 				Name = string.Empty;
 				Code = string.Empty;
 				ParentBranchId = null;
 			}
-			catch (Exception ex)
+
+			await LoadAsync();
+			return Page();
+		}
+
+		public async Task<IActionResult> OnPostUpdateAsync(Guid id)
+		{
+			if (!CanManage)
 			{
-				Error = ex.Message;
+				return Forbid();
 			}
+
+			if (Portal.OrganizationId is not Guid orgId)
+			{
+				Error = "Selecione uma organização em Contexto.";
+				return Page();
+			}
+
+			var cmd = AdminWrap.FromAnonymous<PutBranchCommand>(new
+			{
+				id,
+				organizationId = orgId,
+				parentBranchId = ParentBranchId,
+				name = Name,
+				code = Code
+			});
+			var response = await _mediator.Send(cmd);
+			ApplyResponse(response, "Filial atualizada.");
+
+			await LoadAsync();
+			return Page();
+		}
+
+		public async Task<IActionResult> OnPostDeleteAsync(Guid id)
+		{
+			if (!CanManage)
+			{
+				return Forbid();
+			}
+
+			var cmd = AdminWrap.FromAnonymous<DeleteBranchCommand>(new { id });
+			var response = await _mediator.Send(cmd);
+			ApplyResponse(response, "Filial removida.");
 
 			await LoadAsync();
 			return Page();
@@ -103,7 +146,7 @@ namespace SSO.Web.Api.Areas.Admin.Pages
 		private async Task LoadAsync()
 		{
 			var orgId = Portal.OrganizationId!.Value;
-			Items = await _db.Branches.AsNoTracking()
+			Items = await _reader.Query<Branch>().AsNoTracking()
 				.Where(x => !x.IsDeleted && x.OrganizationId == orgId)
 				.OrderBy(x => x.Name)
 				.ToListAsync();

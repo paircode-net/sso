@@ -17,7 +17,7 @@ Planos de feature derivados das evolutivas prioritárias após o MVP SSO.
 | 00008 | Claims tipadas | [2026-07-16-00008-claims-tipadas.md](2026-07-16-00008-claims-tipadas.md) — **implementado** | P2 | P1 |
 | 00009 | Herança Branch opt-in | [2026-07-16-00009-heranca-branch-opt-in.md](2026-07-16-00009-heranca-branch-opt-in.md) — **implementado** | P3 | P2 |
 | 00010 | Observabilidade + CI/CD | [2026-07-16-00010-observabilidade-cicd.md](2026-07-16-00010-observabilidade-cicd.md) — **implementado** | P0 (ops) | P0 (ops) |
-| 00011 | Expansão cadastros Admin | [2026-07-20-00011-expansao-cadastros-admin.md](2026-07-20-00011-expansao-cadastros-admin.md) — **planejado** | P1 | P0 |
+| 00011 | Expansão cadastros Admin | [2026-07-20-00011-expansao-cadastros-admin.md](2026-07-20-00011-expansao-cadastros-admin.md) — **implementado** | P1 | P0 |
 
 ## Dependências entre features
 

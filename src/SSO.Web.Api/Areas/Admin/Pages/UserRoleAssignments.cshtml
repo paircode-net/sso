@@ -1,0 +1,72 @@
+@page
+@using System.Linq
+@model SSO.Web.Api.Areas.Admin.Pages.UserRoleAssignmentsModel
+@{
+	ViewData["Title"] = "Atribuições de papel";
+}
+<h1>Atribuições de papel</h1>
+<p class="meta">Escopo: organização ativa no Contexto (ou global, se nenhuma organização selecionada).</p>
+@if (!string.IsNullOrEmpty(Model.Message)) { <div class="flash">@Model.Message</div> }
+@if (!string.IsNullOrEmpty(Model.Error)) { <div class="flash error">@Model.Error</div> }
+
+<div class="card">
+	<h2>Nova atribuição</h2>
+	<form method="post">
+		<label>Usuário (Id)</label>
+		<input asp-for="UserId" required />
+		<label>Role</label>
+		<select asp-for="RoleId">
+			@foreach (var r in Model.Roles)
+			{
+				<option value="@r.Id">@r.Code — @r.Name</option>
+			}
+		</select>
+		<label>Produto</label>
+		<select asp-for="ProductId">
+			@foreach (var p in Model.Products)
+			{
+				<option value="@p.Id">@p.Name</option>
+			}
+		</select>
+		<label>Filial (opcional)</label>
+		<select asp-for="BranchId">
+			<option value="">(org-wide)</option>
+			@foreach (var b in Model.Branches)
+			{
+				<option value="@b.Id">@b.Name</option>
+			}
+		</select>
+		<label style="display:flex; align-items:center; gap:.5rem">
+			<input asp-for="Inheritable" type="checkbox" style="width:auto" />
+			Herdável para filiais descendentes
+		</label>
+		<p style="margin-top:1rem"><button type="submit">Atribuir</button></p>
+	</form>
+</div>
+
+<div class="card">
+	<table>
+		<thead><tr><th>Usuário</th><th>Role</th><th>Produto</th><th>Filial</th><th>Herdável</th><th></th></tr></thead>
+		<tbody>
+		@foreach (var a in Model.Items)
+		{
+			var role = Model.Roles.FirstOrDefault(x => x.Id == a.RoleId);
+			var product = Model.Products.FirstOrDefault(x => x.Id == a.ProductId);
+			var branch = Model.Branches.FirstOrDefault(x => x.Id == a.BranchId);
+			<tr>
+				<td><code>@a.UserId</code></td>
+				<td>@(role?.Code ?? a.RoleId.ToString())</td>
+				<td>@(product?.Name ?? a.ProductId.ToString())</td>
+				<td>@(branch?.Name ?? "org-wide")</td>
+				<td>@(a.Inheritable ? "Sim" : "Não")</td>
+				<td>
+					<form method="post" asp-page-handler="Delete" style="display:inline">
+						<input type="hidden" name="id" value="@a.Id" />
+						<button type="submit" class="btn-secondary">Remover</button>
+					</form>
+				</td>
+			</tr>
+		}
+		</tbody>
+	</table>
+</div>

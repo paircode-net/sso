@@ -1,0 +1,36 @@
+@page
+@model SSO.Web.Api.Areas.Admin.Pages.ExternalIdPsModel
+@{
+	ViewData["Title"] = "Provedores externos (IdP)";
+}
+<h1>Provedores externos (IdP)</h1>
+@if (!string.IsNullOrEmpty(Model.Message)) { <div class="flash">@Model.Message</div> }
+@if (!string.IsNullOrEmpty(Model.Error)) { <div class="flash error">@Model.Error</div> }
+
+<div class="card">
+	<table>
+		<thead><tr><th>Código</th><th>Tipo</th><th>Organização</th><th>Habilitado</th><th>JIT provisioning</th><th></th></tr></thead>
+		<tbody>
+		@foreach (var p in Model.Items)
+		{
+			<tr>
+				<td>@p.DisplayName (@p.Code)</td>
+				<td>@p.ProviderType</td>
+				<td>@(p.OrganizationId?.ToString() ?? "global")</td>
+				<td>@(p.IsEnabled ? "Sim" : "Não")</td>
+				<td>@(p.AllowJitProvisioning ? "Sim" : "Não")</td>
+				<td>
+					<form method="post" asp-page-handler="ToggleEnabled" style="display:inline">
+						<input type="hidden" name="id" value="@p.Id" />
+						<button type="submit" class="btn-secondary">@(p.IsEnabled ? "Desabilitar" : "Habilitar")</button>
+					</form>
+					<form method="post" asp-page-handler="ToggleJit" style="display:inline; margin-left:.5rem">
+						<input type="hidden" name="id" value="@p.Id" />
+						<button type="submit" class="btn-secondary">JIT: @(p.AllowJitProvisioning ? "desligar" : "ligar")</button>
+					</form>
+				</td>
+			</tr>
+		}
+		</tbody>
+	</table>
+</div>

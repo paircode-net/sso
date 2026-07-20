@@ -24,6 +24,13 @@ namespace SSO.Web.Api.Identity
 			_mediator = mediator;
 		}
 
+		[HttpGet]
+		[RequiresPermission(SsoAdminPermissions.Platform)]
+		public async Task<ActionResult<GetUsersByFilterQueryResponse>> GetByFilter(
+			GetUsersByFilterQuery request,
+			CancellationToken cancellationToken = default)
+			=> Wrap(await _mediator.Send(request, cancellationToken));
+
 		[HttpGet("{id:Guid}")]
 		public async Task<ActionResult<GetUserByIdQueryResponse>> Get(GetUserByIdQuery request, CancellationToken cancellationToken = default)
 			=> Wrap(await _mediator.Send(request, cancellationToken));
