@@ -17,21 +17,22 @@ Planos de feature derivados das evolutivas prioritárias após o MVP SSO.
 | 00008 | Claims tipadas | [2026-07-16-00008-claims-tipadas.md](2026-07-16-00008-claims-tipadas.md) — **implementado** | P2 | P1 |
 | 00009 | Herança Branch opt-in | [2026-07-16-00009-heranca-branch-opt-in.md](2026-07-16-00009-heranca-branch-opt-in.md) — **implementado** | P3 | P2 |
 | 00010 | Observabilidade + CI/CD | [2026-07-16-00010-observabilidade-cicd.md](2026-07-16-00010-observabilidade-cicd.md) — **implementado** | P0 (ops) | P0 (ops) |
+| 00011 | Expansão cadastros Admin | [2026-07-20-00011-expansao-cadastros-admin.md](2026-07-20-00011-expansao-cadastros-admin.md) — **planejado** | P1 | P0 |
 
 ## Dependências entre features
 
 ```text
-00002 AuthZ admin ──► 00003 Portal admin
+00002 AuthZ admin ──► 00003 Portal admin ──► 00011 Cadastros Admin (UI completa)
+        │                      │
+        └──► 00007 Consent/AuthClients (APIs) ──► 00011 (UI AuthClients)
         │
-        └──► 00007 Consent/AuthClients (APIs protegidas)
+        └──► 00008 Claims tipadas (APIs) ──► 00011 (UI Claims)
 
 00004 SDK ◄── contrato atual (product-integration.md)
         │
-        └──► 00005 Revogação quente (cliente consome sinais)
+        └──► 00005 Revogação quente (cliente consome sinais) ──► 00011 (UI Sessions)
 
-00006 Google/LDAP ◄── Fase 6 (stubs + Entra)
-
-00008 Claims tipadas ◄── motor EffectivePermissions (Fase 3)
+00006 Google/LDAP ◄── Fase 6 (stubs + Entra) ──► 00011 (UI IdPs / LDAP maps)
 
 00009 Herança Branch ◄── ADR-004 (revisão / ADR novo)
 
@@ -42,8 +43,8 @@ Planos de feature derivados das evolutivas prioritárias após o MVP SSO.
 
 1. 00002 → 00010 (mínimo operacional) → homologar Entra (ops)  
 2. 00004 → 00005  
-3. 00003 (MVP do portal)  
-4. 00006 / 00007 conforme demanda de clientes  
+3. 00003 (MVP do portal) → **00011** (portal completo / cadastros)  
+4. 00006 / 00007 conforme demanda de clientes (APIs já entregues; UI em 00011)  
 5. 00008 / 00009 quando o modelo de authz exigir
 
 Épico base: [2026-07-14-00001-plataforma-sso.md](2026-07-14-00001-plataforma-sso.md).
