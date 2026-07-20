@@ -21,20 +21,23 @@ Manter nomenclatura e estilo consistentes com o scaffold BAYSOFT / Forge.
 
 | Artefato | Padrão | Exemplo |
 |----------|--------|---------|
-| Command | `{Verb}{Entity}Command` | `PostSampleCommand` |
-| Command response | `{Verb}{Entity}CommandResponse` | `PostSampleCommandResponse` |
-| Command handler | `{Verb}{Entity}CommandHandler` | herda `ApplicationRequestHandler<...>` |
+| Command | `{HttpVerb}{Entity}Command` ou `{HttpVerb}{Action}{Entity}Command` | `PostSampleCommand`, `PatchAcceptOrganizationInviteCommand` |
+| Command response | `{HttpVerb}…CommandResponse` | `PostSampleCommandResponse` |
+| Command handler | `{HttpVerb}…CommandHandler` | herda `ApplicationRequestHandler<...>` |
 | Query | `Get{Entity}ByIdQuery` / `Get{Entities}ByFilterQuery` | |
-| Notification | `{Verb}{Entity}Notification` | `PostSampleNotification` |
-| Domain service | `{Verb}{Entity}ServiceRequest` + Handler | `CreateSampleServiceRequest` |
+| Notification | `{HttpVerb}{…}Notification` | `PostSampleNotification`, `PatchCancelOrganizationInviteNotification` |
+| Domain service | `{DomainVerb}{Entity}ServiceRequest` + Handler | `CreateSampleServiceRequest`, `AcceptOrganizationInviteServiceRequest` |
 | Specification | `{Entity}{Rule}Specification` | `SampleDescriptionAlreadyExistsSpecification` |
 | Entity validator | `{Entity}Validator` | `SampleValidator` |
-| Domain validator | `{Verb}{Entity}SpecificationsValidator` | `CreateSampleSpecificationsValidator` |
+| Domain validator | `{DomainVerb}{Entity}SpecificationsValidator` | `CreateSampleSpecificationsValidator` |
 | EF map | `{Entity}Map` | `SampleMap` |
 | Controller | `{Entities}Controller` | `SamplesController` |
+| Controller action | mesmo verbo HTTP do Command | `[HttpPatch]` ↔ `PatchCancel…Command` |
 | Test class | `{Operation}Scenarios` | `PostSampleCommandScenarios` |
 
-- Verbos HTTP nos commands: Post, Put, Patch, Delete.
+- Verbos HTTP nos **Commands** (e actions de Controller): **Post**, **Put**, **Patch**, **Delete** — sempre prefixam o nome.
+- Mutações parciais / transições de estado (accept, decline, cancel, enable…): `Patch{Action}{Entity}Command` (ex.: `PatchAcceptOrganizationInviteCommand`, `PatchDeclineOrganizationInviteCommand`, `PatchCancelOrganizationInviteCommand`).
+- Domain Services usam verbo de domínio (`Create`/`Update`/`Delete`/`Accept`…), não o verbo HTTP.
 - Entity herda `DomainEntity<TId>` (hoje `Guid`).
 
 ## Exemplos
@@ -61,3 +64,6 @@ public sealed class SamplesController : ResourceController { ... }
 - Handlers não-`sealed` sem motivo.
 - Nomes genéricos (`Handler1`, `Manager`, `Helper` de domínio).
 - Misturar cultura de localização sem necessidade (runtime default: `pt-BR`).
+- Regra ou atribuição de domínio dentro de `*CommandHandler` (usar Domain Service + Specification).
+- Command sem verbo HTTP (`AcceptXCommand`, `CancelXCommand`) — usar `PatchAcceptXCommand` / `PatchCancelXCommand`.
+- Controller com `[HttpPost]` apontando para um `Patch*Command` (ou o inverso).

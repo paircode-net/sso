@@ -1,0 +1,29 @@
+---
+description: Commands e Controller actions usam verbo HTTP (Post/Put/Patch/Delete); mutações parciais usam Patch{Action}
+globs: **/SSO.Core.Application/**/Commands/**/*.cs,**/SSO.Web.Api/**/*Controller.cs
+alwaysApply: true
+---
+
+# HTTP verbs on Commands
+
+Application Commands **sempre** começam com o verbo HTTP: `Post`, `Put`, `Patch`, `Delete`.
+
+| Operação | Prefixo Command | Controller |
+|----------|-----------------|------------|
+| Criar | `Post{Entity}Command` | `[HttpPost]` |
+| Substituir | `Put{Entity}Command` | `[HttpPut]` |
+| Patch completo ModelWrapper | `Patch{Entity}Command` | `[HttpPatch]` |
+| Transição / ação parcial | `Patch{Action}{Entity}Command` | `[HttpPatch("…/{action}")]` |
+| Remover | `Delete{Entity}Command` | `[HttpDelete]` |
+
+```text
+✅ PatchAcceptOrganizationInviteCommand + [HttpPatch]
+✅ PatchDeclineOrganizationInviteCommand
+✅ PatchCancelOrganizationInviteCommand + [HttpPatch("{id}/cancel")] PatchCancel(...)
+❌ AcceptOrganizationInviteCommand
+❌ CancelOrganizationInviteCommand + [HttpPost("{id}/cancel")]
+```
+
+Domain Services continuam com verbo de domínio (`Create`/`Accept`/`Cancel`), não HTTP.
+
+Detalhe: `.ai/PLAYBOOK/coding-style.md`.

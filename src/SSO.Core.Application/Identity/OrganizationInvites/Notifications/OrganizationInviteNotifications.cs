@@ -17,15 +17,15 @@ namespace SSO.Core.Application.Identity.OrganizationInvites.Notifications
 			=> Task.CompletedTask;
 	}
 
-	public sealed class CancelOrganizationInviteNotification : INotification
+	public sealed class PatchCancelOrganizationInviteNotification : INotification
 	{
 		public OrganizationInvite Payload { get; }
-		public CancelOrganizationInviteNotification(OrganizationInvite payload) => Payload = payload;
+		public PatchCancelOrganizationInviteNotification(OrganizationInvite payload) => Payload = payload;
 	}
 
-	public sealed class CancelOrganizationInviteNotificationHandler : INotificationHandler<CancelOrganizationInviteNotification>
+	public sealed class PatchCancelOrganizationInviteNotificationHandler : INotificationHandler<PatchCancelOrganizationInviteNotification>
 	{
-		public Task Handle(CancelOrganizationInviteNotification notification, CancellationToken cancellationToken)
+		public Task Handle(PatchCancelOrganizationInviteNotification notification, CancellationToken cancellationToken)
 			=> Task.CompletedTask;
 	}
 }

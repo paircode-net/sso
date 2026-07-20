@@ -10,10 +10,11 @@
 ## Implementação
 
 - [ ] Domain: entity/services/specs/validators conforme padrão
-- [ ] Application: commands/queries/notifications
+- [ ] Regras de negócio e atribuições de domínio no **Domain Service + Specs** (não no Command)
+- [ ] Application: commands/queries/notifications **só orquestram**
 - [ ] Data: mapping + migration se necessário
 - [ ] API: controller + rota `api/{context}/{resource}`
-- [ ] DI: registros em Middleware quando novos tipos exigirem
+- [ ] DI: Specs/validators em `AddValidationsConfigurations` quando novos tipos exigirem
 - [ ] Localização: recursos/mensagens quando aplicável
 - [ ] Classes `sealed` e naming conforme coding-style
 

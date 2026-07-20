@@ -57,7 +57,7 @@ namespace SSO.Tests.IntegrationTests.Identity
 				!x.IsDeleted && x.UserId == user.Id && x.OrganizationId == IdentitySeed.DevOrganizationId);
 			Assert.AreEqual(0, before);
 
-			var result = await mediator.Send(new AcceptOrganizationInviteCommand
+			var result = await mediator.Send(new PatchAcceptOrganizationInviteCommand
 			{
 				RawToken = raw,
 				AcceptingUserId = user.Id

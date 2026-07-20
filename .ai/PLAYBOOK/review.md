@@ -35,12 +35,14 @@ Reportar riscos residuais explicitamente.
 ## Exemplos
 
 ```text
-OK: PR que adiciona Command + Domain Service + Map + Controller + testes + nota em modules.md
+OK: PR que adiciona Command + Domain Service + Specs + Map + Controller + testes + nota em modules.md
 NÃO: PR com só controller escrevendo no DbContext “porque era mais simples”
+NÃO: PR com regra/atribuição de domínio no CommandHandler (Status, ExpiresAt, hash, if de negócio)
 ```
 
 ## Anti-patterns
 
 - Review só de estilo.
+- Aceitar Command “gordo” com lógica que deveria estar em Domain Service/Specs.
 - Ignorar TODOs novos introduzidos sem tracking.
 - Aprovar quebra de contrato HTTP sem menção no plano/ADR.

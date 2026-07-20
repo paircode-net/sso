@@ -144,7 +144,7 @@ namespace SSO.Web.Api.Pages.Account
 				}
 			}
 
-			var result = await _mediator.Send(new AcceptOrganizationInviteCommand
+			var result = await _mediator.Send(new PatchAcceptOrganizationInviteCommand
 			{
 				RawToken = Token!,
 				AcceptingUserId = user!.Id
@@ -164,7 +164,7 @@ namespace SSO.Web.Api.Pages.Account
 		public async Task<IActionResult> OnPostDeclineAsync()
 		{
 			var user = await _userManager.GetUserAsync(User);
-			var result = await _mediator.Send(new DeclineOrganizationInviteCommand
+			var result = await _mediator.Send(new PatchDeclineOrganizationInviteCommand
 			{
 				RawToken = Token ?? string.Empty,
 				ActingUserId = user?.Id

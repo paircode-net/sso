@@ -1,13 +1,13 @@
 using BAYSOFT.Abstractions.Core.Application;
 using BAYSOFT.Abstractions.Crosscutting.Helpers;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using ModelWrapper;
 using ModelWrapper.Extensions.Post;
 using SSO.Core.Application.Identity.OrganizationInvites.Notifications;
 using SSO.Core.Domain.Identity._Context.Interfaces.Infrastructures.Data;
-using SSO.Core.Domain.Identity.OrganizationInvites;
 using SSO.Core.Domain.Identity.OrganizationInvites.Entity;
 using SSO.Core.Domain.Identity.OrganizationInvites.Services;
 using SSO.Core.Domain.Interfaces.Infrastructures.Services;
@@ -17,7 +17,6 @@ using System.Net;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 
 namespace SSO.Core.Application.Identity.OrganizationInvites.Commands
 {
@@ -83,13 +82,6 @@ namespace SSO.Core.Application.Identity.OrganizationInvites.Commands
 			{
 				request.IsValid(_localizer, true);
 				var data = request.Post();
-				data.MarkCreated();
-
-				var rawToken = OrganizationInviteToken.CreateRawToken();
-				data.TokenHash = OrganizationInviteToken.Hash(rawToken);
-				data.Status = OrganizationInviteStatuses.Pending;
-				data.ExpiresAt = DateTime.UtcNow.AddDays(7);
-				data.Email = data.Email.Trim().ToLowerInvariant();
 
 				var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier)
 					?? _httpContextAccessor.HttpContext?.User?.FindFirstValue("sub");
@@ -100,8 +92,12 @@ namespace SSO.Core.Application.Identity.OrganizationInvites.Commands
 
 				data.InvitedByUserId = invitedBy;
 
-				await _mediator.Send(new CreateOrganizationInviteServiceRequest(data), cancellationToken);
+				var serviceRequest = new CreateOrganizationInviteServiceRequest(data);
+				await _mediator.Send(serviceRequest, cancellationToken);
 				await _writer.CommitAsync(cancellationToken);
+
+				var rawToken = serviceRequest.IssuedRawToken
+					?? throw new InvalidOperationException("Invite token was not issued.");
 
 				var http = _httpContextAccessor.HttpContext;
 				var link = http is null

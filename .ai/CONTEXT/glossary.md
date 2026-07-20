@@ -8,11 +8,11 @@
 | **Context / Default** | Bounded context do scaffold Sample; schema EF `DefaultDb` |
 | **Context / Identity** | Bounded context SSO; schema EF `IdentityDb` (ADR-006) — Fase 0 ativa |
 | **Sample** | Aggregate de exemplo (não confundir com domínio SSO de produto); mantido até Fase 2 estável |
-| **Application Command** | Caso de uso de escrita orquestrado na Application |
+| **Application Command** | Orquestração de escrita na Application, nomeado com verbo HTTP (`Post`/`Put`/`Patch`/`Delete`; ações parciais: `PatchAccept…`). **Sem** regra/atribuição de domínio |
 | **Application Query** | Caso de uso de leitura |
 | **Notification** | Evento in-process pós-operação (`INotification`) |
-| **Domain Service** | Caso de uso de domínio via MediatR (`*ServiceRequest`) |
-| **Specification** | Regra de domínio consultável (ex.: unicidade) |
+| **Domain Service** | Caso de uso de domínio via MediatR (`*ServiceRequest`): atribuições + validações + persistência do aggregate |
+| **Specification** | Regra de domínio consultável (ex.: unicidade, estado pending, e-mail mismatch); plugada em `*SpecificationsValidator` |
 | **Reader / Writer** | Abstrações de persistência read/write sobre o DbContext |
 | **ModelWrapper** | Biblioteca de wrap de request/response, filtros e tamanhos de coleção |
 | **Middleware (projeto)** | Composition root de DI — não necessariamente middleware HTTP custom |

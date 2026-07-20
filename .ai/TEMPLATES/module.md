@@ -16,23 +16,24 @@ Usar o aggregate **Sample** como referência de estrutura.
 ```text
 SSO.Core.Domain/{{Context}}/{{Aggregates}}/
   Entity/
-  Services/          Create|Update|Delete
-  Specifications/
+  Services/          Create|Update|Delete (+ operações de domínio: Accept, Cancel…)
+  Specifications/    regras de negócio (unicidade, estado, match…)
   Validations/
     EntityValidations/
-    DomainValidations/
+    DomainValidations/   *SpecificationsValidator por operação
   Resources/
 ```
+
+Atribuições de valor de domínio e `ValidateEntity`/`ValidateDomain` ficam nos **Services**, não nos Commands.
 
 ## Application
 
 ```text
 SSO.Core.Application/{{Context}}/{{Aggregates}}/
-  Commands/
+  Commands/          orquestração apenas (IsValid → Service → Commit → Notify)
   Queries/
   Notifications/
 ```
-
 ## Data
 
 ```text

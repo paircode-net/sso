@@ -1,0 +1,44 @@
+---
+description: Regras de negócio ficam no Domain (Services/Specs), não em Application Commands
+globs: **/SSO.Core.Application/**/Commands/**/*.cs,**/SSO.Core.Domain/**/Services/**/*.cs,**/SSO.Core.Domain/**/Specifications/**/*.cs,**/SSO.Core.Domain/**/Validations/**/*.cs
+alwaysApply: true
+---
+
+# Domain rules stay in Domain
+
+Application Commands **orquestram**. Domain Services + Specifications/Validations **possuem** regras e atribuições.
+
+## Command handler MAY
+
+- `request.IsValid` / ModelWrapper `Post|Put|Patch`
+- Checagem de existência (`EntityNotFoundException`)
+- Resolver input de infra/auth (claims → `InvitedByUserId`)
+- `Mediator.Send(*ServiceRequest)` → `Writer.CommitAsync` → `Publish` notification
+- Side effects de aplicação (e-mail, link HTTP)
+
+## Command handler MUST NOT
+
+- Atribuir valores de domínio (`Status`, hashes, `ExpiresAt`, normalizar e-mail, timestamps de negócio)
+- Validar regras além de existência/request (`if status != Pending`, e-mail match, expiração)
+- Criar/alterar aggregates relacionados por regra de negócio (ex.: criar `Membership` no accept)
+- Conter `if` de negócio que deveria ser Specification
+
+## Where it goes
+
+| Concern | Place |
+|---------|--------|
+| Unicidade, estado válido, match de e-mail, expiração | `Specifications/` + `*SpecificationsValidator` |
+| Campos required/format | `EntityValidations/{Entity}Validator` |
+| Atribuições + `ValidateEntity`/`ValidateDomain` + persist | `Services/{Verb}{Entity}Service` |
+
+```text
+❌ PostXCommandHandler: data.Status = Pending; data.ExpiresAt = UtcNow.AddDays(7);
+✅ CreateXServiceRequestHandler: atribui Status/ExpiresAt → Validate* → Writer.AddAsync
+
+❌ AcceptXCommandHandler: if (expired) …; new Membership { … }
+✅ PatchAcceptXCommandHandler → AcceptXServiceRequestHandler + specs (Expired, NotPending, …)
+```
+
+Commands sempre prefixam verbo HTTP (`Post`/`Put`/`Patch`/`Delete`). Transições parciais: `PatchAccept…` / `PatchDecline…` / `PatchCancel…` (ver `coding-style.md`).
+
+Referência: `.ai/PLAYBOOK/architecture.md`, `engineering.md`.

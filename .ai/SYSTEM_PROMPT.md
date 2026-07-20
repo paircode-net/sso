@@ -63,6 +63,7 @@ Em conflito: documentação oficial prevalece sobre convenções implícitas no 
 ## Regras para implementação
 
 - Respeitar a arquitetura e as responsabilidades das camadas.
+- **Escrita:** Command orquestra; Domain Service + Specifications/Validations possuem regras e atribuições de domínio (ver `.ai/PLAYBOOK/architecture.md`).
 - Reutilizar antes de criar.
 - Implementar apenas o necessário.
 - Não alterar comportamento existente sem intenção explícita.

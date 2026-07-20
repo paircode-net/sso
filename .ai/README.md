@@ -31,7 +31,7 @@ Missão, processo, prioridade de fontes, regras de planejamento/documentação/i
 | Arquivo | Uso |
 |---------|-----|
 | `engineering.md` | Disciplina de engenharia e escopo |
-| `architecture.md` | Clean + CQRS e dependências |
+| `architecture.md` | Clean + CQRS; **Command vs Domain Service** (regras/atribuições no Domain) |
 | `coding-style.md` | Nomenclatura e estilo |
 | `testing.md` | MSTest, rotas, helpers |
 | `security.md` | Validação, secrets, auth |

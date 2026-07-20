@@ -15,6 +15,7 @@
 | POST | / | Command Post | 201 | |
 | PUT | /{id} | Command Put | 200 | |
 | PATCH | /{id} | Command Patch | 200 | |
+| PATCH | /{id}/{{action}} | `Patch{Action}{Entity}Command` | 200 | transições parciais (accept/cancel/…) |
 | DELETE | /{id} | Command Delete | 200 | |
 
 ## Contratos / wrapping

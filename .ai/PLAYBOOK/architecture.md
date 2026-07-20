@@ -21,6 +21,32 @@ Preservar Clean Architecture + CQRS Full do repositório.
 
 ## Padrões obrigatórios
 
+### Command vs Domain Service (escrita)
+
+Fluxo obrigatório de escrita:
+
+```text
+Command Handler (Application)
+  → IsValid / ModelWrapper / existência (opcional)
+  → Domain Service (MediatR *ServiceRequest)
+      → atribuições de valor de domínio
+      → ValidateEntity + ValidateDomain (Specs)
+      → Writer.Add / mutação
+  → Writer.CommitAsync
+  → Notification
+```
+
+| Camada | Responsável por | Exemplos |
+|--------|-----------------|----------|
+| **Application Command** | Orquestração | `IsValid`, `EntityNotFound`, claims→campo de auditoria de quem chama, `CommitAsync`, e-mail/link HTTP |
+| **Domain Service** | Atribuições + persistência do aggregate | `Status`, `TokenHash`, `ExpiresAt`, normalizar e-mail, criar membership no accept |
+| **Specification + DomainValidations** | Regras de negócio | não-pending, expirado, e-mail mismatch, unicidade |
+| **EntityValidations** | Forma do dado | required, max length, e-mail format |
+
+**Nunca** colocar no Command: `if` de regra de domínio, atribuição de estado/hashes/datas de negócio, ou criação de aggregates relacionados por regra. Se a regra existe, crie/atualize Specification e registre-a no `*SpecificationsValidator` da operação.
+
+Referência viva: `OrganizationInvites` (Create/Accept/Decline/Cancel Services + Specs).
+
 ### Direção de dependências
 
 ```text
@@ -54,6 +80,7 @@ Novo aggregate "Client" no context Default:
 ## Anti-patterns
 
 - Colocar regra de negócio em Middleware ou Controller.
+- **Command Handler com regra/atribuição de domínio** (status, expiração, hash, normalize, match de e-mail) em vez de Domain Service + Specification.
 - Application usando `DefaultDbContext` concreto.
 - Introduzir Repository/UoW paralelo sem necessidade — Writer.CommitAsync já delimita a unidade de trabalho.
 - Mudar arquitetura (event bus, microserviço, etc.) sem ADR/decisão registrada.

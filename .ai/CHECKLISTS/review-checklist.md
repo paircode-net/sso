@@ -4,6 +4,8 @@
 
 - [ ] Dependências apontam na direção correta
 - [ ] Controller sem regra de negócio
+- [ ] **Command Handler só orquestra** (sem `if` de domínio, sem atribuição de Status/hash/ExpiresAt/normalize)
+- [ ] Regras em Specifications + `*SpecificationsValidator`; atribuições no Domain Service
 - [ ] Application não referencia Infrastructure.Data concreta
 - [ ] Persistência via Reader/Writer / interfaces de Domain
 - [ ] Sem padrão novo injustificado
@@ -13,7 +15,8 @@
 - [ ] Naming alinhado ao playbook
 - [ ] `sealed` onde é o padrão local
 - [ ] Sem duplicação evitável
-- [ ] Validações no lugar certo (Entity vs Domain specs)
+- [ ] Validações no lugar certo (Entity vs Domain specs) — **não no Command**
+- [ ] Novas Specs/validators registradas em `AddValidationsConfigurations`
 - [ ] Tratamento de erro consistente com handlers existentes
 
 ## API e contratos

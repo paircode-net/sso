@@ -27,9 +27,9 @@ namespace SSO.Web.Api.Identity
 			CancellationToken cancellationToken = default)
 			=> await Send(request, cancellationToken);
 
-		[HttpPost("{id:Guid}/cancel")]
-		public async Task<ActionResult<CancelOrganizationInviteCommandResponse>> Cancel(
-			CancelOrganizationInviteCommand request,
+		[HttpPatch("{id:Guid}/cancel")]
+		public async Task<ActionResult<PatchCancelOrganizationInviteCommandResponse>> PatchCancel(
+			PatchCancelOrganizationInviteCommand request,
 			CancellationToken cancellationToken = default)
 			=> await Send(request, cancellationToken);
 	}

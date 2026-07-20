@@ -2,6 +2,13 @@
 
 Registro leve de decisões observáveis ou pendentes. Para decisões novas formais, usar também `.ai/TEMPLATES/adr.md` / `decision.md` e ADRs em `.ai/CONTEXT/adr/`.
 
+## Convenção arquitetural (CQRS / Domain)
+
+| ID | Decisão | Status |
+|----|---------|--------|
+| ARCH-D1 | Regras de negócio e atribuições de valor de domínio ficam em **Domain Services + Specifications/Validations**; Application Commands **só orquestram** | **Aceito** — playbook `architecture.md` / `engineering.md`; regra Cursor `.cursor/rules/domain-rules-in-domain-services.mdc`; referência `OrganizationInvites` |
+| ARCH-D2 | Commands (e actions de Controller) prefixam verbo HTTP; mutações parciais/transições usam `Patch{Action}{Entity}Command` | **Aceito** — `coding-style.md`; regra Cursor `.cursor/rules/http-verb-commands.mdc` |
+
 ## ADRs Aceitos (feature 00001)
 
 | ADR | Título | Arquivo |

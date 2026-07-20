@@ -28,13 +28,17 @@ O README da raiz descreve: `Architecture CQRS Full (.NET 10.0)`.
 HTTP Controller
   → MediatR Command Handler (Application)
       → request.IsValid / ModelWrapper.Post|Put|Patch
+      → existência (se update/delete) / input de auth-infra se necessário
       → MediatR Domain Service (Domain)
-          → Entity validations + Specifications
+          → atribuições de valor de domínio (status, hashes, datas de negócio, normalize…)
+          → Entity validations + Specifications (regras)
           → Writer.Add/Update/Remove
       → Writer.CommitAsync
       → MediatR Notification (side effects / logging)
   → ApplicationResponse (HTTP status + wrap)
 ```
+
+**Invariante:** Command **não** contém regra de negócio nem atribuição de estado de domínio. Isso vive em `Services/` + `Specifications/` + `Validations/`. Detalhe e anti-patterns: `.ai/PLAYBOOK/architecture.md` (§ Command vs Domain Service).
 
 ## Fluxo de leitura
 

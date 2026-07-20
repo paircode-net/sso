@@ -27,6 +27,7 @@ using SSO.Core.Domain.Identity.Roles.Validations.DomainValidations;
 using SSO.Core.Domain.Identity.Roles.Validations.EntityValidations;
 using SSO.Core.Domain.Identity.MenuItems.Validations.DomainValidations;
 using SSO.Core.Domain.Identity.MenuItems.Validations.EntityValidations;
+using SSO.Core.Domain.Identity.OrganizationInvites.Specifications;
 using SSO.Core.Domain.Identity.OrganizationInvites.Validations.DomainValidations;
 using SSO.Core.Domain.Identity.OrganizationInvites.Validations.EntityValidations;
 using SSO.Core.Domain.Identity.UserRoleAssignments.Validations.DomainValidations;
@@ -52,6 +53,11 @@ namespace SSO.Middleware.AddServices
 			services.AddTransient<PermissionCodeAlreadyExistsSpecification>();
 			services.AddTransient<RoleCodeAlreadyExistsSpecification>();
 			services.AddTransient<ClientProductBindingClientIdAlreadyExistsSpecification>();
+
+			services.AddTransient<OrganizationInviteIsNotPendingSpecification>();
+			services.AddTransient<OrganizationInviteIsExpiredSpecification>();
+			services.AddTransient<OrganizationInviteAcceptingUserInvalidSpecification>();
+			services.AddTransient<OrganizationInviteAcceptingUserEmailMismatchSpecification>();
 
 			return services;
 		}
@@ -126,6 +132,8 @@ namespace SSO.Middleware.AddServices
 
 			services.AddTransient<CreateOrganizationInviteSpecificationsValidator>();
 			services.AddTransient<CancelOrganizationInviteSpecificationsValidator>();
+			services.AddTransient<AcceptOrganizationInviteSpecificationsValidator>();
+			services.AddTransient<DeclineOrganizationInviteSpecificationsValidator>();
 
 			return services;
 		}

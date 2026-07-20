@@ -15,7 +15,7 @@
 - Admin envia convite por e-mail (`/Admin/Invites`).
 - Convidado abre `/Account/AcceptInvite?token=...`, aceita ou recusa.
 - **Membership só é criada após aceite.**
-- API: `api/identity/organization-invites` (+ cancel).
+- API: `api/identity/organization-invites` (+ `PATCH …/{id}/cancel`).
 
 ## Contexto (F00003-D3)
 
