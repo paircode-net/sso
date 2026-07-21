@@ -149,32 +149,46 @@ namespace SSO.Middleware.Identity
 
 			_permissions = permissionSet.OrderBy(x => x).ToList();
 
-			var claims = new List<Claim>
+			// Enrich the existing authenticated identity in place (clone).
+			// Never replace with a new principal that adds "sub"/NameIdentifier — antiforgery
+			// ClaimUid would diverge from the cookie identity and Razor POSTs return 400.
+			var existing = http.User.Identities.FirstOrDefault(i => i.IsAuthenticated);
+			if (existing is null)
 			{
-				new Claim(ClaimTypes.NameIdentifier, user.Id.ToString("D")),
-				new Claim("sub", user.Id.ToString("D")),
-				new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-				new Claim(ClaimTypes.Name, user.UserName ?? user.Email ?? user.Id.ToString("D"))
-			};
+				_enriched = true;
+				return;
+			}
+
+			var identity = new ClaimsIdentity(existing);
+			RemoveClaims(identity, SsoClaimTypes.OrganizationId);
+			RemoveClaims(identity, SsoClaimTypes.BranchId);
+			RemoveClaims(identity, SsoClaimTypes.Permissions);
 
 			if (OrganizationId is Guid orgId)
 			{
-				claims.Add(new Claim(SsoClaimTypes.OrganizationId, orgId.ToString("D")));
+				identity.AddClaim(new Claim(SsoClaimTypes.OrganizationId, orgId.ToString("D")));
 			}
 
 			if (BranchId is Guid branchId)
 			{
-				claims.Add(new Claim(SsoClaimTypes.BranchId, branchId.ToString("D")));
+				identity.AddClaim(new Claim(SsoClaimTypes.BranchId, branchId.ToString("D")));
 			}
 
 			foreach (var permission in _permissions)
 			{
-				claims.Add(new Claim(SsoClaimTypes.Permissions, permission));
+				identity.AddClaim(new Claim(SsoClaimTypes.Permissions, permission));
 			}
 
-			var identity = new ClaimsIdentity(claims, authenticationType: IdentityConstants.ApplicationScheme);
 			http.User = new ClaimsPrincipal(identity);
 			_enriched = true;
+		}
+
+		private static void RemoveClaims(ClaimsIdentity identity, string claimType)
+		{
+			foreach (var claim in identity.FindAll(claimType).ToList())
+			{
+				identity.RemoveClaim(claim);
+			}
 		}
 
 		public async Task SwitchContextAsync(
@@ -227,18 +241,25 @@ namespace SSO.Middleware.Identity
 				http.Session.Remove(SessionBranchKey);
 			}
 
+			await http.Session.CommitAsync(cancellationToken);
+
 			_enriched = false;
 			await EnsureEnrichedAsync(cancellationToken);
 		}
 
-		public Task ClearContextAsync()
+		public async Task ClearContextAsync()
 		{
-			var session = _httpContextAccessor.HttpContext?.Session;
+			var http = _httpContextAccessor.HttpContext;
+			var session = http?.Session;
 			session?.Remove(SessionOrgKey);
 			session?.Remove(SessionBranchKey);
+			if (session is not null)
+			{
+				await session.CommitAsync();
+			}
+
 			_enriched = false;
 			_permissions = Array.Empty<string>();
-			return Task.CompletedTask;
 		}
 	}
 }

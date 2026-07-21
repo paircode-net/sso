@@ -75,8 +75,13 @@ namespace SSO.Middleware
 
 			app.UseRequestLocalization(localizationOptions);
 
+			// Session must run after UseRouting and before Map*/UseEndpoints (MS docs).
+			// Enrich Admin User from session after auth+session so Razor antiforgery
+			// sees the same principal on GET (token) and POST (validation).
+			app.UseRouting();
 			app.UseSession();
 			app.UseAuthentication();
+			app.UseAdminPortalEnrichment();
 			app.UseAuthorization();
 
 			return app;
@@ -174,8 +179,6 @@ namespace SSO.Middleware
 				.AddSupportedUICultures(supportedCultures);
 
 			app.UseRequestLocalization(localizationOptions);
-
-			app.UseSession();
 
 			return app;
 		}

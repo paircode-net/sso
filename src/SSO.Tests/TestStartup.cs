@@ -2,6 +2,7 @@
 using SSO.Infrastructures.Services;
 using SSO.Middleware;
 using SSO.Middleware.AddServices;
+using SSO.Middleware.Identity;
 using SSO.Web.Api.Default;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -68,8 +69,9 @@ namespace SSO.Tests
 			app.UseMiddlewareTest();
 
 			app.UseRouting();
-
+			app.UseSession();
 			app.UseAuthentication();
+			app.UseAdminPortalEnrichment();
 			app.UseAuthorization();
 
 			using (var scope = app.ApplicationServices.CreateScope())

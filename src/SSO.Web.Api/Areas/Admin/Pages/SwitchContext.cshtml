@@ -5,6 +5,10 @@
 }
 <h1>Trocar contexto</h1>
 <p class="meta">Equivalente server-side ao grant <code>switch_context</code> (ADR-003).</p>
+<p class="meta">
+	Ativo: @(Model.Portal.OrganizationId?.ToString("D") ?? "(nenhuma)")
+	· Branch: @(Model.Portal.BranchId?.ToString("D") ?? "(nenhuma)")
+</p>
 @if (!string.IsNullOrEmpty(Model.Message)) { <div class="flash">@Model.Message</div> }
 @if (!string.IsNullOrEmpty(Model.Error)) { <div class="flash error">@Model.Error</div> }
 <div class="card">

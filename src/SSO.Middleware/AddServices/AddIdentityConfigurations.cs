@@ -47,6 +47,9 @@ namespace SSO.Middleware.AddServices
 				options.Cookie.Name = ".SSO.AdminSession";
 				options.Cookie.HttpOnly = true;
 				options.Cookie.IsEssential = true;
+				options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
+				options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.SameAsRequest;
+				options.IdleTimeout = TimeSpan.FromHours(8);
 			});
 
 			services

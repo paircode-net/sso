@@ -10,6 +10,7 @@ using Microsoft.Extensions.Options;
 using SSO.Core.Domain.Identity._Context.Interfaces.Services;
 using SSO.Core.Domain.Identity.AuthAuditEvents.Entity;
 using SSO.Core.Domain.Identity.Users.Entity;
+using SSO.Middleware.Identity;
 using SSO.Shared.Identity;
 
 namespace SSO.Web.Api.Pages.Account
@@ -21,17 +22,20 @@ namespace SSO.Web.Api.Pages.Account
 		private readonly UserManager<User> _userManager;
 		private readonly IAuthAuditService _auditService;
 		private readonly SsoHardeningOptions _options;
+		private readonly IAdminPortalContextService _portal;
 
 		public LoginModel(
 			SignInManager<User> signInManager,
 			UserManager<User> userManager,
 			IAuthAuditService auditService,
-			IOptions<SsoHardeningOptions> options)
+			IOptions<SsoHardeningOptions> options,
+			IAdminPortalContextService portal)
 		{
 			_signInManager = signInManager;
 			_userManager = userManager;
 			_auditService = auditService;
 			_options = options.Value;
+			_portal = portal;
 		}
 
 		[BindProperty]
@@ -96,6 +100,7 @@ namespace SSO.Web.Api.Pages.Account
 			if (result.Succeeded)
 			{
 				SsoAuthMetrics.RecordLoginSuccess();
+				await _portal.ClearContextAsync();
 				await _auditService.WriteAsync(AuthAuditEvent.Create(
 					AuthAuditEventTypes.LoginSucceeded,
 					AuthAuditOutcomes.Success,

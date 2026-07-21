@@ -40,6 +40,11 @@ namespace SSO.Web.Api.Areas.Admin.Pages
 
 		public async Task OnGetAsync()
 		{
+			if (TempData["Message"] is string flash)
+			{
+				Message = flash;
+			}
+
 			await LoadAsync();
 		}
 
@@ -48,7 +53,8 @@ namespace SSO.Web.Api.Areas.Admin.Pages
 			try
 			{
 				await Portal.SwitchContextAsync(OrganizationId, BranchId);
-				Message = "Contexto atualizado (switch_context server-side).";
+				TempData["Message"] = "Contexto atualizado (switch_context server-side).";
+				return RedirectToPage();
 			}
 			catch (Exception ex)
 			{
@@ -91,6 +97,7 @@ namespace SSO.Web.Api.Areas.Admin.Pages
 			if (activeOrg is Guid orgId)
 			{
 				OrganizationId = orgId;
+				BranchId = Portal.BranchId;
 				Branches = await _db.Branches.AsNoTracking()
 					.Where(x => !x.IsDeleted && x.OrganizationId == orgId)
 					.OrderBy(x => x.Name)

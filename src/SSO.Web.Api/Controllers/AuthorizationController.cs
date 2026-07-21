@@ -35,6 +35,8 @@ namespace SSO.Web.Api.Controllers
 		private readonly IdentityDbContext _dbContext;
 		private readonly IUserSessionService _sessionService;
 		private readonly IAuthAuditService _auditService;
+		private readonly IEffectivePermissionsResolver _permissionsResolver;
+		private readonly IAdminPortalContextService _portalContext;
 
 		public AuthorizationController(
 			IOpenIddictApplicationManager applicationManager,
@@ -45,7 +47,9 @@ namespace SSO.Web.Api.Controllers
 			TokenClaimsFactory tokenClaimsFactory,
 			IdentityDbContext dbContext,
 			IUserSessionService sessionService,
-			IAuthAuditService auditService)
+			IAuthAuditService auditService,
+			IEffectivePermissionsResolver permissionsResolver,
+			IAdminPortalContextService portalContext)
 		{
 			_applicationManager = applicationManager;
 			_authorizationManager = authorizationManager;
@@ -56,6 +60,8 @@ namespace SSO.Web.Api.Controllers
 			_dbContext = dbContext;
 			_sessionService = sessionService;
 			_auditService = auditService;
+			_permissionsResolver = permissionsResolver;
+			_portalContext = portalContext;
 		}
 
 		[HttpGet("~/connect/authorize")]
@@ -355,6 +361,7 @@ namespace SSO.Web.Api.Controllers
 			}
 
 			await _signInManager.SignOutAsync();
+			await _portalContext.ClearContextAsync();
 			return SignOut(
 				authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
 				properties: new AuthenticationProperties
@@ -452,15 +459,26 @@ namespace SSO.Web.Api.Controllers
 
 			if (!hasMembership)
 			{
-				SsoAuthMetrics.RecordSwitchContextFailure("no_membership");
-				return Forbid(
-					authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
-					properties: new AuthenticationProperties(new Dictionary<string, string?>
-					{
-						[OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.AccessDenied,
-						[OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
-							"The user does not belong to the requested organization."
-					}));
+				var platformPerms = await _permissionsResolver.ResolveAsync(
+					user.Id,
+					organizationId: null,
+					branchId: null,
+					SsoClients.AdminApiClientId);
+				var isPlatform = platformPerms.Any(p =>
+					string.Equals(p, SsoAdminPermissions.Platform, StringComparison.OrdinalIgnoreCase));
+
+				if (!isPlatform)
+				{
+					SsoAuthMetrics.RecordSwitchContextFailure("no_membership");
+					return Forbid(
+						authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+						properties: new AuthenticationProperties(new Dictionary<string, string?>
+						{
+							[OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.AccessDenied,
+							[OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+								"The user does not belong to the requested organization."
+						}));
+				}
 			}
 
 			var scopes = request.GetScopes().Any()
