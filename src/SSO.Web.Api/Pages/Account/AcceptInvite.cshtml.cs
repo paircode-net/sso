@@ -68,7 +68,7 @@ namespace SSO.Web.Api.Pages.Account
 				return Page();
 			}
 
-			if (!Invite.IsPending)
+			if (!Invite.IsPending())
 			{
 				Error = "Convite expirado ou já utilizado.";
 				return Page();
@@ -98,7 +98,7 @@ namespace SSO.Web.Api.Pages.Account
 		public async Task<IActionResult> OnPostAcceptAsync()
 		{
 			await LoadInviteAsync();
-			if (Invite is null || !Invite.IsPending)
+			if (Invite is null || !Invite.IsPending())
 			{
 				Error = "Convite inválido ou expirado.";
 				return Page();

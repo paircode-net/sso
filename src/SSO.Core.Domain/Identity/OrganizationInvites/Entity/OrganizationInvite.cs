@@ -14,7 +14,7 @@ namespace SSO.Core.Domain.Identity.OrganizationInvites.Entity
 		public DateTime? RespondedAt { get; set; }
 		public Guid? AcceptedUserId { get; set; }
 
-		public bool IsPending =>
+		public bool IsPending() =>
 			Status == OrganizationInviteStatuses.Pending && ExpiresAt > DateTime.UtcNow;
 
 		public OrganizationInvite()

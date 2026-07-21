@@ -83,14 +83,7 @@ namespace SSO.Core.Application.Identity.OrganizationInvites.Commands
 				request.IsValid(_localizer, true);
 				var data = request.Post();
 
-				var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier)
-					?? _httpContextAccessor.HttpContext?.User?.FindFirstValue("sub");
-				if (!Guid.TryParse(userIdClaim, out var invitedBy))
-				{
-					throw new UnauthorizedAccessException("Authenticated user is required to send invites.");
-				}
-
-				data.InvitedByUserId = invitedBy;
+				data.InvitedByUserId = ResolveInvitedByUserId(_httpContextAccessor.HttpContext?.User);
 
 				var serviceRequest = new CreateOrganizationInviteServiceRequest(data);
 				await _mediator.Send(serviceRequest, cancellationToken);
@@ -124,6 +117,30 @@ namespace SSO.Core.Application.Identity.OrganizationInvites.Commands
 				_logger.CreateLogger<PostOrganizationInviteCommandHandler>().Log(LogLevel.Error, exception, exception.Message);
 				return new PostOrganizationInviteCommandResponse(ExceptionResponseHelper.CreateTuple(_localizer, request, exception));
 			}
+		}
+
+		private static Guid ResolveInvitedByUserId(ClaimsPrincipal? user)
+		{
+			if (user?.Identity?.IsAuthenticated != true)
+			{
+				throw new UnauthorizedAccessException("Authenticated user is required to send invites.");
+			}
+
+			foreach (var claimType in new[]
+			{
+				ClaimTypes.NameIdentifier,
+				"sub",
+				"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+			})
+			{
+				var raw = user.FindFirstValue(claimType);
+				if (Guid.TryParse(raw, out var id))
+				{
+					return id;
+				}
+			}
+
+			throw new UnauthorizedAccessException("Authenticated user is required to send invites.");
 		}
 	}
 }
