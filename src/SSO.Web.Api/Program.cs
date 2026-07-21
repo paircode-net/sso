@@ -68,7 +68,12 @@ try
 			model => model.Filters.Add(new ServiceFilterAttribute(typeof(AdminPortalPageFilter))));
 	});
 	builder.Services.AddEndpointsApiExplorer();
-	builder.Services.AddSwaggerGen();
+	builder.Services.AddSwaggerGen(options =>
+	{
+		// Nested request DTOs share short names (CreateRequest, UpdateRequest, …);
+		// use full type names so schemaIds stay unique across controllers.
+		options.CustomSchemaIds(type => type.FullName?.Replace('+', '.') ?? type.Name);
+	});
 
 	builder.Services.ConfigureApplicationCookie(options =>
 	{
